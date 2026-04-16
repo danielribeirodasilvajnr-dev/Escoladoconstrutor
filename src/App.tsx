@@ -5,6 +5,7 @@ import { Dashboard } from './components/Dashboard';
 import { Auth } from './components/Auth';
 import { supabase } from './lib/supabase';
 import { Session } from '@supabase/supabase-js';
+import { Toaster } from 'sonner';
 
 type View = 'landing' | 'auth' | 'dashboard';
 
@@ -80,6 +81,20 @@ export default function App() {
           <Dashboard userData={userData} />
         </motion.div>
       )}
+      <Toaster 
+        theme="dark" 
+        position="top-right" 
+        closeButton 
+        toastOptions={{
+          style: {
+            background: 'rgba(10, 11, 14, 0.8)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            color: '#fff',
+            borderRadius: '1rem',
+          },
+        }}
+      />
     </AnimatePresence>
   );
 }

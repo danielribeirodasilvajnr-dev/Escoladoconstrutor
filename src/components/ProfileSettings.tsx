@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { User, Mail, Phone, Upload, Loader2, Camera, CheckCircle2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { cn } from '../lib/utils';
+import { toast } from 'sonner';
 
 interface ProfileSettingsProps {
   userData: any;
@@ -15,7 +16,6 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(userData?.avatar_url || '');
-  const [success, setSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Phone Mask for Brazil (XX) XXXXX-XXXX
@@ -54,8 +54,9 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
         .getPublicUrl(filePath);
 
       setAvatarUrl(publicUrl);
+      toast.success('Imagem de perfil atualizada!');
     } catch (error: any) {
-      alert('Erro ao fazer upload da imagem: ' + error.message);
+      toast.error('Erro ao fazer upload da imagem: ' + error.message);
     } finally {
       setUploading(false);
     }
@@ -77,10 +78,9 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
       });
 
       if (error) throw error;
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
+      toast.success('Perfil atualizado com sucesso!');
     } catch (error: any) {
-      alert('Erro ao salvar perfil: ' + error.message);
+      toast.error('Erro ao salvar perfil: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -185,19 +185,7 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
         </div>
 
         {/* Footer Actions */}
-        <div className="pt-10 flex items-center justify-between border-t border-white/5">
-          <div className="flex items-center gap-3">
-             {success && (
-               <motion.div 
-                 initial={{ opacity: 0, x: -10 }} 
-                 animate={{ opacity: 1, x: 0 }}
-                 className="flex items-center gap-2 text-[#22ff88] text-sm font-bold"
-               >
-                 <CheckCircle2 className="w-5 h-5" />
-                 Perfil Atualizado!
-               </motion.div>
-             )}
-          </div>
+        <div className="pt-10 flex items-center justify-end border-t border-white/5">
           <button 
             type="submit"
             disabled={loading || uploading}

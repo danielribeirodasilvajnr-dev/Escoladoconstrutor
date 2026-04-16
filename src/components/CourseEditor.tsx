@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { motion, AnimatePresence } from 'motion/react';
+import { toast } from 'sonner';
+import { ConfirmModal } from './ConfirmModal';
 
 interface Lesson {
   id: string;
@@ -71,6 +73,21 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadingLessonId, setUploadingLessonId] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+
+  // Confirm Modal State
+  const [confirmConfig, setConfirmConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    variant: 'danger' | 'warning' | 'info';
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+    variant: 'info'
+  });
 
   const coverInputRef = useRef<HTMLInputElement>(null);
   const lessonInputRef = useRef<HTMLInputElement>(null);
@@ -142,6 +159,7 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
           })
           .eq('id', courseId);
         if (error) throw error;
+        toast.success('Curso atualizado com sucesso!');
       } else {
         const { data, error } = await supabase
           .from('courses')
@@ -158,13 +176,11 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
 
         // Update local state with new ID to allow adding modules
         setCourse(data);
-        alert('Curso criado com sucesso! Agora você pode adicionar módulos e aulas.');
-        // If we want to stay in editor, we need to refresh with the new ID
-        // or just rely on the parent state update if we had a callback
+        toast.success('Curso criado com sucesso!');
         onBack(); // Go back to list to see the new course
       }
     } catch (error: any) {
-      alert('Erro ao salvar curso: ' + error.message);
+      toast.error('Erro ao salvar curso: ' + error.message);
     } finally {
       setSaving(false);
     }
@@ -203,8 +219,9 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
         .getPublicUrl(filePath);
 
       setCourse(prev => ({ ...prev, cover_url: publicUrl }));
+      toast.success('Capa do curso atualizada!');
     } catch (error: any) {
-      alert('Erro ao subir capa: ' + error.message);
+      toast.error('Erro ao subir capa: ' + error.message);
     } finally {
       setUploadingCover(false);
     }
@@ -225,8 +242,9 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
         .single();
       if (error) throw error;
       setModules([...modules, { ...data, lessons: [] }]);
+      toast.success('Módulo adicionado!');
     } catch (error: any) {
-      alert('Erro ao criar módulo: ' + error.message);
+      toast.error('Erro ao criar módulo: ' + error.message);
     }
   };
 
@@ -244,17 +262,25 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
   };
 
   const handleDeleteModule = async (moduleId: string) => {
-    if (!confirm('Deseja realmente excluir este módulo e todas as suas aulas?')) return;
-    try {
-      const { error } = await supabase
-        .from('modules')
-        .delete()
-        .eq('id', moduleId);
-      if (error) throw error;
-      setModules(modules.filter(m => m.id !== moduleId));
-    } catch (error: any) {
-      alert('Erro ao excluir módulo: ' + error.message);
-    }
+    setConfirmConfig({
+      isOpen: true,
+      title: 'Excluir Módulo?',
+      message: 'Isso removerá permanentemente o módulo e todas as aulas dentro dele.',
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          const { error } = await supabase
+            .from('modules')
+            .delete()
+            .eq('id', moduleId);
+          if (error) throw error;
+          setModules(modules.filter(m => m.id !== moduleId));
+          toast.success('Módulo excluído');
+        } catch (error: any) {
+          toast.error('Erro ao excluir módulo: ' + error.message);
+        }
+      }
+    });
   };
 
   const handleAddLesson = async (moduleId: string) => {
@@ -276,8 +302,9 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
       const updatedModules = [...modules];
       updatedModules[moduleIndex].lessons.push(data);
       setModules(updatedModules);
+      toast.success('Aula adicionada!');
     } catch (error: any) {
-      alert('Erro ao criar aula: ' + error.message);
+      toast.error('Erro ao criar aula: ' + error.message);
     }
   };
 
@@ -298,24 +325,32 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
   };
 
   const handleDeleteLesson = async (moduleId: string, lessonId: string) => {
-    if (!confirm('Excluir esta aula?')) return;
-    try {
-      const { error } = await supabase
-        .from('lessons')
-        .delete()
-        .eq('id', lessonId);
-      if (error) throw error;
+    setConfirmConfig({
+      isOpen: true,
+      title: 'Excluir Aula?',
+      message: 'Tem certeza que deseja remover esta aula do currículo? Esta ação não pode ser desfeita.',
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          const { error } = await supabase
+            .from('lessons')
+            .delete()
+            .eq('id', lessonId);
+          if (error) throw error;
 
-      const updatedModules = modules.map(m => {
-        if (m.id === moduleId) {
-          return { ...m, lessons: m.lessons.filter(l => l.id !== lessonId) };
+          const updatedModules = modules.map(m => {
+            if (m.id === moduleId) {
+              return { ...m, lessons: m.lessons.filter(l => l.id !== lessonId) };
+            }
+            return m;
+          });
+          setModules(updatedModules);
+          toast.success('Aula excluída');
+        } catch (error: any) {
+          toast.error('Erro ao excluir aula: ' + error.message);
         }
-        return m;
-      });
-      setModules(updatedModules);
-    } catch (error: any) {
-      alert('Erro ao excluir aula: ' + error.message);
-    }
+      }
+    });
   };
 
   const getFileDuration = (file: File): Promise<string> => {
@@ -691,6 +726,11 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
         </div>
       </div>
       <input type="file" ref={lessonInputRef} className="hidden" accept="video/*" onChange={handleLessonFileUpload} />
+
+      <ConfirmModal
+        {...confirmConfig}
+        onClose={() => setConfirmConfig({ ...confirmConfig, isOpen: false })}
+      />
     </div>
   );
 }

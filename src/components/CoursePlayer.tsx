@@ -17,6 +17,7 @@ import {
   Bell
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { toast } from 'sonner';
 
 interface Lesson {
   id: string;
@@ -165,6 +166,7 @@ export function CoursePlayer({ courseId, onBack }: CoursePlayerProps) {
 
         // Also update currentLesson duration so the condition doesn't trigger again
         setCurrentLesson(prev => prev ? { ...prev, duration: durationStr } : null);
+        toast.success(`Duração da aula sincronizada: ${durationStr}`);
       } catch (error) {
         console.error('Erro ao atualizar duração auto-healing:', error);
       }

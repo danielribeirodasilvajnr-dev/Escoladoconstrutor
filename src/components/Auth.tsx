@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { supabase } from '../lib/supabase';
 import { cn } from '../lib/utils';
 import { Globe, AlertCircle, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface AuthProps {
   onSuccess: () => void;
@@ -31,6 +32,7 @@ export function Auth({ onSuccess }: AuthProps) {
           password,
         });
         if (error) throw error;
+        toast.success(`Bem-vindo de volta, ${email.split('@')[0]}!`);
       } else {
         const { error } = await supabase.auth.signUp({
           email,
@@ -42,10 +44,11 @@ export function Auth({ onSuccess }: AuthProps) {
           },
         });
         if (error) throw error;
-        alert('Confirme seu e-mail para ativar sua conta!');
+        toast.success('Conta criada! Confirme seu e-mail para ativar sua conta.');
       }
       onSuccess();
     } catch (err: any) {
+      toast.error(err.message || 'Ocorreu um erro na autenticação.');
       setError(err.message || 'Ocorreu um erro na autenticação.');
     } finally {
       setLoading(false);
