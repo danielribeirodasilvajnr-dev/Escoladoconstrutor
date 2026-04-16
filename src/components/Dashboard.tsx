@@ -5,6 +5,8 @@ import { AdminOverview } from './AdminOverview';
 import { ExamCreator } from './ExamCreator';
 import { CourseManager } from './CourseManager';
 import { ProfileSettings } from './ProfileSettings';
+import { Vitrine } from './Vitrine';
+import { CoursePlayer } from './CoursePlayer';
 
 type DashboardView = 
   | 'vitrine' 
@@ -15,7 +17,8 @@ type DashboardView =
   | 'admin-overview' 
   | 'admin-provas' 
   | 'admin-cursos' 
-  | 'settings';
+  | 'settings'
+  | 'player';
 
 interface DashboardProps {
   userData: any;
@@ -23,11 +26,26 @@ interface DashboardProps {
 
 export function Dashboard({ userData }: DashboardProps) {
   const [activeView, setActiveView] = useState<DashboardView>('overview');
+  const [activeCourseId, setActiveCourseId] = useState<string | null>(null);
+
+  const handleCourseSelect = (courseId: string) => {
+    setActiveCourseId(courseId);
+    setActiveView('player');
+  };
 
   const renderView = () => {
     switch (activeView) {
+      case 'vitrine':
+        return <Vitrine userData={userData} onViewChange={(view) => setActiveView(view as DashboardView)} />;
       case 'overview':
-        return <DashboardOverview />;
+        return <DashboardOverview userData={userData} onCourseSelect={handleCourseSelect} />;
+      case 'player':
+        return activeCourseId ? (
+          <CoursePlayer 
+            courseId={activeCourseId} 
+            onBack={() => setActiveView('overview')} 
+          />
+        ) : null;
       case 'admin-overview':
         return <AdminOverview onViewChange={(view) => setActiveView(view as DashboardView)} />;
       case 'admin-provas':

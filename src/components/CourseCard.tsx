@@ -5,11 +5,12 @@ interface CourseCardProps {
   title: string;
   mentor: string;
   progress: number;
+  onClick?: () => void;
 }
 
-export function CourseCard({ image, title, mentor, progress }: CourseCardProps) {
+export function CourseCard({ image, title, mentor, progress, onClick }: CourseCardProps) {
   return (
-    <div className="group cursor-pointer">
+    <div className="group cursor-pointer" onClick={onClick}>
       <div className="relative aspect-video rounded-2xl overflow-hidden mb-4 border border-white/5">
         <img 
           src={image} 

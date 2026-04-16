@@ -1,0 +1,189 @@
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { X, CreditCard, ShieldCheck, CheckCircle2, Loader2, Award } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+
+interface CheckoutModalProps {
+  course: any;
+  userId: string;
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+export function CheckoutModal({ course, userId, onClose, onSuccess }: CheckoutModalProps) {
+  const [step, setStep] = useState<'details' | 'processing' | 'success'>('details');
+  const [loading, setLoading] = useState(false);
+
+  const handlePayment = async () => {
+    setLoading(true);
+    setStep('processing');
+    
+    // Simulate payment delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    try {
+      const { error } = await supabase
+        .from('enrollments')
+        .insert({
+          user_id: userId,
+          course_id: course.id
+        });
+
+      if (error) {
+        if (error.code === '23505') {
+          // Already enrolled
+          setStep('success');
+          return;
+        }
+        throw error;
+      }
+
+      setStep('success');
+    } catch (error: any) {
+      alert('Erro ao processar inscrição: ' + error.message);
+      setStep('details');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/80 backdrop-blur-xl">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+        className="w-full max-w-2xl bg-[#0f1115] rounded-[2.5rem] border border-white/5 overflow-hidden relative shadow-2xl"
+      >
+        {step !== 'success' && (
+          <button 
+            onClick={onClose}
+            className="absolute top-8 right-8 p-3 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors z-10"
+          >
+            <X className="w-5 h-5 text-[#64748b]" />
+          </button>
+        )}
+
+        <AnimatePresence mode="wait">
+          {step === 'details' && (
+            <motion.div 
+              key="details"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="p-12"
+            >
+              <div className="flex gap-8 mb-10">
+                <div className="w-48 aspect-video rounded-2xl overflow-hidden shrink-0 border border-white/5">
+                  <img src={course.cover_url} className="w-full h-full object-cover" alt={course.title} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-2 text-[#22ff88]">
+                    <ShieldCheck className="w-4 h-4" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest">Acesso Vitalício</span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-2">{course.title}</h3>
+                  <p className="text-sm text-[#64748b] line-clamp-2">{course.description}</p>
+                </div>
+              </div>
+
+              <div className="space-y-6 mb-12">
+                <div className="flex justify-between items-center py-4 border-b border-white/5">
+                  <span className="text-white font-medium">Preço da Inscrição</span>
+                  <span className="text-xl font-bold text-white">R$ {course.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                </div>
+                <div className="flex justify-between items-center py-4 border-b border-white/5">
+                  <span className="text-white font-medium">Taxas e Encargos</span>
+                  <span className="text-[#22ff88] font-bold text-sm tracking-widest uppercase">Isento</span>
+                </div>
+                <div className="flex justify-between items-center pt-4">
+                  <span className="text-lg font-bold text-white">Total</span>
+                  <span className="text-3xl font-bold text-[#22ff88]">R$ {course.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                </div>
+              </div>
+
+              <div className="bg-[#1a1c22] p-6 rounded-2xl border border-white/5 mb-10 flex items-center gap-4">
+                <div className="w-12 h-12 bg-[#22ff88]/10 rounded-xl flex items-center justify-center border border-[#22ff88]/20">
+                  <CreditCard className="w-6 h-6 text-[#22ff88]" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-white uppercase tracking-wider">Simulação de Pagamento</p>
+                  <p className="text-[11px] text-[#64748b]">Nenhuma cobrança real será feita neste ambiente de testes.</p>
+                </div>
+              </div>
+
+              <button 
+                onClick={handlePayment}
+                disabled={loading}
+                className="w-full py-5 bg-[#22ff88] text-black font-extrabold rounded-2xl hover:opacity-90 transition-all flex items-center justify-center gap-3 group shadow-[0_0_30px_rgba(34,255,136,0.2)]"
+              >
+                {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : (
+                  <>
+                    CONFIRMAR INSCRIÇÃO AGORA
+                    <motion.div
+                      animate={{ x: [0, 5, 0] }}
+                      transition={{ repeat: Infinity, duration: 1.5 }}
+                    >
+                      <CheckCircle2 className="w-5 h-5" />
+                    </motion.div>
+                  </>
+                )}
+              </button>
+            </motion.div>
+          )}
+
+          {step === 'processing' && (
+            <motion.div 
+              key="processing"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="p-20 text-center"
+            >
+              <Loader2 className="w-20 h-20 text-[#22ff88] animate-spin mx-auto mb-8" />
+              <h3 className="text-2xl font-bold text-white mb-4">Processando Inscrição...</h3>
+              <p className="text-[#64748b]">Sincronizando dados com a Escola do Construtor.</p>
+            </motion.div>
+          )}
+
+          {step === 'success' && (
+            <motion.div 
+              key="success"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="p-20 text-center"
+            >
+              <div className="w-24 h-24 bg-[#22ff88]/10 rounded-full flex items-center justify-center mx-auto mb-8 border-4 border-[#22ff88]/20 shadow-[0_0_50px_rgba(34,255,136,0.1)]">
+                <CheckCircle2 className="w-12 h-12 text-[#22ff88]" />
+              </div>
+              <h3 className="text-4xl font-bold text-white mb-4">Acesso Liberado!</h3>
+              <p className="text-[#64748b] text-lg mb-12 max-w-sm mx-auto">
+                Parabéns! O curso <strong>{course.title}</strong> já está disponível no seu console.
+              </p>
+              
+              <div className="grid grid-cols-2 gap-4 max-w-md mx-auto mb-12">
+                 <div className="bg-white/5 p-4 rounded-xl border border-white/5">
+                   <Award className="w-6 h-6 text-[#22ff88] mx-auto mb-2" />
+                   <p className="text-[10px] uppercase font-bold text-white/40">Certificação</p>
+                   <p className="text-xs font-bold text-white">Inclusa</p>
+                 </div>
+                 <div className="bg-white/5 p-4 rounded-xl border border-white/5">
+                   <ShieldCheck className="w-6 h-6 text-[#22ff88] mx-auto mb-2" />
+                   <p className="text-[10px] uppercase font-bold text-white/40">Acesso</p>
+                   <p className="text-xs font-bold text-white">Vitalício</p>
+                 </div>
+              </div>
+
+              <button 
+                onClick={onSuccess}
+                className="px-12 py-5 bg-white text-black font-extrabold rounded-2xl hover:bg-white/90 transition-all uppercase tracking-widest text-sm"
+              >
+                Ir para Meus Cursos
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </div>
+  );
+}

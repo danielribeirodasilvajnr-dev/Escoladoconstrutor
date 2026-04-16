@@ -1,14 +1,16 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { HeroSection } from './HeroSection';
 import { CourseCard } from './CourseCard';
 import { FeaturedCard } from './FeaturedCard';
 import { WeeklyCard } from './WeeklyCard';
+import { supabase } from '../lib/supabase';
+import { BookOpen, Loader2 } from 'lucide-react';
 
-const myCourses = [
-  { image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&h=450&auto=format&fit=crop", title: "Design de Microprocessadores", mentor: "Dr. David Heinemeier", progress: 65 },
-  { image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&h=450&auto=format&fit=crop", title: "Estruturas Paramétricas", mentor: "Eng. Sarah Chen", progress: 20 },
-  { image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc51?w=800&h=450&auto=format&fit=crop", title: "Segurança de Rede Industrial", mentor: "Marcus V. Hollis", progress: 88 }
-];
+interface DashboardOverviewProps {
+  userData: any;
+  onCourseSelect: (courseId: string) => void;
+}
 
 const recommended = [
   { image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600&h=800&auto=format&fit=crop", category: "Novo Masterclass", title: "Inteligência Artificial em Sistemas Embarcados" },
@@ -36,7 +38,41 @@ const itemVariants = {
   visible: { opacity: 1, y: 0 }
 };
 
-export function DashboardOverview() {
+export function DashboardOverview({ userData, onCourseSelect }: DashboardOverviewProps) {
+  const [enrolledCourses, setEnrolledCourses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (userData?.id) {
+      fetchEnrollments();
+    }
+  }, [userData]);
+
+  async function fetchEnrollments() {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('enrollments')
+        .select(`
+          *,
+          course:courses (
+            *,
+            instructor:profiles (
+              full_name
+            )
+          )
+        `)
+        .eq('user_id', userData.id);
+
+      if (error) throw error;
+      setEnrolledCourses(data || []);
+    } catch (error: any) {
+      console.error('Erro ao buscar inscrições:', error.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <motion.div 
       initial="hidden"
@@ -54,20 +90,41 @@ export function DashboardOverview() {
           <div className="flex items-center gap-3">
             <h2 className="text-2xl font-bold text-white">Meus Cursos</h2>
             <span className="px-2 py-0.5 bg-[#22ff88]/10 text-[#22ff88] text-[10px] font-bold rounded-md uppercase tracking-wider">
-              3 Ativos
+              {enrolledCourses.length} {enrolledCourses.length === 1 ? 'Ativo' : 'Ativos'}
             </span>
           </div>
           <button className="text-sm font-medium text-[#64748b] hover:text-white transition-colors">
             Ver todos
           </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {myCourses.map((course, i) => (
-            <motion.div key={i} variants={itemVariants}>
-              <CourseCard {...course} />
-            </motion.div>
-          ))}
-        </div>
+
+        {loading ? (
+          <div className="flex items-center justify-center p-20">
+            <Loader2 className="w-8 h-8 text-[#22ff88] animate-spin" />
+          </div>
+        ) : enrolledCourses.length === 0 ? (
+          <div className="bg-[#1a1c22] rounded-[2.5rem] border border-white/5 p-16 text-center">
+            <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <BookOpen className="w-8 h-8 text-[#64748b]" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">Você ainda não tem cursos</h3>
+            <p className="text-[#64748b] mb-8">Explore nossa Vitrine e comece sua jornada hoje.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {enrolledCourses.map((enrollment, i) => (
+              <motion.div key={enrollment.id} variants={itemVariants}>
+                <CourseCard 
+                  image={enrollment.course.cover_url || "https://images.unsplash.com/photo-1541829070764-84a7d30dee73?w=800"} 
+                  title={enrollment.course.title} 
+                  mentor={enrollment.course.instructor?.full_name || 'Especialista'} 
+                  progress={enrollment.progress || 0} 
+                  onClick={() => onCourseSelect(enrollment.course.id)}
+                />
+              </motion.div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Recomendados */}
