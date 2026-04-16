@@ -141,6 +141,36 @@ export function CoursePlayer({ courseId, onBack }: CoursePlayerProps) {
     }
   }
 
+  const handleLoadedMetadata = async () => {
+    if (!videoRef.current || !currentLesson) return;
+    
+    // If duration is missing or just a placeholder, "heal" it by saving the real metadata to DB
+    if (!currentLesson.duration || currentLesson.duration === '--:--' || currentLesson.duration === '45:00') {
+      const minutes = Math.floor(videoRef.current.duration / 60);
+      const seconds = Math.floor(videoRef.current.duration % 60);
+      const durationStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+      
+      try {
+        // Update Supabase
+        await supabase
+          .from('lessons')
+          .update({ duration: durationStr })
+          .eq('id', currentLesson.id);
+          
+        // Update local state for immediate UI feedback
+        setModules(prev => prev.map(m => ({
+          ...m,
+          lessons: m.lessons.map(l => l.id === currentLesson.id ? { ...l, duration: durationStr } : l)
+        })));
+
+        // Also update currentLesson duration so the condition doesn't trigger again
+        setCurrentLesson(prev => prev ? { ...prev, duration: durationStr } : null);
+      } catch (error) {
+        console.error('Erro ao atualizar duração auto-healing:', error);
+      }
+    }
+  };
+
   // Throttled progress saving
   const handleTimeUpdate = async () => {
     if (!videoRef.current || !currentLesson) return;
@@ -201,6 +231,7 @@ export function CoursePlayer({ courseId, onBack }: CoursePlayerProps) {
                 key={currentLesson.id}
                 src={currentLesson.content_url}
                 onTimeUpdate={handleTimeUpdate}
+                onLoadedMetadata={handleLoadedMetadata}
                 className="w-full h-full object-contain"
                 controls
               />

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Plus,
   Play,
@@ -316,20 +316,6 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
     } catch (error: any) {
       alert('Erro ao excluir aula: ' + error.message);
     }
-  };
-
-  const getFileDuration = (file: File): Promise<string> => {
-    return new Promise((resolve) => {
-      const video = document.createElement('video');
-      video.preload = 'metadata';
-      video.onloadedmetadata = () => {
-        window.URL.revokeObjectURL(video.src);
-        const minutes = Math.floor(video.duration / 60);
-        const seconds = Math.floor(video.duration % 60);
-        resolve(`${minutes}:${seconds.toString().padStart(2, '0')}`);
-      };
-      video.src = URL.createObjectURL(file);
-    });
   };
 
   const getFileDuration = (file: File): Promise<string> => {
