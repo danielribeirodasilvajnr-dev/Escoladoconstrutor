@@ -40,6 +40,8 @@ interface Course {
   cover_url: string;
   price: number;
   is_published: boolean;
+  students_count: number;
+  rating: number;
 }
 
 interface CourseEditorProps {
@@ -57,8 +59,11 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange }: Cours
     description: '',
     price: 0,
     cover_url: '',
-    is_published: false
+    is_published: false,
+    students_count: 0,
+    rating: 0
   });
+  const [priceInput, setPriceInput] = useState('0,00');
   const [modules, setModules] = useState<Module[]>([]);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadingLessonId, setUploadingLessonId] = useState<string | null>(null);
@@ -106,6 +111,11 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange }: Cours
       }));
       
       setModules(formattedModules);
+      
+      // Update price input string
+      if (courseData.price !== undefined) {
+        setPriceInput(courseData.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 }));
+      }
     } catch (error: any) {
       console.error('Erro ao carregar curso:', error.message);
     } finally {
@@ -156,6 +166,18 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange }: Cours
       setSaving(false);
     }
   }
+
+  const handlePriceChange = (value: string) => {
+    // Remove non-numeric chars except comma
+    const cleanValue = value.replace(/[^\d,]/g, '');
+    setPriceInput(cleanValue);
+    
+    // Convert to number for DB (replace comma with dot)
+    const numericValue = parseFloat(cleanValue.replace(',', '.'));
+    if (!isNaN(numericValue)) {
+      setCourse(prev => ({ ...prev, price: numericValue }));
+    }
+  };
 
   const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -525,14 +547,22 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange }: Cours
              <div className="space-y-8">
                 <div>
                   <p className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest mb-4">PREÇO DE INSCRIÇÃO (BRL)</p>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl font-bold text-[#22ff88]">R$</span>
-                    <input 
-                      type="number" 
-                      value={course.price}
-                      onChange={(e) => setCourse(prev => ({ ...prev, price: Number(e.target.value) }))}
-                      className="w-full bg-[#0f1115] border border-white/5 rounded-xl px-12 py-5 text-2xl font-bold text-white focus:outline-none"
-                    />
+                  <div className="relative bg-[#0f1115] border border-white/5 rounded-2xl overflow-hidden">
+                    <div className="px-8 py-7 flex items-baseline gap-2">
+                      <span className="text-xl font-bold text-[#22ff88]">R$</span>
+                      <input 
+                        type="text" 
+                        value={priceInput}
+                        onChange={(e) => handlePriceChange(e.target.value)}
+                        onBlur={() => {
+                          const val = parseFloat(priceInput.replace(',', '.'));
+                          if (!isNaN(val)) {
+                            setPriceInput(val.toLocaleString('pt-BR', { minimumFractionDigits: 2 }));
+                          }
+                        }}
+                        className="bg-transparent border-none text-4xl font-bold text-white w-full focus:outline-none placeholder:text-white/20"
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -564,12 +594,12 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange }: Cours
               
               <div className="grid grid-cols-2 gap-4">
                  <div className="bg-[#0f1115] p-5 rounded-2xl border border-white/5">
-                    <p className="text-2xl font-bold text-white mb-1">0</p>
+                    <p className="text-2xl font-bold text-white mb-1">{course.students_count || 0}</p>
                     <p className="text-[9px] font-bold text-[#64748b] uppercase tracking-widest">ALUNOS</p>
                  </div>
                  <div className="bg-[#0f1115] p-5 rounded-2xl border border-white/5">
-                    <p className="text-2xl font-bold text-[#22ff88] mb-1">5.0</p>
-                    <p className="text-[9px] font-bold text-[#64748b] uppercase tracking-widest">RANKING</p>
+                    <p className="text-2xl font-bold text-[#22ff88] mb-1">{course.rating ? Number(course.rating).toFixed(1) : '5.0'}</p>
+                    <p className="text-[9px] font-bold text-[#64748b] uppercase tracking-widest">AVALIAÇÃO</p>
                  </div>
               </div>
            </div>
