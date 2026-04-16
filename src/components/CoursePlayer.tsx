@@ -42,6 +42,7 @@ export function CoursePlayer({ courseId, onBack }: CoursePlayerProps) {
   const [course, setCourse] = useState<any>(null);
   const [modules, setModules] = useState<Module[]>([]);
   const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null);
+  const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [lastSavedTime, setLastSavedTime] = useState(0);
