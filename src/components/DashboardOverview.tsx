@@ -1,14 +1,42 @@
 import { motion } from 'motion/react';
-import { cn } from '../lib/utils';
+import { HeroSection } from './HeroSection';
+import { CourseCard } from './CourseCard';
+import { FeaturedCard } from './FeaturedCard';
+import { WeeklyCard } from './WeeklyCard';
+
+const myCourses = [
+  { image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&h=450&auto=format&fit=crop", title: "Design de Microprocessadores", mentor: "Dr. David Heinemeier", progress: 65 },
+  { image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&h=450&auto=format&fit=crop", title: "Estruturas Paramétricas", mentor: "Eng. Sarah Chen", progress: 20 },
+  { image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc51?w=800&h=450&auto=format&fit=crop", title: "Segurança de Rede Industrial", mentor: "Marcus V. Hollis", progress: 88 }
+];
+
+const recommended = [
+  { image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600&h=800&auto=format&fit=crop", category: "Novo Masterclass", title: "Inteligência Artificial em Sistemas Embarcados" },
+  { image: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=600&h=800&auto=format&fit=crop", category: "Fundamentos", title: "Termodinâmica para Energias Renováveis" },
+  { image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&h=800&auto=format&fit=crop", category: "Avançado", title: "Soberania de Dados & Criptografia Industrial" }
+];
+
+const weekly = [
+  { image: "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=800&h=450&auto=format&fit=crop", type: "Workshop", title: "Otimização de Turbinas Eólicas em Altas Altitudes" },
+  { image: "https://images.unsplash.com/photo-1515162305285-0293e4767cc2?w=800&h=450&auto=format&fit=crop", type: "Entrevista", title: "Mobilidade Urbana: O Futuro dos Trens Maglev" },
+  { image: "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=800&h=450&auto=format&fit=crop", type: "Documentário", title: "Bastidores: A Engenharia por trás da PrecisionX" },
+  { image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&h=450&auto=format&fit=crop", type: "Live", title: "Telecomunicações via Starlink & Além" }
+];
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 }
+};
 
 export function DashboardOverview() {
-  const data = [
-    { id: "01", name: "SaaS Redesign", status: "Active", lead: "Alex Rivera", avatar: "https://i.pravatar.cc/150?u=alex", deadline: "Oct 24" },
-    { id: "02", name: "Mobile App V2", status: "Scheduled", lead: "Sarah Chen", avatar: "https://i.pravatar.cc/150?u=sarah", deadline: "Nov 12" },
-    { id: "03", name: "Brand Identity", status: "Review", lead: "Marc Hughes", avatar: "https://i.pravatar.cc/150?u=marc", deadline: "Oct 28" },
-    { id: "04", name: "Marketing Site", status: "Active", lead: "Elena K.", avatar: "https://i.pravatar.cc/150?u=elena", deadline: "Oct 20" },
-    { id: "05", name: "Platform Core", status: "Idle", lead: "Tom Wilson", avatar: "https://i.pravatar.cc/150?u=tom", deadline: "Dec 05" },
-  ];
 
   return (
     <div className="p-8">
