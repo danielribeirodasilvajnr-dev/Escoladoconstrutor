@@ -17,7 +17,7 @@ export function CheckoutModal({ course, userId, onClose, onSuccess }: CheckoutMo
   const handlePayment = async () => {
     setLoading(true);
     setStep('processing');
-    
+
     // Simulate payment delay
     await new Promise(resolve => setTimeout(resolve, 2000));
 
@@ -49,14 +49,14 @@ export function CheckoutModal({ course, userId, onClose, onSuccess }: CheckoutMo
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/80 backdrop-blur-xl">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
         className="w-full max-w-2xl bg-[#0f1115] rounded-[2.5rem] border border-white/5 overflow-hidden relative shadow-2xl"
       >
         {step !== 'success' && (
-          <button 
+          <button
             onClick={onClose}
             className="absolute top-8 right-8 p-3 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors z-10"
           >
@@ -66,7 +66,7 @@ export function CheckoutModal({ course, userId, onClose, onSuccess }: CheckoutMo
 
         <AnimatePresence mode="wait">
           {step === 'details' && (
-            <motion.div 
+            <motion.div
               key="details"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -112,7 +112,7 @@ export function CheckoutModal({ course, userId, onClose, onSuccess }: CheckoutMo
                 </div>
               </div>
 
-              <button 
+              <button
                 onClick={handlePayment}
                 disabled={loading}
                 className="w-full py-5 bg-[#22ff88] text-black font-extrabold rounded-2xl hover:opacity-90 transition-all flex items-center justify-center gap-3 group shadow-[0_0_30px_rgba(34,255,136,0.2)]"
@@ -133,7 +133,7 @@ export function CheckoutModal({ course, userId, onClose, onSuccess }: CheckoutMo
           )}
 
           {step === 'processing' && (
-            <motion.div 
+            <motion.div
               key="processing"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -147,7 +147,7 @@ export function CheckoutModal({ course, userId, onClose, onSuccess }: CheckoutMo
           )}
 
           {step === 'success' && (
-            <motion.div 
+            <motion.div
               key="success"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -160,21 +160,21 @@ export function CheckoutModal({ course, userId, onClose, onSuccess }: CheckoutMo
               <p className="text-[#64748b] text-lg mb-12 max-w-sm mx-auto">
                 Parabéns! O curso <strong>{course.title}</strong> já está disponível no seu console.
               </p>
-              
+
               <div className="grid grid-cols-2 gap-4 max-w-md mx-auto mb-12">
-                 <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                   <Award className="w-6 h-6 text-[#22ff88] mx-auto mb-2" />
-                   <p className="text-[10px] uppercase font-bold text-white/40">Certificação</p>
-                   <p className="text-xs font-bold text-white">Inclusa</p>
-                 </div>
-                 <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                   <ShieldCheck className="w-6 h-6 text-[#22ff88] mx-auto mb-2" />
-                   <p className="text-[10px] uppercase font-bold text-white/40">Acesso</p>
-                   <p className="text-xs font-bold text-white">Vitalício</p>
-                 </div>
+                <div className="bg-white/5 p-4 rounded-xl border border-white/5">
+                  <Award className="w-6 h-6 text-[#22ff88] mx-auto mb-2" />
+                  <p className="text-[10px] uppercase font-bold text-white/40">Certificação</p>
+                  <p className="text-xs font-bold text-white">Inclusa</p>
+                </div>
+                <div className="bg-white/5 p-4 rounded-xl border border-white/5">
+                  <ShieldCheck className="w-6 h-6 text-[#22ff88] mx-auto mb-2" />
+                  <p className="text-[10px] uppercase font-bold text-white/40">Acesso</p>
+                  <p className="text-xs font-bold text-white">Vitalício</p>
+                </div>
               </div>
 
-              <button 
+              <button
                 onClick={onSuccess}
                 className="px-12 py-5 bg-white text-black font-extrabold rounded-2xl hover:bg-white/90 transition-all uppercase tracking-widest text-sm"
               >

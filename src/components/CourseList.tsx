@@ -46,7 +46,7 @@ export function CourseList({ userData, onEditCourse, onCreateCourse }: CourseLis
     }
   }
 
-  const filteredCourses = courses.filter(course => 
+  const filteredCourses = courses.filter(course =>
     course.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -57,7 +57,7 @@ export function CourseList({ userData, onEditCourse, onCreateCourse }: CourseLis
           <h1 className="text-4xl font-bold text-white mb-2">Meus Cursos</h1>
           <p className="text-[#64748b] text-base">Gerencie seus conteúdos autorais e acompanhe o engajamento.</p>
         </div>
-        <button 
+        <button
           onClick={onCreateCourse}
           className="flex items-center gap-2 px-8 py-4 bg-[#22ff88] text-black font-bold rounded-2xl hover:opacity-90 transition-all shadow-[0_0_20px_rgba(34,255,136,0.2)] active:scale-95"
         >
@@ -69,7 +69,7 @@ export function CourseList({ userData, onEditCourse, onCreateCourse }: CourseLis
       {/* Search and Filters */}
       <div className="relative group max-w-md">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#64748b] group-focus-within:text-[#22ff88] transition-colors" />
-        <input 
+        <input
           type="text"
           placeholder="Buscar nos meus cursos..."
           value={searchTerm}
@@ -91,7 +91,7 @@ export function CourseList({ userData, onEditCourse, onCreateCourse }: CourseLis
           </div>
           <h2 className="text-2xl font-bold text-white mb-4">Nenhum curso encontrado</h2>
           <p className="text-[#64748b] mb-8 max-w-md mx-auto">Comece agora a criar sua primeira Masterclass cinematográfica para a Escola do Construtor.</p>
-          <button 
+          <button
             onClick={onCreateCourse}
             className="px-8 py-3.5 bg-white/5 text-white font-bold rounded-xl hover:bg-white/10 transition-all"
           >
@@ -109,10 +109,10 @@ export function CourseList({ userData, onEditCourse, onCreateCourse }: CourseLis
               className="bg-[#1a1c22] rounded-[2.5rem] border border-white/5 overflow-hidden group hover:border-[#22ff88]/30 transition-all"
             >
               <div className="aspect-video relative overflow-hidden">
-                <img 
-                  src={course.cover_url || 'https://images.unsplash.com/photo-1541829070764-84a7d30dee73?w=800'} 
+                <img
+                  src={course.cover_url || 'https://images.unsplash.com/photo-1541829070764-84a7d30dee73?w=800'}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  alt={course.title} 
+                  alt={course.title}
                 />
                 <div className="absolute top-4 right-4">
                   <span className={cn(
@@ -136,7 +136,7 @@ export function CourseList({ userData, onEditCourse, onCreateCourse }: CourseLis
                   </div>
                 </div>
                 <div className="flex gap-4">
-                  <button 
+                  <button
                     onClick={() => onEditCourse(course.id)}
                     className="flex-1 py-4 bg-white/5 text-white text-[10px] font-bold uppercase tracking-widest rounded-2xl border border-white/10 hover:bg-white/10 transition-all flex items-center justify-center gap-2"
                   >

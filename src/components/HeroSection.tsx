@@ -24,13 +24,13 @@ export function HeroSection({ lastWatched, onContinue }: HeroSectionProps) {
   return (
     <section className="relative h-[480px] w-full rounded-3xl overflow-hidden mb-12 group">
       {/* Background Image */}
-      <img 
-        src={course.cover_url} 
+      <img
+        src={course.cover_url}
         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
         alt={course.title}
         referrerPolicy="no-referrer"
       />
-      
+
       {/* Gradients */}
       <div className="absolute inset-0 bg-gradient-to-r from-[#0f1115] via-[#0f1115]/60 to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-t from-[#0f1115] via-transparent to-transparent" />
@@ -57,7 +57,7 @@ export function HeroSection({ lastWatched, onContinue }: HeroSectionProps) {
         </p>
 
         <div className="flex items-center gap-4">
-          <button 
+          <button
             onClick={onContinue}
             className="flex items-center gap-3 px-8 py-4 bg-[#22ff88] text-black rounded-xl font-bold hover:opacity-90 active:scale-95 transition-all shadow-xl shadow-[#22ff88]/20 group/btn"
           >

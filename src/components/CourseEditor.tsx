@@ -85,7 +85,7 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
     isOpen: false,
     title: '',
     message: '',
-    onConfirm: () => {},
+    onConfirm: () => { },
     variant: 'info'
   });
 
@@ -393,9 +393,9 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
         .getPublicUrl(filePath);
 
       const { error: updateError } = await supabase.from('lessons')
-        .update({ 
+        .update({
           content_url: publicUrl,
-          duration: duration 
+          duration: duration
         })
         .eq('id', lessonId);
 
@@ -557,8 +557,8 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                           <div className="flex items-center gap-4 flex-1">
                             <div className="w-12 h-12 rounded-lg overflow-hidden bg-black/40 border border-white/10 flex items-center justify-center shrink-0 group-hover:border-[#22ff88]/30 transition-colors">
                               {lesson.content_url ? (
-                                <video 
-                                  src={lesson.content_url} 
+                                <video
+                                  src={lesson.content_url}
                                   className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity"
                                   preload="metadata"
                                 />
@@ -616,7 +616,7 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                   </div>
 
                   {/* Module Exam Square */}
-                  <div 
+                  <div
                     onClick={() => onOpenExam?.(course.id, module.id)}
                     className="bg-white/[0.02] border border-dashed border-white/10 rounded-3xl p-8 flex flex-col items-center justify-center text-center group hover:border-[#22ff88]/50 transition-all cursor-pointer h-full min-h-[200px]"
                   >
@@ -635,7 +635,7 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
               ))}
 
               {/* Final Exam Square */}
-              <div 
+              <div
                 onClick={() => onOpenExam?.(course.id || '', null)}
                 className="mt-12 bg-[#ffcc00]/5 border border-dashed border-[#ffcc00]/20 rounded-[2.5rem] p-10 flex flex-col lg:flex-row items-center justify-between group hover:border-[#ffcc00]/50 transition-all cursor-pointer"
               >

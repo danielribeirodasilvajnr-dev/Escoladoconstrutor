@@ -74,7 +74,7 @@ export function AdminOverview({ userData, onViewChange }: AdminOverviewProps) {
       const now = new Date();
       const currentMonthIndex = now.getMonth();
       const currentYear = now.getFullYear();
-      
+
       const lastMonthIndex = currentMonthIndex === 0 ? 11 : currentMonthIndex - 1;
       const lastMonthYear = currentMonthIndex === 0 ? currentYear - 1 : currentYear;
 
@@ -85,14 +85,14 @@ export function AdminOverview({ userData, onViewChange }: AdminOverviewProps) {
         const enrollCount = course.enrollments?.length || 0;
         const revenue = enrollCount * (course.price || 0);
         const coursePrice = course.price || 0;
-        
+
         totalEnrollmentsCount += enrollCount;
         totalRevenue += revenue;
 
         course.enrollments?.forEach((enroll: any) => {
           totalStudentsSet.add(enroll.user_id);
           totalProgress += enroll.progress || 0;
-          
+
           const enrollDate = new Date(enroll.created_at);
           const enrollMonth = enrollDate.getMonth();
           const enrollYear = enrollDate.getFullYear();
@@ -103,11 +103,11 @@ export function AdminOverview({ userData, onViewChange }: AdminOverviewProps) {
           } else if (enrollMonth === lastMonthIndex && enrollYear === lastMonthYear) {
             lastMonthRev += coursePrice;
           }
-          
+
           // Growth Data Calculation (last 6 months logic)
           const monthName = months[enrollMonth];
           if (growthMap[monthName] !== undefined) {
-             growthMap[monthName]++;
+            growthMap[monthName]++;
           }
         });
 
@@ -195,7 +195,7 @@ export function AdminOverview({ userData, onViewChange }: AdminOverviewProps) {
                 </div>
                 <p className="text-[#64748b] text-sm font-medium mb-1">{stat.label}</p>
                 <p className="text-4xl font-bold text-white tracking-tight">{stat.value}</p>
-                
+
                 <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/5">
                   <div className={cn("h-full opacity-50 transition-all duration-1000", stat.color === 'text-[#22ff88]' ? 'bg-[#22ff88]' : 'bg-[#00ffcc]')} style={{ width: '60%' }} />
                 </div>
@@ -222,11 +222,11 @@ export function AdminOverview({ userData, onViewChange }: AdminOverviewProps) {
                   </div>
                 </div>
               </div>
-              
+
               <div className="h-64 flex items-end justify-between gap-4 px-4">
                 {growthData.map((data, i) => (
                   <div key={data.month} className="flex-1 flex flex-col items-center gap-4">
-                    <motion.div 
+                    <motion.div
                       initial={{ height: 0 }}
                       animate={{ height: `${data.value || 5}%` }} // Min 5% height for visibility
                       transition={{ duration: 1, delay: i * 0.1 }}
@@ -243,7 +243,7 @@ export function AdminOverview({ userData, onViewChange }: AdminOverviewProps) {
 
             {/* Right Actions & Status */}
             <div className="space-y-6">
-              <div 
+              <div
                 onClick={() => onViewChange?.('admin-cursos')}
                 className="bg-[#22ff88] p-6 rounded-3xl border border-[#22ff88] flex items-center justify-between group cursor-pointer hover:opacity-90 active:scale-[0.98] transition-all"
               >
