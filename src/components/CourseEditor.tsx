@@ -237,6 +237,7 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
         .update({ title })
         .eq('id', moduleId);
       if (error) throw error;
+      setModules(prev => prev.map(m => m.id === moduleId ? { ...m, title } : m));
     } catch (error: any) {
       console.error('Erro ao atualizar título do módulo:', error.message);
     }
@@ -287,6 +288,10 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
         .update({ title })
         .eq('id', lessonId);
       if (error) throw error;
+      setModules(prev => prev.map(m => ({
+        ...m,
+        lessons: m.lessons.map(l => l.id === lessonId ? { ...l, title } : l)
+      })));
     } catch (error: any) {
       console.error('Erro ao atualizar título da aula:', error.message);
     }
@@ -477,7 +482,12 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                           type="text"
                           defaultValue={module.title}
                           onBlur={(e) => handleUpdateModuleTitle(module.id, e.target.value)}
-                          className="bg-transparent border-none text-lg font-bold text-white focus:outline-none focus:text-[#22ff88] transition-colors"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              (e.target as HTMLInputElement).blur();
+                            }
+                          }}
+                          className="bg-transparent border-none text-lg font-bold text-white focus:outline-none focus:text-[#22ff88] transition-colors w-full"
                         />
                       </div>
                       <div className="flex gap-4 text-[#64748b]">
@@ -490,16 +500,27 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                       {module.lessons.map((lesson, lIdx) => (
                         <div key={lesson.id} className="bg-[#0f1115] border border-white/5 rounded-xl p-4 flex items-center justify-between group">
                           <div className="flex items-center gap-4 flex-1">
-                            {lesson.content_url ? (
-                              <Play className="w-4 h-4 text-[#22ff88] fill-current" />
-                            ) : (
-                              <Upload className="w-4 h-4 text-white/30" />
-                            )}
+                            <div className="w-12 h-12 rounded-lg overflow-hidden bg-black/40 border border-white/10 flex items-center justify-center shrink-0 group-hover:border-[#22ff88]/30 transition-colors">
+                              {lesson.content_url ? (
+                                <video 
+                                  src={lesson.content_url} 
+                                  className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity"
+                                  preload="metadata"
+                                />
+                              ) : (
+                                <Upload className="w-4 h-4 text-white/20" />
+                              )}
+                            </div>
                             <input
                               type="text"
                               defaultValue={lesson.title}
                               onBlur={(e) => handleUpdateLessonTitle(lesson.id, e.target.value)}
-                              className="bg-transparent border-none text-sm font-bold text-white/60 group-hover:text-white focus:outline-none flex-1"
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  (e.target as HTMLInputElement).blur();
+                                }
+                              }}
+                              className="bg-transparent border-none text-sm font-bold text-white/60 group-hover:text-white focus:outline-none flex-1 focus:text-[#22ff88]"
                             />
                           </div>
                           <div className="flex items-center gap-4">
