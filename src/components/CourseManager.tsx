@@ -20,7 +20,7 @@ export function CourseManager() {
     <div className="p-10 max-w-[1600px] mx-auto pb-20">
       <header className="flex justify-between items-start mb-12">
         <div className="max-w-xl">
-          <p className="text-[10px] font-bold text-[#64748b] uppercase tracking-[0.2em] mb-4">Course Architecture / Admin</p>
+          <p className="text-[10px] font-bold text-[#64748b] uppercase tracking-[0.2em] mb-4">Arquitetura de Cursos / Professor</p>
           <h1 className="text-6xl font-bold text-white mb-6 leading-tight">
             Course <span className="text-[#22ff88]">Genesis</span>
           </h1>

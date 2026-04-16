@@ -110,7 +110,7 @@ export function Auth({ onSuccess }: AuthProps) {
               accessLevel === 'administrador' ? "text-[#22ff88]" : "text-[#64748b]"
             )}
           >
-            Administrador
+            Professor
           </button>
         </div>
 

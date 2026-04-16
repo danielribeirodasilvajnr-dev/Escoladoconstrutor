@@ -35,7 +35,7 @@ export function Navbar({ userData, activeView, onViewChange }: NavbarProps) {
           <div className="text-right hidden sm:block">
             <p className="text-sm font-bold text-white leading-tight">{userData?.name || 'Carregando...'}</p>
             <p className="text-[10px] items-center text-[#22ff88] font-bold uppercase tracking-wider font-mono">
-              {userData?.role === 'administrador' ? 'ADMINISTRADOR' : 'ESTUDANTE ELITE'}
+              {userData?.role === 'administrador' ? 'PROFESSOR' : 'ESTUDANTE ELITE'}
             </p>
           </div>
           <button 

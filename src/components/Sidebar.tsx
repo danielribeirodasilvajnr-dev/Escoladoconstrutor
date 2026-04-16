@@ -78,7 +78,7 @@ export function Sidebar({ activeView, onViewChange, userData }: SidebarProps) {
           {/* Admin Section */}
           {userRole === 'administrador' && (
             <nav className="space-y-1 animate-in fade-in slide-in-from-left-4 duration-500">
-              <p className="text-[9px] uppercase tracking-[0.2em] text-[#22ff88] font-bold mb-4 px-4">Console Admin</p>
+              <p className="text-[9px] uppercase tracking-[0.2em] text-[#22ff88] font-bold mb-4 px-4">Console Professor</p>
               {adminItems.map((item) => (
                 <button 
                   key={item.id}

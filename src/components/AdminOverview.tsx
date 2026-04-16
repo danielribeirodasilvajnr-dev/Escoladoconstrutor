@@ -26,7 +26,7 @@ export function AdminOverview() {
     <div className="p-10 max-w-[1600px] mx-auto space-y-10 pb-20">
       <header className="flex justify-between items-start mb-12">
         <div>
-          <h1 className="text-4xl font-bold text-white mb-2">Admin Dashboard</h1>
+          <h1 className="text-4xl font-bold text-white mb-2">Painel do Professor</h1>
           <p className="text-[#64748b] text-base">Relatório de performance editorial e métricas de engajamento.</p>
         </div>
         <div className="flex gap-4">
