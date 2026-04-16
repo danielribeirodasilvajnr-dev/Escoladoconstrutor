@@ -33,7 +33,7 @@ export function Dashboard({ userData }: DashboardProps) {
       case 'admin-provas':
         return <ExamCreator />;
       case 'admin-cursos':
-        return <CourseManager />;
+        return <CourseManager userData={userData} onViewChange={(view) => setActiveView(view as DashboardView)} />;
       case 'settings':
         return <ProfileSettings userData={userData} />;
       default:

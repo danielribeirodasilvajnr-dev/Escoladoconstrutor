@@ -24,6 +24,7 @@ export default function App() {
           name: session.user.user_metadata.full_name || session.user.email?.split('@')[0],
           avatar_url: session.user.user_metadata.avatar_url,
           phone: session.user.user_metadata.phone,
+          bio: session.user.user_metadata.bio,
         });
         setView('dashboard');
       } else {

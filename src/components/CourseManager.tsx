@@ -15,7 +15,14 @@ import {
   Image as ImageIcon
 } from 'lucide-react';
 
-export function CourseManager() {
+interface CourseManagerProps {
+  userData: any;
+  onViewChange: (view: string) => void;
+}
+
+export function CourseManager({ userData, onViewChange }: CourseManagerProps) {
+  const avatarUrl = userData?.avatar_url || `https://i.pravatar.cc/100?u=${userData?.email}`;
+  
   return (
     <div className="p-10 max-w-[1600px] mx-auto pb-20">
       <header className="flex justify-between items-start mb-12">
@@ -197,23 +204,27 @@ export function CourseManager() {
 
              <div className="relative inline-block mb-8">
                 <img 
-                  src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=200&h=200&auto=format&fit=crop" 
+                  src={avatarUrl} 
                   className="w-32 h-32 rounded-[2rem] object-cover border-2 border-[#22ff88]/30 p-1" 
                   alt="Instructor" 
+                  referrerPolicy="no-referrer"
                 />
                 <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-[#22ff88] rounded-2xl flex items-center justify-center border-4 border-[#1a1c22]">
                    <CheckCircle2 className="w-5 h-5 text-black" />
                 </div>
              </div>
 
-             <h4 className="text-2xl font-bold text-white underline decoration-[#22ff88]/20 underline-offset-4">Dr. Elena Rodriguez</h4>
-             <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#22ff88] mt-2 mb-6 font-mono">Doutora em Mecânica Estrutural</p>
+             <h4 className="text-2xl font-bold text-white underline decoration-[#22ff88]/20 underline-offset-4">{userData?.name || 'Instrutor'}</h4>
+             <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#22ff88] mt-2 mb-6 font-mono">Corpo Docente Verificado</p>
              
              <p className="text-sm text-[#64748b] leading-relaxed mb-8 px-4">
-               Especialista em integridade estrutural sismológica com mais de 15 anos em arquitetura de engenharia industrial.
+               {userData?.bio || 'Especialista em Engenharia com foco em inovação e integridade estrutural. Liderando a próxima geração de construtores.'}
              </p>
 
-             <button className="w-full py-4 bg-white/5 text-[#94a3b8] text-[10px] font-bold uppercase tracking-widest rounded-2xl border border-white/10 hover:bg-white/10 transition-all mb-10">
+             <button 
+               onClick={() => onViewChange('settings')}
+               className="w-full py-4 bg-white/5 text-[#94a3b8] text-[10px] font-bold uppercase tracking-widest rounded-2xl border border-white/10 hover:bg-white/10 transition-all mb-10"
+             >
                EDITAR PERFIL DO CORPO DOCENTE
              </button>
 

@@ -11,6 +11,7 @@ interface ProfileSettingsProps {
 export function ProfileSettings({ userData }: ProfileSettingsProps) {
   const [name, setName] = useState(userData?.name || '');
   const [phone, setPhone] = useState(userData?.phone || '');
+  const [bio, setBio] = useState(userData?.bio || '');
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(userData?.avatar_url || '');
@@ -71,6 +72,7 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
           full_name: name,
           phone: phone,
           avatar_url: avatarUrl,
+          bio: bio,
         }
       });
 
@@ -169,6 +171,16 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
                 className="w-full bg-[#1a1c22] border border-white/5 rounded-2xl pl-12 pr-4 py-4 text-white focus:outline-none focus:border-[#22ff88]/30 transition-all font-medium"
               />
             </div>
+          </div>
+
+          <div className="space-y-2 md:col-span-2">
+            <label className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest px-1">Resumo do Perfil (Bio)</label>
+            <textarea 
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              placeholder="Descreva sua experiência e especialidades..."
+              className="w-full bg-[#1a1c22] border border-white/5 rounded-2xl p-6 text-white focus:outline-none focus:border-[#22ff88]/30 transition-all font-medium min-h-[120px] resize-none"
+            />
           </div>
         </div>
 
