@@ -21,7 +21,11 @@ const recentActivities = [
   { course: "Lógica Digital & Síntese", published: "Publicado há 1 semana", instructor: "Dr. Marcus Thorne", enrollments: "+842", revenue: "R$ 8.920", image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=100&h=100&auto=format&fit=crop" }
 ];
 
-export function AdminOverview() {
+interface AdminOverviewProps {
+  onViewChange?: (view: string) => void;
+}
+
+export function AdminOverview({ onViewChange }: AdminOverviewProps) {
   return (
     <div className="p-10 max-w-[1600px] mx-auto space-y-10 pb-20">
       <header className="flex justify-between items-start mb-12">
@@ -114,7 +118,10 @@ export function AdminOverview() {
 
         {/* Right Actions & Status */}
         <div className="space-y-6">
-          <div className="bg-[#22ff88] p-6 rounded-3xl flex items-center justify-between group cursor-pointer hover:opacity-90 transition-all">
+          <div 
+            onClick={() => onViewChange?.('admin-cursos')}
+            className="bg-[#22ff88] p-6 rounded-3xl border border-[#22ff88] flex items-center justify-between group cursor-pointer hover:opacity-90 active:scale-[0.98] transition-all"
+          >
             <div>
               <h3 className="text-black font-bold text-lg mb-1">Criar Novo Curso</h3>
               <p className="text-black/60 text-xs font-medium">Lançar novo conteúdo autoral</p>

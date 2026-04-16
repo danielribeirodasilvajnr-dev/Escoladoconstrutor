@@ -29,7 +29,7 @@ export function Dashboard({ userData }: DashboardProps) {
       case 'overview':
         return <DashboardOverview />;
       case 'admin-overview':
-        return <AdminOverview />;
+        return <AdminOverview onViewChange={(view) => setActiveView(view as DashboardView)} />;
       case 'admin-provas':
         return <ExamCreator />;
       case 'admin-cursos':
