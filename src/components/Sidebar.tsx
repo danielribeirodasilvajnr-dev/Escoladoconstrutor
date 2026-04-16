@@ -24,11 +24,10 @@ export function Sidebar({ activeView, onViewChange, userData }: SidebarProps) {
   const userRole = userData?.role || 'membro';
   const menuItems = [
     { id: "vitrine", icon: PlaySquare, label: "Vitrine" },
-    { id: "suporte", icon: BookOpen, label: "Suporte Educação" },
-    { id: "trilhas", icon: Map, label: "Trilhas" },
     { id: "overview", icon: Play, label: "Meus Cursos" },
     { id: "certificados", icon: Award, label: "Certificados" },
     { id: "comunidade", icon: Users2, label: "Comunidade" },
+    { id: "suporte", icon: BookOpen, label: "Suporte Educação" },
   ];
 
   const adminItems = [

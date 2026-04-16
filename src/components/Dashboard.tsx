@@ -9,7 +9,6 @@ import { ProfileSettings } from './ProfileSettings';
 type DashboardView = 
   | 'vitrine' 
   | 'suporte' 
-  | 'trilhas' 
   | 'overview' 
   | 'certificados' 
   | 'comunidade' 
