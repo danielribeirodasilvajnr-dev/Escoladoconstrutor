@@ -5,9 +5,10 @@ import { CourseEditor } from './CourseEditor';
 interface CourseManagerProps {
   userData: any;
   onViewChange: (view: string) => void;
+  onOpenExam?: (courseId: string, moduleId: string | null) => void;
 }
 
-export function CourseManager({ userData, onViewChange }: CourseManagerProps) {
+export function CourseManager({ userData, onViewChange, onOpenExam }: CourseManagerProps) {
   const [activeSubView, setActiveSubView] = useState<'list' | 'editor'>('list');
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
 
@@ -28,18 +29,19 @@ export function CourseManager({ userData, onViewChange }: CourseManagerProps) {
 
   if (activeSubView === 'editor') {
     return (
-      <CourseEditor 
-        courseId={selectedCourseId} 
-        userData={userData} 
+      <CourseEditor
+        courseId={selectedCourseId}
+        userData={userData}
         onBack={handleBackToList}
         onViewChange={onViewChange}
+        onOpenExam={onOpenExam}
       />
     );
   }
 
   return (
-    <CourseList 
-      userData={userData} 
+    <CourseList
+      userData={userData}
       onEditCourse={handleEditCourse}
       onCreateCourse={handleCreateCourse}
     />

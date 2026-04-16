@@ -1,132 +1,499 @@
-import { useState } from 'react';
-import { motion } from 'motion/react';
-import { 
-  Clock, 
-  Star, 
-  Shield, 
-  Trash2, 
-  Copy, 
-  Plus, 
-  CheckCircle2, 
-  Info, 
-  AlertTriangle,
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import {
+  Clock,
+  Star,
+  Shield,
+  Trash2,
+  Plus,
+  CheckCircle2,
+  Info,
   FileText,
-  Upload
+  Upload,
+  ChevronDown,
+  Award,
+  Layers,
+  Save,
+  Loader2
 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
-export function ExamCreator() {
-  const [questions, setQuestions] = useState([{ id: 1, text: '', alternatives: ['', '', ''] }]);
+interface ExamCreatorProps {
+  userData: any;
+  initialCourseId?: string;
+  initialModuleId?: string | null;
+  onBack?: () => void;
+}
+
+interface Alternative {
+  id: string;
+  text: string;
+  is_correct: boolean;
+}
+
+interface Question {
+  id: string;
+  text: string;
+  alternatives: Alternative[];
+}
+
+export function ExamCreator({ userData, initialCourseId, initialModuleId, onBack }: ExamCreatorProps) {
+  const [loading, setLoading] = useState(false);
+  const [courses, setCourses] = useState<any[]>([]);
+  const [modules, setModules] = useState<any[]>([]);
+
+  // Exam Info
+  const [targetCourse, setTargetCourse] = useState("");
+  const [targetModule, setTargetModule] = useState("");
+  const [isFinal, setIsFinal] = useState(false);
+  const [title, setTitle] = useState("");
+  const [timeLimit, setTimeLimit] = useState("60");
+  const [passingScore, setPassingScore] = useState("70");
+  const [attempts, setAttempts] = useState("1");
+
+  const [questions, setQuestions] = useState<Question[]>([
+    {
+      id: Math.random().toString(),
+      text: '',
+      alternatives: [
+        { id: Math.random().toString(), text: '', is_correct: true },
+        { id: Math.random().toString(), text: '', is_correct: false },
+        { id: Math.random().toString(), text: '', is_correct: false },
+      ]
+    }
+  ]);
+
+  useEffect(() => {
+    fetchCourses();
+    
+    if (initialCourseId) {
+      setTargetCourse(initialCourseId);
+    }
+    
+    if (initialModuleId) {
+      setTargetModule(initialModuleId);
+      setIsFinal(false);
+    } else if (initialModuleId === null && initialCourseId) {
+      // If moduleId is explicitly null but courseId exists, it's a final exam
+      setIsFinal(true);
+    }
+  }, [initialCourseId, initialModuleId]);
+
+  useEffect(() => {
+    if (targetCourse) {
+      fetchModules(targetCourse);
+    } else {
+      setModules([]);
+      setTargetModule("");
+    }
+  }, [targetCourse]);
+
+  async function fetchCourses() {
+    const { data } = await supabase
+      .from('courses')
+      .select('id, title')
+      .eq('instructor_id', userData.id);
+    setCourses(data || []);
+  }
+
+  async function fetchModules(courseId: string) {
+    const { data } = await supabase
+      .from('modules')
+      .select('id, title')
+      .eq('course_id', courseId)
+      .order('order_index', { ascending: true });
+    setModules(data || []);
+  }
+
+  const addQuestion = () => {
+    setQuestions([...questions, {
+      id: Math.random().toString(),
+      text: '',
+      alternatives: [
+        { id: Math.random().toString(), text: '', is_correct: true },
+        { id: Math.random().toString(), text: '', is_correct: false },
+        { id: Math.random().toString(), text: '', is_correct: false },
+      ]
+    }]);
+  };
+
+  const removeQuestion = (id: string) => {
+    if (questions.length > 1) {
+      setQuestions(questions.filter(q => q.id !== id));
+    }
+  };
+
+  const updateQuestionText = (id: string, text: string) => {
+    setQuestions(questions.map(q => q.id === id ? { ...q, text } : q));
+  };
+
+  const updateAlternative = (qId: string, aId: string, text: string) => {
+    setQuestions(questions.map(q => {
+      if (q.id === qId) {
+        return {
+          ...q,
+          alternatives: q.alternatives.map(a => a.id === aId ? { ...a, text } : a)
+        };
+      }
+      return q;
+    }));
+  };
+
+  const setCorrectAlternative = (qId: string, aId: string) => {
+    setQuestions(questions.map(q => {
+      if (q.id === qId) {
+        return {
+          ...q,
+          alternatives: q.alternatives.map(a => ({ ...a, is_correct: a.id === aId }))
+        };
+      }
+      return q;
+    }));
+  };
+
+  const addAlternative = (qId: string) => {
+    setQuestions(questions.map(q => {
+      if (q.id === qId) {
+        return {
+          ...q,
+          alternatives: [...q.alternatives, { id: Math.random().toString(), text: '', is_correct: false }]
+        };
+      }
+      return q;
+    }));
+  };
+
+  const removeAlternative = (qId: string, aId: string) => {
+    setQuestions(questions.map(q => {
+      if (q.id === qId && q.alternatives.length > 2) {
+        return {
+          ...q,
+          alternatives: q.alternatives.filter(a => a.id !== aId)
+        };
+      }
+      return q;
+    }));
+  };
+
+  const handleSave = async () => {
+    if (!targetCourse || !title) {
+      alert("Por favor, selecione um curso e defina um título para a prova.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // 1. Create the Exam
+      const { data: exam, error: examError } = await supabase
+        .from('exams')
+        .insert({
+          course_id: targetCourse,
+          module_id: isFinal ? null : (targetModule || null),
+          title,
+          time_limit: parseInt(timeLimit),
+          passing_score: parseInt(passingScore),
+          attempts_allowed: attempts === 'Única tentativa' ? 1 : attempts === '2 Tentativas' ? 2 : 99,
+          is_final: isFinal
+        })
+        .select()
+        .single();
+
+      if (examError) throw examError;
+
+      // 2. Create Questions and Alternatives
+      for (const q of questions) {
+        const { data: question, error: qError } = await supabase
+          .from('questions')
+          .insert({
+            exam_id: exam.id,
+            text: q.text,
+            order_index: questions.indexOf(q)
+          })
+          .select()
+          .single();
+
+        if (qError) throw qError;
+
+        const alternativesToInsert = q.alternatives.map(a => ({
+          question_id: question.id,
+          text: a.text,
+          is_correct: a.is_correct
+        }));
+
+        const { error: aError } = await supabase
+          .from('alternatives')
+          .insert(alternativesToInsert);
+
+        if (aError) throw aError;
+      }
+
+      alert("Prova publicada com sucesso!");
+      // Reset form or navigate back
+    } catch (error: any) {
+      console.error("Erro ao salvar prova:", error.message);
+      alert("Erro ao publicar prova. Verifique o console.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="p-10 max-w-[1600px] mx-auto pb-20">
-      <header className="flex justify-between items-end mb-12">
-        <div className="max-w-xl">
-          <h1 className="text-5xl font-bold text-white mb-4 leading-tight">
-            Console de Criação: <span className="text-[#22ff88]">Exame Final</span>
+      <header className="flex flex-col lg:flex-row justify-between lg:items-end mb-12 gap-8">
+        <div className="max-w-2xl">
+          {onBack && (
+            <button 
+              onClick={onBack}
+              className="flex items-center gap-2 text-[#64748b] hover:text-white transition-colors mb-6 group"
+            >
+              <Plus className="w-4 h-4 rotate-45 transform" />
+              <span className="text-[10px] font-bold uppercase tracking-widest">Voltar ao Curso</span>
+            </button>
+          )}
+          <div className="flex items-center gap-3 mb-4">
+            <span className="w-10 h-10 bg-[#22ff88]/10 rounded-xl flex items-center justify-center border border-[#22ff88]/20">
+              <FileText className="w-5 h-5 text-[#22ff88]" />
+            </span>
+            <h2 className="text-xs font-black text-[#22ff88] uppercase tracking-[0.2em]">Exam Factory</h2>
+          </div>
+          <h1 className="text-5xl font-black text-white mb-4 leading-tight">
+            Criar Nova <span className="text-[#22ff88]">Avaliação</span>
           </h1>
           <p className="text-[#64748b] text-base leading-relaxed">
-            Defina os parâmetros técnicos e construa a avaliação de integridade estrutural para a trilha de Engenharia Avançada.
+            Configure o escopo da avaliação, defina os parâmetros de aprovação e construa as questões técnicas para validar o conhecimento dos seus alunos.
           </p>
         </div>
         <div className="flex gap-4">
-          <button className="px-8 py-3.5 bg-transparent border border-white/10 text-white font-bold rounded-xl hover:bg-white/5 transition-all">
-            SALVAR RASCUNHO
+          <button className="px-8 py-4 bg-transparent border border-white/10 text-white font-bold rounded-2xl hover:bg-white/5 transition-all uppercase tracking-widest text-[11px]">
+            Salvar Rascunho
           </button>
-          <button className="px-8 py-3.5 bg-[#22ff88] text-black font-bold rounded-xl hover:opacity-90 active:scale-95 transition-all shadow-[0_0_20px_rgba(34,255,136,0.2)]">
-            PUBLICAR PROVA
+          <button
+            onClick={handleSave}
+            disabled={loading}
+            className="px-10 py-4 bg-[#22ff88] text-black font-black rounded-2xl hover:opacity-90 active:scale-95 transition-all shadow-[0_0_30px_rgba(34,255,136,0.2)] flex items-center gap-2 uppercase tracking-widest text-[11px]"
+          >
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            Publicar Prova
           </button>
         </div>
       </header>
 
-      {/* Parameters Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-        <div className="bg-[#1a1c22] p-8 rounded-3xl border border-white/5 relative group">
-          <div className="absolute top-0 left-0 w-1 h-full bg-[#22ff88]/40" />
-          <div className="flex items-center gap-3 mb-6">
-            <Clock className="w-5 h-5 text-[#22ff88]" />
-            <h3 className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest">Parâmetros de Tempo</h3>
+      {/* Configuration Hub */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-12">
+        {/* Course Select */}
+        <div className="bg-[#1a1c22] p-8 rounded-3xl border border-white/5 space-y-4">
+          <div className="flex items-center gap-3 mb-2">
+            <Star className="w-4 h-4 text-[#22ff88]" />
+            <h3 className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest">Curso Vinculado</h3>
           </div>
-          <p className="text-[10px] font-bold text-white/40 uppercase mb-2">Tempo Limite (Minutos)</p>
-          <input 
-            type="text" 
-            defaultValue="120"
-            className="w-full bg-[#0f1115] border border-white/5 rounded-lg px-4 py-3 text-white font-bold text-xl focus:outline-none focus:border-[#22ff88]/30 transition-all"
-          />
-        </div>
-
-        <div className="bg-[#1a1c22] p-8 rounded-3xl border border-white/5 relative">
-          <div className="absolute top-0 left-0 w-1 h-full bg-[#00ffcc]/40" />
-          <div className="flex items-center gap-3 mb-6">
-            <Star className="w-5 h-5 text-[#00ffcc]" />
-            <h3 className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest">Exigência Mínima</h3>
-          </div>
-          <p className="text-[10px] font-bold text-white/40 uppercase mb-2">Nota de Corte (0-100)</p>
-          <input 
-            type="text" 
-            defaultValue="75"
-            className="w-full bg-[#0f1115] border border-white/5 rounded-lg px-4 py-3 text-white font-bold text-xl focus:outline-none focus:border-[#00ffcc]/30 transition-all"
-          />
-        </div>
-
-        <div className="bg-[#1a1c22] p-8 rounded-3xl border border-white/5 relative">
-          <div className="absolute top-0 left-0 w-1 h-full bg-blue-500/40" />
-          <div className="flex items-center gap-3 mb-6">
-            <Shield className="w-5 h-5 text-blue-500" />
-            <h3 className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest">Controle de Acesso</h3>
-          </div>
-          <p className="text-[10px] font-bold text-white/40 uppercase mb-2">Tentativas Permitidas</p>
-          <select className="w-full bg-[#0f1115] border border-white/5 rounded-lg px-4 py-3 text-white font-bold text-lg focus:outline-none appearance-none cursor-pointer">
-            <option>Única tentativa</option>
-            <option>2 Tentativas</option>
-            <option>Ilimitado</option>
+          <select
+            value={targetCourse}
+            onChange={(e) => setTargetCourse(e.target.value)}
+            className="w-full bg-[#0f1115] border border-white/5 rounded-xl px-4 py-3.5 text-white font-bold text-sm focus:outline-none focus:border-[#22ff88]/30 transition-all appearance-none cursor-pointer"
+          >
+            <option value="">Selecione o Curso</option>
+            {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
           </select>
+        </div>
+
+        {/* Scope Toggle */}
+        <div className="bg-[#1a1c22] p-8 rounded-3xl border border-white/5 space-y-4">
+          <div className="flex items-center gap-3 mb-2">
+            <Layers className="w-4 h-4 text-[#00ffcc]" />
+            <h3 className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest">Escopo da Prova</h3>
+          </div>
+          <div className="flex p-1 bg-[#0f1115] rounded-xl border border-white/5">
+            <button
+              onClick={() => setIsFinal(false)}
+              className={`flex-1 py-2 text-[10px] font-bold uppercase rounded-lg transition-all ${!isFinal ? 'bg-[#22ff88] text-black shadow-lg' : 'text-[#64748b] hover:text-white'}`}
+            >
+              Módulo
+            </button>
+            <button
+              onClick={() => setIsFinal(true)}
+              className={`flex-1 py-2 text-[10px] font-bold uppercase rounded-lg transition-all ${isFinal ? 'bg-[#22ff88] text-black shadow-lg' : 'text-[#64748b] hover:text-white'}`}
+            >
+              Final
+            </button>
+          </div>
+        </div>
+
+        {/* Target Module / Certificate Info */}
+        <div className="bg-[#1a1c22] p-8 rounded-3xl border border-white/5 space-y-4">
+          {isFinal ? (
+            <>
+              <div className="flex items-center gap-3 mb-2">
+                <Award className="w-4 h-4 text-[#ffcc00]" />
+                <h3 className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest">Certificação</h3>
+              </div>
+              <div className="p-3 bg-[#ffcc00]/10 border border-[#ffcc00]/20 rounded-xl">
+                <p className="text-[10px] text-[#ffcc00] font-bold uppercase text-center">Gera Certificado após Provação</p>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex items-center gap-3 mb-2">
+                <ChevronDown className="w-4 h-4 text-[#00ffcc]" />
+                <h3 className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest">Selecione o Módulo</h3>
+              </div>
+              <select
+                value={targetModule}
+                onChange={(e) => setTargetModule(e.target.value)}
+                className="w-full bg-[#0f1115] border border-white/5 rounded-xl px-4 py-3.5 text-white font-bold text-sm focus:outline-none focus:border-[#22ff88]/30 transition-all appearance-none cursor-pointer"
+              >
+                <option value="">Todos os Módulos</option>
+                {modules.map(m => <option key={m.id} value={m.id}>{m.title}</option>)}
+              </select>
+            </>
+          )}
+        </div>
+
+        {/* Basic Info */}
+        <div className="bg-[#1a1c22] p-8 rounded-3xl border border-white/5 space-y-4">
+          <div className="flex items-center gap-3 mb-2">
+            <Info className="w-4 h-4 text-blue-400" />
+            <h3 className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest">Título da Prova</h3>
+          </div>
+          <input
+            type="text"
+            placeholder="Ex: Avaliação de Solo Nível 1"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="w-full bg-[#0f1115] border border-white/5 rounded-xl px-4 py-3 text-white font-bold text-sm focus:outline-none focus:border-[#22ff88]/30 transition-all"
+          />
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-8">
-        {/* Question Editor */}
+      <div className="grid lg:grid-cols-3 gap-10">
+        {/* Parameters Sidebar */}
+        <div className="space-y-6">
+          <div className="bg-[#1a1c22] p-8 rounded-[2.5rem] border border-white/5 space-y-8">
+            <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] mb-4">Configurações Técnicas</h3>
+
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <Clock className="w-4 h-4 text-[#22ff88]" />
+                <span className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest">Tempo Limite (Min)</span>
+              </div>
+              <input
+                type="number"
+                value={timeLimit}
+                onChange={(e) => setTimeLimit(e.target.value)}
+                className="w-full bg-[#0f1115] border border-white/5 rounded-xl px-5 py-4 text-white font-bold text-xl focus:outline-none focus:border-[#22ff88]/30 transition-all"
+              />
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <Star className="w-4 h-4 text-[#22ff88]" />
+                <span className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest">Nota de Corte (0-100)</span>
+              </div>
+              <input
+                type="number"
+                value={passingScore}
+                onChange={(e) => setPassingScore(e.target.value)}
+                className="w-full bg-[#0f1115] border border-white/5 rounded-xl px-5 py-4 text-white font-bold text-xl focus:outline-none focus:border-[#22ff88]/30 transition-all"
+              />
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <Shield className="w-4 h-4 text-[#22ff88]" />
+                <span className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest">Tentativas Permitidas</span>
+              </div>
+              <select
+                value={attempts}
+                onChange={(e) => setAttempts(e.target.value)}
+                className="w-full bg-[#0f1115] border border-white/5 rounded-xl px-5 py-4 text-white font-bold text-sm focus:outline-none appearance-none"
+              >
+                <option>Única tentativa</option>
+                <option>2 Tentativas</option>
+                <option>Ilimitado</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="bg-[#1a1c22] p-8 rounded-[2.5rem] border border-white/5">
+            <div className="flex items-center gap-4 mb-8">
+              <Plus className="w-5 h-5 text-[#22ff88]" />
+              <h3 className="text-sm font-bold text-white">Documentos de Apoio</h3>
+            </div>
+            <div className="bg-[#0f1115] border border-dashed border-white/10 rounded-2xl p-8 text-center cursor-pointer hover:bg-white/5 transition-all">
+              <Upload className="w-8 h-8 text-[#64748b] mx-auto mb-4" />
+              <p className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest">Anexar material técnico</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Questions Main Area */}
         <div className="lg:col-span-2 space-y-8">
           {questions.map((q, idx) => (
-            <motion.div 
+            <motion.div
               key={q.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="bg-[#1a1c22] p-10 rounded-3xl border border-white/5"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-[#1a1c22] p-10 rounded-[2.5rem] border border-white/5 relative group"
             >
-              <div className="flex justify-between items-center mb-8">
-                <div>
-                  <span className="text-[10px] font-bold text-[#22ff88] uppercase tracking-widest">Questão 0{idx + 1}</span>
-                  <h3 className="text-xl font-bold text-white mt-1">Editor de Questão Técnica</h3>
+              <div className="flex justify-between items-center mb-10">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-[#0f1115] border border-white/5 rounded-xl flex items-center justify-center text-[#22ff88] font-black italic">
+                    {idx + 1}
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-white">Editor de Questão</h3>
+                    <p className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest">Multiple Choice</p>
+                  </div>
                 </div>
-                <div className="flex gap-4 text-[#64748b]">
-                  <button className="hover:text-white transition-colors"><Trash2 className="w-5 h-5" /></button>
-                  <button className="hover:text-white transition-colors"><Copy className="w-5 h-5" /></button>
-                </div>
+                <button
+                  onClick={() => removeQuestion(q.id)}
+                  className="p-3 bg-red-500/5 text-red-400 opacity-0 group-hover:opacity-100 rounded-xl hover:bg-red-500/10 transition-all"
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-8">
                 <div>
-                  <label className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest block mb-4">Enunciado da Pergunta</label>
-                  <textarea 
-                    placeholder="Descreva o problema técnico, incluindo especificações de carga e tensões críticas..."
-                    className="w-full bg-[#0f1115] border border-white/5 rounded-2xl p-6 text-white text-base min-h-[160px] focus:outline-none focus:border-[#22ff88]/30 transition-all resize-none"
+                  <label className="text-[10px] font-extrabold text-[#64748b] uppercase tracking-[0.2em] mb-4 block">Enunciado</label>
+                  <textarea
+                    value={q.text}
+                    onChange={(e) => updateQuestionText(q.id, e.target.value)}
+                    placeholder="Qual o coeficiente de tensão estrutural para..."
+                    className="w-full bg-[#0f1115] border border-white/5 rounded-2xl p-6 text-white text-lg min-h-[140px] focus:outline-none focus:border-[#22ff88]/30 transition-all resize-none"
                   />
                 </div>
 
-                <div>
-                  <label className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest block mb-4">Alternativas de Resposta</label>
-                  <div className="space-y-3">
-                    {['A', 'B', 'C'].map((letter) => (
-                      <div key={letter} className="flex gap-4 items-center group">
-                        <div className="w-6 h-6 rounded-full border-2 border-white/10 flex-shrink-0 cursor-pointer group-hover:border-[#22ff88]/50 transition-all" />
-                        <input 
-                          type="text" 
-                          defaultValue={letter === 'A' ? "Tensão máxima de escoamento excedida em 15%" : letter === 'B' ? "Coeficiente de segurança mantido em 1.5." : "Flambagem lateral-torcional identificada na seção"}
-                          className="w-full bg-[#1a1c22] border border-white/5 rounded-xl px-4 py-3.5 text-sm text-[#94a3b8] focus:outline-none focus:border-[#22ff88]/30 transition-all"
+                <div className="space-y-6">
+                  <label className="text-[10px] font-extrabold text-[#64748b] uppercase tracking-[0.2em] mb-2 block">Alternativas (Selecione a Correta)</label>
+                  <div className="space-y-4">
+                    {q.alternatives.map((alt, aIdx) => (
+                      <div key={alt.id} className="flex gap-4 items-center group/item">
+                        <button
+                          onClick={() => setCorrectAlternative(q.id, alt.id)}
+                          className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-all ${alt.is_correct ? 'bg-[#22ff88] border-[#22ff88] text-black shadow-[0_0_15px_rgba(34,255,136,0.2)]' : 'bg-[#0f1115] border-white/5 text-[#64748b] hover:border-[#22ff88]/30'}`}
+                        >
+                          {alt.is_correct ? <CheckCircle2 className="w-5 h-5" /> : <span className="text-[10px] font-black uppercase text-inherit">{String.fromCharCode(65 + aIdx)}</span>}
+                        </button>
+                        <input
+                          type="text"
+                          value={alt.text}
+                          onChange={(e) => updateAlternative(q.id, alt.id, e.target.value)}
+                          className="flex-1 bg-[#0f1115] border border-white/5 rounded-xl px-5 py-4 text-white text-sm focus:outline-none focus:border-[#22ff88]/30 transition-all"
+                          placeholder="Descreva a alternativa..."
                         />
+                        <button
+                          onClick={() => removeAlternative(q.id, alt.id)}
+                          className="p-3 text-[#64748b] hover:text-red-400 opacity-0 group-hover/item:opacity-100 transition-all"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
                     ))}
-                    <button className="flex items-center gap-2 text-[10px] font-bold text-[#22ff88] uppercase tracking-widest mt-4 hover:translate-x-1 transition-transform">
+                    <button
+                      onClick={() => addAlternative(q.id)}
+                      className="flex items-center gap-3 text-[10px] font-black text-[#22ff88] uppercase tracking-[0.15em] pt-4 hover:translate-x-2 transition-transform"
+                    >
                       <Plus className="w-4 h-4" />
                       Adicionar Alternativa
                     </button>
@@ -136,84 +503,17 @@ export function ExamCreator() {
             </motion.div>
           ))}
 
-          {/* Documents Support */}
-          <div className="bg-[#1a1c22] p-10 rounded-3xl border border-white/5">
-            <div className="flex justify-between items-center mb-8">
-              <h2 className="text-xl font-bold text-white">Documentos de Apoio</h2>
-              <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-widest">PDF, DWG, PNG (Max 50MB)</span>
+          <button
+            onClick={addQuestion}
+            className="w-full py-10 bg-[#0f1115] border-2 border-dashed border-white/10 rounded-[2.5rem] flex flex-col items-center justify-center gap-4 text-[#64748b] hover:border-[#22ff88]/40 hover:text-white transition-all group"
+          >
+            <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center group-hover:bg-[#22ff88]/10 group-hover:text-[#22ff88] transition-all">
+              <Plus className="w-8 h-8" />
             </div>
-            <div className="flex gap-4">
-              <div className="bg-[#0f1115] border border-[#22ff88]/10 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 w-40 cursor-pointer hover:bg-white/5 transition-all text-center">
-                 <FileText className="w-6 h-6 text-[#22ff88]" />
-                 <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-widest leading-tight">PLANTA_NIVEL_01.DWG</span>
-              </div>
-              <div className="bg-transparent border border-white/5 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center gap-3 w-40 cursor-pointer hover:bg-white/5 transition-all text-center">
-                 <Upload className="w-6 h-6 text-[#64748b]" />
-                 <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-widest leading-tight">NOVO PROJETO</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Side Panels */}
-        <div className="space-y-8">
-          {/* Integrity Check */}
-          <div className="bg-[#1a1c22] p-8 rounded-3xl border border-white/5">
-            <h3 className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest mb-8">Verificação de Integridade</h3>
-            <div className="space-y-6">
-              {[
-                { title: "Enunciado Validado", desc: "Conteúdo Técnico identificado e processado.", icon: CheckCircle2, color: "text-[#22ff88]" },
-                { title: "Alternativa Única", desc: "Apenas uma resposta correta selecionada.", icon: CheckCircle2, color: "text-[#22ff88]" },
-                { title: "Complexidade: Alta", desc: "A questão exige análise de múltiplos diagramas.", icon: Info, color: "text-blue-400" },
-                { title: "Risco de Ambiguidade", desc: "A Opção B e C possuem termos similares (78% match).", icon: AlertTriangle, color: "text-red-400", warning: true }
-              ].map((item, i) => (
-                <div key={i} className="flex gap-4">
-                  <item.icon className={cn("w-5 h-5 shrink-0 mt-0.5", item.color)} />
-                  <div>
-                    <h4 className={cn("text-xs font-bold uppercase tracking-wider mb-1", item.color)}>{item.title}</h4>
-                    <p className="text-[10px] text-[#64748b] leading-relaxed">{item.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <button className="w-full py-4 bg-white/5 text-[#64748b] text-[10px] font-bold uppercase tracking-widest rounded-xl mt-12 hover:bg-white/10 hover:text-white transition-all">
-              RE-ANALISAR QUESTÃO
-            </button>
-          </div>
-
-          {/* Exam Summary */}
-          <div className="bg-[#1a1c22] p-8 rounded-3xl border border-white/5">
-            <h3 className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest mb-8">Resumo do Exame</h3>
-            <div className="space-y-6">
-              <div className="flex justify-between items-center text-sm font-bold">
-                 <span className="text-[#64748b]">Total de Questões</span>
-                 <span className="text-white text-xl">01</span>
-              </div>
-              <div className="flex justify-between items-center text-sm font-bold">
-                 <span className="text-[#64748b]">Tempo Total Estimado</span>
-                 <span className="text-white text-xl">120m</span>
-              </div>
-              <div className="flex justify-between items-center text-sm font-bold pt-6 border-t border-white/5">
-                 <span className="text-[#64748b]">Score de Dificuldade</span>
-                 <span className="text-[#22ff88] text-xl font-mono">8.4/10</span>
-              </div>
-            </div>
-          </div>
+            <span className="text-sm font-black uppercase tracking-[0.2em]">Adicionar Nova Questão Técnica</span>
+          </button>
         </div>
       </div>
-
-      {/* Rodapé */}
-      <footer className="mt-20 pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center text-[10px] text-[#64748b] gap-8">
-        <div className="space-y-4">
-          <p className="font-bold text-white uppercase tracking-widest">Escola do Construtor</p>
-          <p>© 2026 Escola do Construtor. Conteúdo de Precisão para o Engenheiro Moderno.</p>
-        </div>
-        <div className="flex gap-10 font-bold uppercase tracking-widest">
-           <a href="#" className="hover:text-white transition-colors">Termos de Serviço</a>
-           <a href="#" className="hover:text-white transition-colors">Política de Privacidade</a>
-           <a href="#" className="hover:text-white transition-colors">Contato Suporte</a>
-        </div>
-      </footer>
     </div>
   );
 }

@@ -8,7 +8,6 @@ import {
   LogOut,
   ChevronRight,
   ShieldCheck,
-  ClipboardCheck,
   Layers
 } from 'lucide-react';
 import { cn } from '../lib/utils';
@@ -32,7 +31,6 @@ export function Sidebar({ activeView, onViewChange, userData }: SidebarProps) {
 
   const adminItems = [
     { id: "admin-overview", icon: ShieldCheck, label: "Painel Geral" },
-    { id: "admin-provas", icon: ClipboardCheck, label: "Criador de Provas" },
     { id: "admin-cursos", icon: Layers, label: "Gerenciar Cursos" },
   ];
 

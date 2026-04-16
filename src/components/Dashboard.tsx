@@ -8,15 +8,15 @@ import { ProfileSettings } from './ProfileSettings';
 import { Vitrine } from './Vitrine';
 import { CoursePlayer } from './CoursePlayer';
 
-type DashboardView = 
-  | 'vitrine' 
-  | 'suporte' 
-  | 'overview' 
-  | 'certificados' 
-  | 'comunidade' 
-  | 'admin-overview' 
-  | 'admin-provas' 
-  | 'admin-cursos' 
+type DashboardView =
+  | 'vitrine'
+  | 'suporte'
+  | 'overview'
+  | 'certificados'
+  | 'comunidade'
+  | 'admin-overview'
+  | 'admin-provas'
+  | 'admin-cursos'
   | 'settings'
   | 'player';
 
@@ -27,6 +27,12 @@ interface DashboardProps {
 export function Dashboard({ userData }: DashboardProps) {
   const [activeView, setActiveView] = useState<DashboardView>('overview');
   const [activeCourseId, setActiveCourseId] = useState<string | null>(null);
+  const [examContext, setExamContext] = useState<{ courseId: string; moduleId: string | null } | null>(null);
+
+  const handleOpenExam = (courseId: string, moduleId: string | null) => {
+    setExamContext({ courseId, moduleId });
+    setActiveView("admin-provas");
+  };
 
   const handleCourseSelect = (courseId: string) => {
     setActiveCourseId(courseId);
@@ -41,17 +47,33 @@ export function Dashboard({ userData }: DashboardProps) {
         return <DashboardOverview userData={userData} onCourseSelect={handleCourseSelect} />;
       case 'player':
         return activeCourseId ? (
-          <CoursePlayer 
-            courseId={activeCourseId} 
-            onBack={() => setActiveView('overview')} 
+          <CoursePlayer
+            courseId={activeCourseId}
+            onBack={() => setActiveView('overview')}
           />
         ) : null;
       case 'admin-overview':
         return <AdminOverview userData={userData} onViewChange={(view) => setActiveView(view as DashboardView)} />;
-      case 'admin-provas':
-        return <ExamCreator />;
-      case 'admin-cursos':
-        return <CourseManager userData={userData} onViewChange={(view) => setActiveView(view as DashboardView)} />;
+      case "admin-provas":
+        return (
+          <ExamCreator
+            userData={userData}
+            initialCourseId={examContext?.courseId}
+            initialModuleId={examContext?.moduleId}
+            onBack={() => {
+              setExamContext(null);
+              setActiveView("admin-cursos");
+            }}
+          />
+        );
+      case "admin-cursos":
+        return (
+          <CourseManager
+            userData={userData}
+            onViewChange={(view) => setActiveView(view as DashboardView)}
+            onOpenExam={handleOpenExam}
+          />
+        );
       case 'settings':
         return <ProfileSettings userData={userData} />;
       default:
@@ -63,7 +85,7 @@ export function Dashboard({ userData }: DashboardProps) {
               </div>
               <h2 className="text-3xl font-bold text-white mb-4">Módulo em Desenvolvimento</h2>
               <p className="text-[#64748b] leading-relaxed">
-                Estamos preparando o acesso aos sistemas de {activeView}. 
+                Estamos preparando o acesso aos sistemas de {activeView}.
                 Em breve, novas trilhas e conteúdos estarão disponíveis no seu console.
               </p>
             </div>
@@ -73,8 +95,8 @@ export function Dashboard({ userData }: DashboardProps) {
   };
 
   return (
-    <DashboardLayout 
-      activeView={activeView} 
+    <DashboardLayout
+      activeView={activeView}
       onViewChange={(view) => setActiveView(view as DashboardView)}
       userData={userData}
     >
