@@ -186,17 +186,6 @@ export function CoursePlayer({ courseId, onBack }: CoursePlayerProps) {
         <div className="p-8 border-b border-white/5">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-xl font-bold text-white">Conteúdo do Curso</h2>
-            <div className="flex items-center gap-3">
-              <button className="p-2.5 bg-white/5 rounded-xl text-[#64748b] hover:text-[#22ff88] transition-colors">
-                <Bell className="w-4.5 h-4.5" />
-              </button>
-              <button className="p-2.5 bg-white/5 rounded-xl text-[#64748b] hover:text-[#22ff88] transition-colors">
-                <Settings className="w-4.5 h-4.5" />
-              </button>
-              <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/10">
-                <img src="https://i.pravatar.cc/100" alt="Profile" />
-              </div>
-            </div>
           </div>
 
           <div className="space-y-4">
