@@ -25,6 +25,12 @@ export function AdminOverview({ userData, onViewChange }: AdminOverviewProps) {
     { month: 'JUN', value: 0 },
   ]);
 
+  const [revenueStats, setRevenueStats] = useState({
+    currentMonth: 0,
+    lastMonth: 0,
+    averageTicket: 0
+  });
+
   const [recentActivities, setRecentActivities] = useState<any[]>([]);
 
   useEffect(() => {
@@ -62,13 +68,23 @@ export function AdminOverview({ userData, onViewChange }: AdminOverviewProps) {
       let totalProgress = 0;
       let totalEnrollmentsCount = 0;
       let totalRevenue = 0;
+      let currentMonthRev = 0;
+      let lastMonthRev = 0;
 
-      const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN'];
+      const now = new Date();
+      const currentMonthIndex = now.getMonth();
+      const currentYear = now.getFullYear();
+      
+      const lastMonthIndex = currentMonthIndex === 0 ? 11 : currentMonthIndex - 1;
+      const lastMonthYear = currentMonthIndex === 0 ? currentYear - 1 : currentYear;
+
+      const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
       const growthMap: { [key: string]: number } = { JAN: 0, FEB: 0, MAR: 0, APR: 0, MAY: 0, JUN: 0 };
 
       const formattedActivities = (courses || []).map(course => {
         const enrollCount = course.enrollments?.length || 0;
         const revenue = enrollCount * (course.price || 0);
+        const coursePrice = course.price || 0;
         
         totalEnrollmentsCount += enrollCount;
         totalRevenue += revenue;
@@ -77,9 +93,19 @@ export function AdminOverview({ userData, onViewChange }: AdminOverviewProps) {
           totalStudentsSet.add(enroll.user_id);
           totalProgress += enroll.progress || 0;
           
-          // Growth Data Calculation (simplified for last 6 months)
-          const date = new Date(enroll.created_at);
-          const monthName = months[date.getMonth()];
+          const enrollDate = new Date(enroll.created_at);
+          const enrollMonth = enrollDate.getMonth();
+          const enrollYear = enrollDate.getFullYear();
+
+          // Calculate current vs last month revenue
+          if (enrollMonth === currentMonthIndex && enrollYear === currentYear) {
+            currentMonthRev += coursePrice;
+          } else if (enrollMonth === lastMonthIndex && enrollYear === lastMonthYear) {
+            lastMonthRev += coursePrice;
+          }
+          
+          // Growth Data Calculation (last 6 months logic)
+          const monthName = months[enrollMonth];
           if (growthMap[monthName] !== undefined) {
              growthMap[monthName]++;
           }
@@ -104,6 +130,12 @@ export function AdminOverview({ userData, onViewChange }: AdminOverviewProps) {
         { label: "Taxa de Conclusão", value: `${avgCompletion}%`, status: Number(avgCompletion) > 50 ? "Alta" : "Média", icon: CheckCircle, color: "text-[#00ffcc]" },
       ]);
 
+      setRevenueStats({
+        currentMonth: currentMonthRev,
+        lastMonth: lastMonthRev,
+        averageTicket: totalEnrollmentsCount > 0 ? (totalRevenue / totalEnrollmentsCount) : 0
+      });
+
       // Normalize growth data for the chart (find max to set percentages)
       const maxGrowth = Math.max(...Object.values(growthMap), 1);
       setGrowthData(months.map(m => ({
@@ -127,17 +159,6 @@ export function AdminOverview({ userData, onViewChange }: AdminOverviewProps) {
         <div>
           <h1 className="text-4xl font-bold text-white mb-2">Painel do Professor</h1>
           <p className="text-[#64748b] text-base">Relatório de performance editorial e métricas de engajamento.</p>
-        </div>
-        <div className="flex gap-4">
-          <button 
-            onClick={() => onViewChange?.('admin-cursos')}
-            className="p-2.5 bg-[#1a1c22] border border-white/5 rounded-xl hover:bg-[#2a2d35] transition-all text-[#64748b] hover:text-white"
-          >
-            <Plus className="w-5 h-5" />
-          </button>
-          <div className="w-12 h-12 rounded-xl bg-[#1a1c22] border border-white/5 p-1 overflow-hidden">
-             <img src={userData?.avatar_url || "https://i.pravatar.cc/100?u=admin"} className="w-full h-full rounded-lg object-cover" alt="Admin" />
-          </div>
         </div>
       </header>
 
@@ -245,17 +266,17 @@ export function AdminOverview({ userData, onViewChange }: AdminOverviewProps) {
                 </div>
               </div>
 
-              {/* Status do Sistema */}
+              {/* Faturamento Mensal */}
               <div className="bg-[#1a1c22] p-8 rounded-3xl border border-white/5">
                 <div className="flex items-center gap-2 mb-6">
-                  <div className="w-2 h-2 rounded-full bg-[#22ff88] animate-pulse" />
-                  <span className="text-[10px] uppercase tracking-widest font-bold text-white">Status do Sistema</span>
+                  <div className="w-2 h-2 rounded-full bg-[#22ff88]" />
+                  <span className="text-[10px] uppercase tracking-widest font-bold text-white">Faturamento Mensal</span>
                 </div>
                 <div className="space-y-4">
                   {[
-                    { label: "Carga do Servidor", value: "24%" },
-                    { label: "Sessões Ativas", value: (recentActivities.length * 12 + 15).toLocaleString(), color: "text-white" },
-                    { label: "Tempo de Atividade", value: "99.9%", color: "text-[#22ff88]" },
+                    { label: "Este Mês", value: `R$ ${revenueStats.currentMonth.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`, color: "text-[#22ff88]" },
+                    { label: "Mês Anterior", value: `R$ ${revenueStats.lastMonth.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}` },
+                    { label: "Ticket Médio", value: `R$ ${revenueStats.averageTicket.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` },
                   ].map((item) => (
                     <div key={item.label} className="flex justify-between items-center text-sm">
                       <span className="text-[#64748b]">{item.label}</span>
