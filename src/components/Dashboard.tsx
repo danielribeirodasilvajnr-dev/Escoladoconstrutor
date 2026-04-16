@@ -47,7 +47,7 @@ export function Dashboard({ userData }: DashboardProps) {
           />
         ) : null;
       case 'admin-overview':
-        return <AdminOverview onViewChange={(view) => setActiveView(view as DashboardView)} />;
+        return <AdminOverview userData={userData} onViewChange={(view) => setActiveView(view as DashboardView)} />;
       case 'admin-provas':
         return <ExamCreator />;
       case 'admin-cursos':
