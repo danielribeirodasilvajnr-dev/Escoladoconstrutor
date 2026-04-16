@@ -318,13 +318,44 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
     }
   };
 
+  const getFileDuration = (file: File): Promise<string> => {
+    return new Promise((resolve) => {
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      video.onloadedmetadata = () => {
+        window.URL.revokeObjectURL(video.src);
+        const minutes = Math.floor(video.duration / 60);
+        const seconds = Math.floor(video.duration % 60);
+        resolve(`${minutes}:${seconds.toString().padStart(2, '0')}`);
+      };
+      video.src = URL.createObjectURL(file);
+    });
+  };
+
+  const getFileDuration = (file: File): Promise<string> => {
+    return new Promise((resolve) => {
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      video.onloadedmetadata = () => {
+        window.URL.revokeObjectURL(video.src);
+        const minutes = Math.floor(video.duration / 60);
+        const seconds = Math.floor(video.duration % 60);
+        resolve(`${minutes}:${seconds.toString().padStart(2, '0')}`);
+      };
+      video.src = URL.createObjectURL(file);
+    });
+  };
+
   const handleLessonFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     const lessonId = uploadingLessonId;
     if (!file || !lessonId) return;
 
     try {
+      setUploadProgress(5);
+      const duration = await getFileDuration(file);
       setUploadProgress(10);
+
       const fileExt = file.name.split('.').pop();
       const fileName = `${lessonId}-${Math.random()}.${fileExt}`;
       const filePath = `lessons/${fileName}`;
@@ -341,7 +372,10 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
         .getPublicUrl(filePath);
 
       const { error: updateError } = await supabase.from('lessons')
-        .update({ content_url: publicUrl })
+        .update({ 
+          content_url: publicUrl,
+          duration: duration 
+        })
         .eq('id', lessonId);
 
       if (updateError) throw updateError;
@@ -349,7 +383,7 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
       // Update local state
       const updatedModules = modules.map(m => ({
         ...m,
-        lessons: m.lessons.map(l => l.id === lessonId ? { ...l, content_url: publicUrl } : l)
+        lessons: m.lessons.map(l => l.id === lessonId ? { ...l, content_url: publicUrl, duration } : l)
       }));
       setModules(updatedModules);
       setUploadProgress(100);

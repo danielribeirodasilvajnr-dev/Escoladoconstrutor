@@ -308,7 +308,7 @@ export function CoursePlayer({ courseId, onBack }: CoursePlayerProps) {
                         </h4>
                         <div className="flex items-center gap-2 text-[#64748b]">
                           <Play className={`w-3 h-3 ${isActive ? 'text-[#22ff88] fill-[#22ff88]' : ''}`} />
-                          <span className="text-[10px] font-bold tracking-widest uppercase">{lesson.duration || '45:00'}</span>
+                          <span className="text-[10px] font-bold tracking-widest uppercase">{lesson.duration || '--:--'}</span>
                         </div>
                       </div>
                       <div className="mt-1">
