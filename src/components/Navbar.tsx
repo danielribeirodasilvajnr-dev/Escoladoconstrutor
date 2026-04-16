@@ -29,15 +29,6 @@ export function Navbar({ userData, activeView, onViewChange }: NavbarProps) {
             <Bell className="w-5 h-5" />
             <span className="absolute top-2 right-2 w-2 h-2 bg-[#22ff88] rounded-full ring-2 ring-[#0f1115]" />
           </button>
-          <button 
-            onClick={() => onViewChange('settings')}
-            className={cn(
-              "p-2 transition-all",
-              activeView === 'settings' ? "text-[#22ff88]" : "text-[#64748b] hover:text-white"
-            )}
-          >
-            <Settings className="w-5 h-5" />
-          </button>
         </div>
 
         <div className="flex items-center gap-3 border-l border-white/10 pl-8 py-2">
@@ -47,15 +38,24 @@ export function Navbar({ userData, activeView, onViewChange }: NavbarProps) {
               {userData?.role === 'administrador' ? 'ADMINISTRADOR' : 'ESTUDANTE ELITE'}
             </p>
           </div>
-          <div className="relative">
+          <button 
+            onClick={() => onViewChange('settings')}
+            className={cn(
+              "relative group transition-all active:scale-95",
+              activeView === 'settings' ? "ring-2 ring-[#22ff88] ring-offset-4 ring-offset-[#0f1115] rounded-xl" : ""
+            )}
+          >
             <img 
               src={avatarUrl} 
-              className="w-10 h-10 rounded-xl object-cover border border-white/10 shadow-lg" 
+              className="w-10 h-10 rounded-xl object-cover border border-white/10 shadow-lg group-hover:border-[#22ff88]/50 transition-colors" 
               alt="Profile"
               referrerPolicy="no-referrer"
             />
             <div className="absolute bottom-[-2px] right-[-2px] w-3 h-3 bg-[#22ff88] rounded-full border-2 border-[#1a1c22]" />
-          </div>
+            <div className="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <Settings className="w-4 h-4 text-white" />
+            </div>
+          </button>
         </div>
       </div>
     </header>
