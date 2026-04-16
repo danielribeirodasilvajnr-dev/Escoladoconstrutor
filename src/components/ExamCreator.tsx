@@ -149,7 +149,7 @@ export function ExamCreator() {
               </div>
               <div className="bg-transparent border border-white/5 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center gap-3 w-40 cursor-pointer hover:bg-white/5 transition-all text-center">
                  <Upload className="w-6 h-6 text-[#64748b]" />
-                 <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-widest leading-tight">NOVO BLUEPRINT</span>
+                 <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-widest leading-tight">NOVO PROJETO</span>
               </div>
             </div>
           </div>
@@ -202,16 +202,16 @@ export function ExamCreator() {
         </div>
       </div>
 
-      {/* Footer */}
+      {/* Rodapé */}
       <footer className="mt-20 pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center text-[10px] text-[#64748b] gap-8">
         <div className="space-y-4">
           <p className="font-bold text-white uppercase tracking-widest">Escola do Construtor</p>
-          <p>© 2026 Escola do Construtor. Precision Content for the Modern Engineer.</p>
+          <p>© 2026 Escola do Construtor. Conteúdo de Precisão para o Engenheiro Moderno.</p>
         </div>
         <div className="flex gap-10 font-bold uppercase tracking-widest">
-           <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
-           <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-           <a href="#" className="hover:text-white transition-colors">Contact Support</a>
+           <a href="#" className="hover:text-white transition-colors">Termos de Serviço</a>
+           <a href="#" className="hover:text-white transition-colors">Política de Privacidade</a>
+           <a href="#" className="hover:text-white transition-colors">Contato Suporte</a>
         </div>
       </footer>
     </div>

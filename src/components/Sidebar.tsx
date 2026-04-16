@@ -54,7 +54,7 @@ export function Sidebar({ activeView, onViewChange, userData }: SidebarProps) {
         <div className="space-y-8">
           {/* Main Navigation */}
           <nav className="space-y-1">
-            <p className="text-[9px] uppercase tracking-[0.2em] text-[#64748b] font-bold mb-4 px-4">Navigation</p>
+            <p className="text-[9px] uppercase tracking-[0.2em] text-[#64748b] font-bold mb-4 px-4">Navegação</p>
             {menuItems.map((item) => (
               <button 
                 key={item.id}
@@ -107,7 +107,7 @@ export function Sidebar({ activeView, onViewChange, userData }: SidebarProps) {
         {userRole !== 'administrador' && (
           <div className="bg-[#1a1c22] rounded-2xl p-4 border border-white/5">
             <p className="text-[10px] uppercase tracking-widest text-[#64748b] font-bold mb-2">Próxima Aula</p>
-            <h4 className="text-sm font-bold mb-4 text-white">Structural Dynamics II</h4>
+            <h4 className="text-sm font-bold mb-4 text-white">Dinâmica Estrutural II</h4>
             <button className="w-full py-2.5 bg-[#22ff88] text-black text-[11px] font-bold rounded-lg hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2">
               Continuar Assistindo
             </button>

@@ -18,15 +18,15 @@ export function LandingPage({ onExplore }: LandingPageProps) {
           <span className="font-display text-xl tracking-tighter font-bold">Escola do Construtor</span>
         </div>
         <div className="hidden md:flex gap-8 text-[11px] uppercase tracking-widest font-bold text-muted">
-          <a href="#" className="hover:text-ink transition-colors">Platform</a>
-          <a href="#" className="hover:text-ink transition-colors">Resources</a>
-          <a href="#" className="hover:text-ink transition-colors">Enterprise</a>
+          <a href="#" className="hover:text-ink transition-colors">Plataforma</a>
+          <a href="#" className="hover:text-ink transition-colors">Recursos</a>
+          <a href="#" className="hover:text-ink transition-colors">Empresarial</a>
         </div>
         <button 
           onClick={onExplore}
           className="px-6 py-2 bg-ink text-paper rounded-full text-[11px] uppercase tracking-widest font-bold hover:scale-105 active:scale-95 shadow-xl shadow-ink/10 transition-all"
         >
-          Get Started
+          Começar Agora
         </button>
       </nav>
 
@@ -45,27 +45,27 @@ export function LandingPage({ onExplore }: LandingPageProps) {
               className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 text-accent text-[10px] uppercase tracking-[0.2em] font-bold mb-8 border border-accent/20"
             >
               <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-              Intelligence Driven Design
+              Design Impulsionado por Inteligência
             </motion.div>
             <h1 className="text-7xl md:text-[96px] leading-[0.9] font-display font-bold tracking-tighter mb-8 bg-gradient-to-br from-ink to-ink/60 bg-clip-text text-transparent">
-              Elevate <br />
-              Digital <br />
-              <span className="text-accent underline decoration-accent/20 underline-offset-8">Experiences.</span>
+              Eleve <br />
+              Suas <br />
+              <span className="text-accent underline decoration-accent/20 underline-offset-8">Experiências.</span>
             </h1>
             <p className="text-lg text-muted max-w-md leading-relaxed mb-10">
-              The neural operating system for modern creative teams. 
-              Automate the mundane. Focus on what matters: the craft.
+              O sistema operacional neural para equipes criativas modernas. 
+              Automatize o mundano. Foque no que importa: a arte da construção.
             </p>
             <div className="flex items-center gap-6">
               <button 
                 onClick={onExplore}
                 className="group flex items-center gap-2 px-8 py-4 bg-accent text-white rounded-full text-sm font-bold shadow-2xl shadow-accent/30 hover:bg-accent/90 transition-all"
               >
-                Launch Console
+                Iniciar Console
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
               <button className="text-sm font-bold border-b-2 border-ink/5 pb-1 hover:border-accent/40 transition-colors">
-                Read Whitepaper
+                Documentação Técnica
               </button>
             </div>
           </motion.div>
@@ -129,19 +129,19 @@ export function LandingPage({ onExplore }: LandingPageProps) {
             transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
             className="flex gap-20 whitespace-nowrap whitespace-pre text-8xl font-display font-medium opacity-5 uppercase tracking-tighter"
           >
-            <span>Innovation</span>
+            <span>Inovação</span>
             <span>·</span>
-            <span>Creativity</span>
+            <span>Criatividade</span>
             <span>·</span>
-            <span>Future</span>
+            <span>Futuro</span>
             <span>·</span>
             <span>Escola do Construtor</span>
             <span>·</span>
-            <span>Spatial Computing</span>
+            <span>Computação Espacial</span>
             <span>·</span>
-            <span>Spatial Computing</span>
+            <span>Computação Espacial</span>
             <span>·</span>
-            <span>Innovation</span>
+            <span>Inovação</span>
             <span>·</span>
           </motion.div>
         </div>
@@ -150,9 +150,9 @@ export function LandingPage({ onExplore }: LandingPageProps) {
         <section className="px-8 py-32 max-w-7xl mx-auto">
           <div className="grid md:grid-cols-3 gap-1px bg-ink/10 border border-ink/10 rounded-3xl overflow-hidden">
             {[
-              { icon: Sparkles, title: "AI Augmented", desc: "Our neural engine predicts your next move, suggesting assets and styles as you create." },
-              { icon: Shield, title: "Enterprise Grade", desc: "Bank-level security for your most valuable IP. Roles, permissions, and audit logs included." },
-              { icon: MousePointer2, title: "Multiplayer", desc: "The smoothest real-time collaboration experience ever built for creative tools." }
+              { icon: Sparkles, title: "IA Aprimorada", desc: "Nossa ferramenta neural prevê seu próximo passo, sugerindo recursos e estilos enquanto você cria." },
+              { icon: Shield, title: "Nível Corporativo", desc: "Segurança de nível bancário para seu PI mais valioso. Funções, permissões e logs de auditoria incluídos." },
+              { icon: MousePointer2, title: "Colaborativo", desc: "A experiência de colaboração em tempo real mais suave já construída para ferramentas de engenharia." }
             ].map((feature, i) => (
               <div key={i} className="bg-paper p-12 hover:bg-surface transition-colors group">
                 <div className="w-12 h-12 rounded-2xl bg-accent/10 text-accent flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">

@@ -19,7 +19,7 @@ export function HeroSection() {
       <div className="absolute inset-0 flex flex-col justify-center px-12 max-w-3xl">
         <div className="flex items-center gap-3 mb-6">
           <span className="px-3 py-1 bg-[#22ff88] text-black text-[10px] font-bold uppercase tracking-wider rounded-md">
-            Original Series
+            Série Original
           </span>
           <span className="text-[#64748b] text-[10px] font-bold uppercase tracking-wider flex items-center gap-2">
             <span className="w-1 h-1 bg-[#64748b] rounded-full" />

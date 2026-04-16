@@ -34,7 +34,7 @@ export function CourseCard({ image, title, mentor, progress }: CourseCardProps) 
       </div>
       
       <h3 className="text-white font-bold text-sm mb-1 group-hover:text-[#22ff88] transition-colors">{title}</h3>
-      <p className="text-[#64748b] text-[11px] font-medium">Mentor: {mentor}</p>
+      <p className="text-[#64748b] text-[11px] font-medium">Professor: {mentor}</p>
     </div>
   );
 }

@@ -2,9 +2,9 @@ import { motion } from 'motion/react';
 import { Users, GraduationCap, CheckCircle, TrendingUp, ArrowUpRight, Plus } from 'lucide-react';
 
 const stats = [
-  { label: "Total Students", value: "12,842", change: "+12%", icon: Users, color: "text-[#22ff88]" },
-  { label: "Total Courses", value: "154", status: "Active", icon: GraduationCap, color: "text-[#22ff88]" },
-  { label: "Completion Rate", value: "84.2%", status: "High", icon: CheckCircle, color: "text-[#00ffcc]" },
+  { label: "Total de Alunos", value: "12,842", change: "+12%", icon: Users, color: "text-[#22ff88]" },
+  { label: "Cursos Totais", value: "154", status: "Ativos", icon: GraduationCap, color: "text-[#22ff88]" },
+  { label: "Taxa de Conclusão", value: "84.2%", status: "Alta", icon: CheckCircle, color: "text-[#00ffcc]" },
 ];
 
 const growthData = [
@@ -17,8 +17,8 @@ const growthData = [
 ];
 
 const recentActivities = [
-  { course: "Structural Analysis: Void", published: "Published 2 days ago", instructor: "Arch. Elena Vance", enrollments: "+1,240", revenue: "$12,480", image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=100&h=100&auto=format&fit=crop" },
-  { course: "Digital Logic & Synthesis", published: "Published 1 week ago", instructor: "Dr. Marcus Thorne", enrollments: "+842", revenue: "$8,920", image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=100&h=100&auto=format&fit=crop" }
+  { course: "Análise Estrutural: Void", published: "Publicado há 2 dias", instructor: "Arq. Elena Vance", enrollments: "+1,240", revenue: "R$ 12.480", image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=100&h=100&auto=format&fit=crop" },
+  { course: "Lógica Digital & Síntese", published: "Publicado há 1 semana", instructor: "Dr. Marcus Thorne", enrollments: "+842", revenue: "R$ 8.920", image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=100&h=100&auto=format&fit=crop" }
 ];
 
 export function AdminOverview() {
@@ -79,17 +79,17 @@ export function AdminOverview() {
         <div className="lg:col-span-2 bg-[#1a1c22] p-8 rounded-3xl border border-white/5">
           <div className="flex justify-between items-center mb-10">
             <div>
-              <h2 className="text-xl font-bold text-white mb-1">Growth Dynamics</h2>
+              <h2 className="text-xl font-bold text-white mb-1">Dinâmica de Crescimento</h2>
               <p className="text-[#64748b] text-xs">Visualização semestral de novos ingressantes.</p>
             </div>
             <div className="flex gap-4 text-[10px] uppercase tracking-widest font-bold">
               <div className="flex items-center gap-2 text-[#22ff88]">
                 <div className="w-2 h-2 rounded-full bg-[#22ff88]" />
-                New Users
+                Novos Usuários
               </div>
               <div className="flex items-center gap-2 text-[#64748b]">
                 <div className="w-2 h-2 rounded-full bg-[#33353b]" />
-                Average
+                Média
               </div>
             </div>
           </div>
@@ -116,8 +116,8 @@ export function AdminOverview() {
         <div className="space-y-6">
           <div className="bg-[#22ff88] p-6 rounded-3xl flex items-center justify-between group cursor-pointer hover:opacity-90 transition-all">
             <div>
-              <h3 className="text-black font-bold text-lg mb-1">Create New Course</h3>
-              <p className="text-black/60 text-xs font-medium">Deploy new auteur content</p>
+              <h3 className="text-black font-bold text-lg mb-1">Criar Novo Curso</h3>
+              <p className="text-black/60 text-xs font-medium">Lançar novo conteúdo autoral</p>
             </div>
             <div className="w-12 h-12 bg-black/10 rounded-2xl flex items-center justify-center">
               <Plus className="w-6 h-6 text-black" />
@@ -126,25 +126,25 @@ export function AdminOverview() {
 
           <div className="bg-[#1a1c22] p-6 rounded-3xl border border-white/5 flex items-center justify-between group cursor-pointer hover:bg-white/5 transition-all">
             <div>
-              <h3 className="text-white font-bold text-lg mb-1">Manage Students</h3>
-              <p className="text-[#64748b] text-xs font-medium">Control access & permissions</p>
+              <h3 className="text-white font-bold text-lg mb-1">Gerenciar Alunos</h3>
+              <p className="text-[#64748b] text-xs font-medium">Controle de acesso e permissões</p>
             </div>
             <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center">
               <ArrowUpRight className="w-6 h-6 text-white" />
             </div>
           </div>
 
-          {/* System Status */}
+          {/* Status do Sistema */}
           <div className="bg-[#1a1c22] p-8 rounded-3xl border border-white/5">
             <div className="flex items-center gap-2 mb-6">
               <div className="w-2 h-2 rounded-full bg-[#22ff88] animate-pulse" />
-              <span className="text-[10px] uppercase tracking-widest font-bold text-white">Live System Status</span>
+              <span className="text-[10px] uppercase tracking-widest font-bold text-white">Status do Sistema</span>
             </div>
             <div className="space-y-4">
               {[
-                { label: "Server Load", value: "24%" },
-                { label: "Active Sessions", value: "1,429" },
-                { label: "Uptime", value: "99.9%", color: "text-[#22ff88]" },
+                { label: "Carga do Servidor", value: "24%" },
+                { label: "Sessões Ativas", value: "1,429" },
+                { label: "Tempo de Atividade", value: "99.9%", color: "text-[#22ff88]" },
               ].map((item) => (
                 <div key={item.label} className="flex justify-between items-center text-sm">
                   <span className="text-[#64748b]">{item.label}</span>
@@ -159,19 +159,19 @@ export function AdminOverview() {
       {/* Recent Activity Table */}
       <section className="mt-12 bg-[#1a1c22] rounded-3xl border border-white/5 overflow-hidden">
         <div className="p-8 border-b border-white/5 flex justify-between items-center">
-          <h2 className="text-xl font-bold text-white">Recent Course Activities</h2>
+          <h2 className="text-xl font-bold text-white">Atividades Recentes de Cursos</h2>
           <button className="text-[11px] font-bold text-[#22ff88] uppercase tracking-widest hover:underline transition-all">
-            View all logs
+            Ver todos os logs
           </button>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="text-[10px] uppercase tracking-widest text-[#64748b] border-b border-white/5">
-                <th className="px-8 py-5">Course Name</th>
-                <th className="px-8 py-5">Instructor</th>
-                <th className="px-8 py-5">New Enrollments</th>
-                <th className="px-8 py-5 text-right">Revenue</th>
+                <th className="px-8 py-5">Nome do Curso</th>
+                <th className="px-8 py-5">Instrutor</th>
+                <th className="px-8 py-5">Novas Inscrições</th>
+                <th className="px-8 py-5 text-right">Receita</th>
               </tr>
             </thead>
             <tbody>
