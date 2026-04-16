@@ -1,19 +1,42 @@
 import { useState } from 'react';
 import { DashboardLayout } from './DashboardLayout';
 import { DashboardOverview } from './DashboardOverview';
-import { AddClientsView } from './AddClientsView';
+import { AdminOverview } from './AdminOverview';
+import { ExamCreator } from './ExamCreator';
+import { CourseManager } from './CourseManager';
+import { ProfileSettings } from './ProfileSettings';
 
-type DashboardView = 'vitrine' | 'suporte' | 'trilhas' | 'overview' | 'certificados' | 'comunidade' | 'team' | 'settings';
+type DashboardView = 
+  | 'vitrine' 
+  | 'suporte' 
+  | 'trilhas' 
+  | 'overview' 
+  | 'certificados' 
+  | 'comunidade' 
+  | 'admin-overview' 
+  | 'admin-provas' 
+  | 'admin-cursos' 
+  | 'settings';
 
-export function Dashboard() {
+interface DashboardProps {
+  userData: any;
+}
+
+export function Dashboard({ userData }: DashboardProps) {
   const [activeView, setActiveView] = useState<DashboardView>('overview');
 
   const renderView = () => {
     switch (activeView) {
       case 'overview':
         return <DashboardOverview />;
-      case 'team':
-        return <AddClientsView />;
+      case 'admin-overview':
+        return <AdminOverview />;
+      case 'admin-provas':
+        return <ExamCreator />;
+      case 'admin-cursos':
+        return <CourseManager />;
+      case 'settings':
+        return <ProfileSettings userData={userData} />;
       default:
         return (
           <div className="p-12 flex items-center justify-center h-[calc(100vh-80px)]">
@@ -36,6 +59,7 @@ export function Dashboard() {
     <DashboardLayout 
       activeView={activeView} 
       onViewChange={(view) => setActiveView(view as DashboardView)}
+      userData={userData}
     >
       {renderView()}
     </DashboardLayout>

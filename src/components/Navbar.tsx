@@ -1,6 +1,15 @@
 import { Search, Bell, Settings } from 'lucide-react';
+import { cn } from '../lib/utils';
 
-export function Navbar() {
+interface NavbarProps {
+  userData: any;
+  activeView: string;
+  onViewChange: (view: string) => void;
+}
+
+export function Navbar({ userData, activeView, onViewChange }: NavbarProps) {
+  const avatarUrl = userData?.avatar_url || `https://i.pravatar.cc/100?u=${userData?.email}`;
+
   return (
     <header className="h-20 flex items-center justify-between px-8 bg-black/20 backdrop-blur-sm sticky top-0 z-40 border-b border-white/5">
       <div className="flex items-center flex-1 max-w-2xl px-4">
@@ -20,21 +29,27 @@ export function Navbar() {
             <Bell className="w-5 h-5" />
             <span className="absolute top-2 right-2 w-2 h-2 bg-[#22ff88] rounded-full ring-2 ring-[#0f1115]" />
           </button>
-          <button className="text-[#64748b] hover:text-white transition-colors p-2">
+          <button 
+            onClick={() => onViewChange('settings')}
+            className={cn(
+              "p-2 transition-all",
+              activeView === 'settings' ? "text-[#22ff88]" : "text-[#64748b] hover:text-white"
+            )}
+          >
             <Settings className="w-5 h-5" />
           </button>
         </div>
 
         <div className="flex items-center gap-3 border-l border-white/10 pl-8 py-2">
           <div className="text-right hidden sm:block">
-            <p className="text-sm font-bold text-white leading-tight">Arthur Morgan</p>
+            <p className="text-sm font-bold text-white leading-tight">{userData?.name || 'Carregando...'}</p>
             <p className="text-[10px] items-center text-[#22ff88] font-bold uppercase tracking-wider font-mono">
-              Senior Engineer
+              {userData?.role === 'administrador' ? 'ADMINISTRADOR' : 'ESTUDANTE ELITE'}
             </p>
           </div>
           <div className="relative">
             <img 
-              src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=100&h=100&auto=format&fit=crop" 
+              src={avatarUrl} 
               className="w-10 h-10 rounded-xl object-cover border border-white/10 shadow-lg" 
               alt="Profile"
               referrerPolicy="no-referrer"

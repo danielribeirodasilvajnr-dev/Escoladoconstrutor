@@ -15,7 +15,7 @@ export function LandingPage({ onExplore }: LandingPageProps) {
           <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center shadow-lg shadow-accent/20">
             <Sparkles className="w-4 h-4 text-white" />
           </div>
-          <span className="font-display text-xl tracking-tighter font-bold">Aurora</span>
+          <span className="font-display text-xl tracking-tighter font-bold">Escola do Construtor</span>
         </div>
         <div className="hidden md:flex gap-8 text-[11px] uppercase tracking-widest font-bold text-muted">
           <a href="#" className="hover:text-ink transition-colors">Platform</a>
@@ -135,7 +135,7 @@ export function LandingPage({ onExplore }: LandingPageProps) {
             <span>·</span>
             <span>Future</span>
             <span>·</span>
-            <span>Aurora</span>
+            <span>Escola do Construtor</span>
             <span>·</span>
             <span>Spatial Computing</span>
             <span>·</span>
@@ -169,10 +169,10 @@ export function LandingPage({ onExplore }: LandingPageProps) {
       <footer className="px-8 py-12 border-t border-ink/5 max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
         <div className="flex items-center gap-2 grayscale-0">
           <Sparkles className="w-4 h-4 text-accent" />
-          <span className="font-display text-lg font-bold">Aurora</span>
+          <span className="font-display text-lg font-bold">Escola do Construtor</span>
         </div>
         <div className="text-[10px] uppercase tracking-widest text-muted font-bold">
-          © 2026 Aurora Labs. All rights reserved. Built with intentional design.
+          © 2026 Escola do Construtor. Todos os direitos reservados.
         </div>
       </footer>
     </div>

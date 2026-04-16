@@ -67,7 +67,7 @@ export function Auth({ onSuccess }: AuthProps) {
         className="absolute top-12 left-12 z-20"
       >
         <h1 className="text-[28px] font-bold tracking-tight text-[#22ff88] font-display">
-          Aurora
+          Escola do Construtor
         </h1>
       </motion.div>
 
@@ -196,7 +196,7 @@ export function Auth({ onSuccess }: AuthProps) {
             <Globe className="w-3 h-3" />
             Português (BR)
           </button>
-          <span>© 2026 Aurora Creative Studio</span>
+          <span>© 2026 Escola do Construtor</span>
         </div>
       </div>
     </div>

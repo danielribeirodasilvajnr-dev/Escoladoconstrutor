@@ -11,22 +11,35 @@ type View = 'landing' | 'auth' | 'dashboard';
 export default function App() {
   const [view, setView] = useState<View>('landing');
   const [session, setSession] = useState<Session | null>(null);
+  const [userData, setUserData] = useState<any>(null);
 
   useEffect(() => {
+    const handleSession = (session: Session | null) => {
+      setSession(session);
+      if (session) {
+        setUserData({
+          id: session.user.id,
+          email: session.user.email,
+          role: session.user.user_metadata.role || 'membro',
+          name: session.user.user_metadata.full_name || session.user.email?.split('@')[0],
+          avatar_url: session.user.user_metadata.avatar_url,
+          phone: session.user.user_metadata.phone,
+        });
+        setView('dashboard');
+      } else {
+        setUserData(null);
+        setView('landing');
+      }
+    };
+
     // Initial session check
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session) setView('dashboard');
+      handleSession(session);
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (session) {
-        setView('dashboard');
-      } else {
-        setView('landing');
-      }
+      handleSession(session);
     });
 
     return () => subscription.unsubscribe();
@@ -63,21 +76,7 @@ export default function App() {
           transition={{ duration: 0.5, ease: 'easeOut' }}
           className="h-screen w-full"
         >
-          <Dashboard />
-          <div className="fixed bottom-12 right-12 flex gap-4 z-50">
-            <button 
-              onClick={() => setView('landing')}
-              className="px-6 py-2 bg-[#141414] text-[#E4E3E0] rounded-full text-[10px] font-mono uppercase tracking-[0.2em] shadow-xl hover:scale-110 active:scale-95 transition-all border border-[#E4E3E0]/20"
-            >
-              ← Public View
-            </button>
-            <button 
-              onClick={() => supabase.auth.signOut()}
-              className="px-6 py-2 bg-red-500/10 text-red-400 rounded-full text-[10px] font-mono uppercase tracking-[0.2em] shadow-xl hover:scale-110 active:scale-95 transition-all border border-red-500/20"
-            >
-              Sign Out
-            </button>
-          </div>
+          <Dashboard userData={userData} />
         </motion.div>
       )}
     </AnimatePresence>
