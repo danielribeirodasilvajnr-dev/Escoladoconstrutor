@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Play, 
@@ -42,8 +42,11 @@ export function CoursePlayer({ courseId, onBack }: CoursePlayerProps) {
   const [course, setCourse] = useState<any>(null);
   const [modules, setModules] = useState<Module[]>([]);
   const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null);
-  const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [lastSavedTime, setLastSavedTime] = useState(0);
+  const currentTimeRef = useRef(0);
+  const [isInitialSeek, setIsInitialSeek] = useState(true);
 
   useEffect(() => {
     fetchCourseData();
@@ -103,6 +106,69 @@ export function CoursePlayer({ courseId, onBack }: CoursePlayerProps) {
     }
   }
 
+  // Fetch progress for current lesson
+  useEffect(() => {
+    if (currentLesson) {
+      setIsInitialSeek(true);
+      fetchProgress(currentLesson.id);
+    }
+  }, [currentLesson]);
+
+  // Save progress on unmount or lesson change
+  useEffect(() => {
+    return () => {
+      if (currentTimeRef.current > 0) {
+        saveProgress(currentTimeRef.current);
+      }
+    };
+  }, [currentLesson?.id]);
+
+  async function fetchProgress(lessonId: string) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data } = await supabase
+      .from('lesson_progress')
+      .select('watched_time')
+      .eq('user_id', user.id)
+      .eq('lesson_id', lessonId)
+      .single();
+
+    if (data && videoRef.current) {
+      videoRef.current.currentTime = data.watched_time;
+      setLastSavedTime(data.watched_time);
+    }
+  }
+
+  // Throttled progress saving
+  const handleTimeUpdate = async () => {
+    if (!videoRef.current || !currentLesson) return;
+
+    const currentTime = Math.floor(videoRef.current.currentTime);
+    currentTimeRef.current = currentTime;
+    
+    // Save every 10 seconds or when close to end
+    if (Math.abs(currentTime - lastSavedTime) >= 10 || videoRef.current.ended) {
+      setLastSavedTime(currentTime);
+      await saveProgress(currentTime);
+    }
+  };
+
+  async function saveProgress(time: number) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    await supabase
+      .from('lesson_progress')
+      .upsert({
+        user_id: user.id,
+        course_id: courseId,
+        lesson_id: currentLesson?.id,
+        watched_time: time,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id,lesson_id' });
+  }
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-80px)] space-y-4">
@@ -130,8 +196,10 @@ export function CoursePlayer({ courseId, onBack }: CoursePlayerProps) {
           <div className="relative aspect-video rounded-[2.5rem] bg-black border border-white/5 overflow-hidden shadow-2xl group mb-10">
             {currentLesson?.content_url ? (
               <video 
+                ref={videoRef}
                 key={currentLesson.id}
                 src={currentLesson.content_url}
+                onTimeUpdate={handleTimeUpdate}
                 className="w-full h-full object-contain"
                 controls
               />

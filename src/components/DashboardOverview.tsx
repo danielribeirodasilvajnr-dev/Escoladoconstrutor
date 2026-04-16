@@ -40,11 +40,16 @@ const itemVariants = {
 
 export function DashboardOverview({ userData, onCourseSelect }: DashboardOverviewProps) {
   const [enrolledCourses, setEnrolledCourses] = useState<any[]>([]);
+  const [lastWatched, setLastWatched] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (userData?.id) {
-      fetchEnrollments();
+      const init = async () => {
+        const courses = await fetchEnrollments();
+        fetchLastWatched(courses);
+      };
+      init();
     }
   }, [userData]);
 
@@ -65,11 +70,59 @@ export function DashboardOverview({ userData, onCourseSelect }: DashboardOvervie
         .eq('user_id', userData.id);
 
       if (error) throw error;
-      setEnrolledCourses(data || []);
+      const courses = data || [];
+      setEnrolledCourses(courses);
+      return courses;
     } catch (error: any) {
       console.error('Erro ao buscar inscrições:', error.message);
+      return [];
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function fetchLastWatched(currentEnrolled?: any[]) {
+    const coursesToUse = currentEnrolled || enrolledCourses;
+    try {
+      const { data, error } = await supabase
+        .from('lesson_progress')
+        .select(`
+          watched_time,
+          course:courses (*),
+          lesson:lessons (
+            *,
+            module:modules (
+              title,
+              order_index
+            )
+          )
+        `)
+        .eq('user_id', userData.id)
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error) {
+        if (error.code !== 'PGRST116') console.error('Erro ao buscar último curso:', error.message);
+        
+        // Fallback: If no progress, use most recent enrollment
+        if (coursesToUse.length > 0) {
+          const latestEnrolled = [...coursesToUse].sort((a, b) => 
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          )[0];
+          
+          setLastWatched({
+            course: latestEnrolled.course,
+            watched_time: 0,
+            lesson: null
+          });
+        }
+        return;
+      }
+      
+      setLastWatched(data);
+    } catch (error: any) {
+      console.error('Erro ao buscar último curso:', error.message);
     }
   }
 
@@ -81,7 +134,10 @@ export function DashboardOverview({ userData, onCourseSelect }: DashboardOvervie
       className="p-8 max-w-[1600px] mx-auto pb-20"
     >
       <motion.div variants={itemVariants}>
-        <HeroSection />
+        <HeroSection 
+          lastWatched={lastWatched} 
+          onContinue={() => lastWatched && onCourseSelect(lastWatched.course.id)}
+        />
       </motion.div>
 
       {/* Meus Cursos */}
