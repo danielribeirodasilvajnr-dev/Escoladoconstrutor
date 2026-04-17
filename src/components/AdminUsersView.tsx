@@ -69,10 +69,13 @@ export function AdminUsersView() {
     }
   }
 
-  const filteredUsers = users.filter(user => 
-    user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredUsers = users.filter(user => {
+    if (!searchTerm) return true;
+    const searchLower = searchTerm.toLowerCase();
+    const nameMatch = user.full_name?.toLowerCase().includes(searchLower) || false;
+    const emailMatch = user.email?.toLowerCase().includes(searchLower) || false;
+    return nameMatch || emailMatch;
+  });
 
   const getRoleBadge = (role: string) => {
     switch (role) {

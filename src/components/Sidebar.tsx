@@ -8,7 +8,8 @@ import {
   LogOut,
   ChevronRight,
   ShieldCheck,
-  Layers
+  Layers,
+  DollarSign
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { supabase } from '../lib/supabase';
@@ -36,7 +37,7 @@ export function Sidebar({ activeView, onViewChange, userData }: SidebarProps) {
 
   const masterItems = [
     { id: "admin-usuarios", icon: Users2, label: "Gestão de Usuários" },
-    { id: "admin-financeiro", icon: Award, label: "Financeiro Geral" },
+    { id: "admin-financeiro", icon: DollarSign, label: "Gestão Financeira" },
   ];
 
   const handleLogout = async () => {

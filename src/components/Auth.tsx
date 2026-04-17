@@ -70,6 +70,7 @@ export function Auth({ onSuccess }: AuthProps) {
           options: {
             data: {
               role: accessLevel,
+              email: email,
             },
           },
         });
