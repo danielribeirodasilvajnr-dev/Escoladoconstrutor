@@ -8,6 +8,7 @@ import { ProfileSettings } from './ProfileSettings';
 import { Vitrine } from './Vitrine';
 import { CoursePlayer } from './CoursePlayer';
 import { AdminUsersView } from './AdminUsersView';
+import { AdminFinanceView } from './AdminFinanceView';
 
 type DashboardView =
   | 'vitrine'
@@ -19,6 +20,7 @@ type DashboardView =
   | 'admin-provas'
   | 'admin-cursos'
   | 'admin-usuarios'
+  | 'admin-financeiro'
   | 'settings'
   | 'player';
 
@@ -78,6 +80,8 @@ export function Dashboard({ userData }: DashboardProps) {
         );
       case "admin-usuarios":
         return <AdminUsersView />;
+      case "admin-financeiro":
+        return <AdminFinanceView />;
       case 'settings':
         return <ProfileSettings userData={userData} />;
       default:
