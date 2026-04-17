@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { LandingPage } from './components/LandingPage';
 import { Dashboard } from './components/Dashboard';
 import { Auth } from './components/Auth';
+import { PublicCourseView } from './components/PublicCourseView';
 import { supabase } from './lib/supabase';
 import { Session } from '@supabase/supabase-js';
 import { Toaster } from 'sonner';
@@ -13,8 +14,16 @@ export default function App() {
   const [view, setView] = useState<View>('landing');
   const [session, setSession] = useState<Session | null>(null);
   const [userData, setUserData] = useState<any>(null);
+  const [publicCourseId, setPublicCourseId] = useState<string | null>(null);
 
   useEffect(() => {
+    // Check for public course ID in URL
+    const params = new URLSearchParams(window.location.search);
+    const courseId = params.get('c');
+    if (courseId) {
+      setPublicCourseId(courseId);
+    }
+
     const handleSession = (session: Session | null) => {
       setSession(session);
       if (session) {
@@ -43,7 +52,10 @@ export default function App() {
         setView('dashboard');
       } else {
         setUserData(null);
-        setView('landing');
+        // Only set to landing if not viewing a public course
+        if (!new URLSearchParams(window.location.search).get('c')) {
+          setView('landing');
+        }
       }
     };
 
@@ -72,6 +84,27 @@ export default function App() {
         >
           <LandingPage onExplore={() => setView(session ? 'dashboard' : 'auth')} />
         </motion.div>
+      ) : publicCourseId ? (
+        <motion.div
+          key="public-course"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <PublicCourseView 
+            courseId={publicCourseId} 
+            session={session}
+            onBack={() => {
+              setPublicCourseId(null);
+              // Remove ?c= parameter without refreshing
+              const url = new URL(window.location.href);
+              url.searchParams.delete('c');
+              window.history.replaceState({}, '', url);
+              setView(session ? 'dashboard' : 'landing');
+            }}
+            onAuth={() => setView('auth')}
+          />
+        </motion.div>
       ) : view === 'auth' ? (
         <motion.div
           key="auth"
@@ -80,7 +113,11 @@ export default function App() {
           exit={{ opacity: 0, scale: 0.9 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         >
-          <Auth onSuccess={() => setView('dashboard')} />
+          <Auth onSuccess={() => {
+            setView('dashboard');
+            // If was on a public course, the session check will handle it, 
+            // but we might want to keep the public ID to show the checkout
+          }} />
         </motion.div>
       ) : (
         <motion.div

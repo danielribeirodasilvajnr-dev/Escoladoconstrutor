@@ -14,10 +14,16 @@ import {
   FastForward,
   Rewind,
   Loader2,
-  Bell
+  Bell,
+  MessageSquare,
+  FileText,
+  Send,
+  Trash2,
+  Reply
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { toast } from 'sonner';
+import { cn } from '../lib/utils';
 
 interface Lesson {
   id: string;
@@ -25,6 +31,25 @@ interface Lesson {
   duration: string;
   content_url: string;
   order_index: number;
+}
+
+interface Attachment {
+  id: string;
+  title: string;
+  file_url: string;
+  file_type: string;
+  file_size: number;
+}
+
+interface Comment {
+  id: string;
+  content: string;
+  created_at: string;
+  user_id: string;
+  profiles: {
+    full_name: string;
+    avatar_url: string;
+  };
 }
 
 interface Module {
@@ -45,6 +70,11 @@ export function CoursePlayer({ courseId, onBack }: CoursePlayerProps) {
   const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [activeTab, setActiveTab] = useState<'about' | 'materials' | 'comments'>('about');
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [newComment, setNewComment] = useState('');
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [lastSavedTime, setLastSavedTime] = useState(0);
   const currentTimeRef = useRef(0);
@@ -108,13 +138,85 @@ export function CoursePlayer({ courseId, onBack }: CoursePlayerProps) {
     }
   }
 
-  // Fetch progress for current lesson
+  // Fetch progress, attachments and comments for current lesson
   useEffect(() => {
     if (currentLesson) {
       setIsInitialSeek(true);
       fetchProgress(currentLesson.id);
+      fetchLessonExtras(currentLesson.id);
     }
   }, [currentLesson]);
+
+  async function fetchLessonExtras(lessonId: string) {
+    try {
+      // Fetch Attachments
+      const { data: atts } = await supabase
+        .from('lesson_attachments')
+        .select('*')
+        .eq('lesson_id', lessonId);
+      setAttachments(atts || []);
+
+      // Fetch Comments with User Profile
+      const { data: comms } = await supabase
+        .from('lesson_comments')
+        .select(`
+          *,
+          profiles (
+            full_name,
+            avatar_url
+          )
+        `)
+        .eq('lesson_id', lessonId)
+        .order('created_at', { ascending: false });
+      setComments(comms || []);
+    } catch (error) {
+      console.error('Error fetching lesson extras:', error);
+    }
+  }
+
+  async function handlePostComment() {
+    if (!newComment.trim() || !currentLesson) return;
+
+    try {
+      setIsSubmittingComment(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      const { data, error } = await supabase
+        .from('lesson_comments')
+        .insert({
+          lesson_id: currentLesson.id,
+          user_id: user.id,
+          content: newComment.trim()
+        })
+        .select(`
+          *,
+          profiles (
+            full_name,
+            avatar_url
+          )
+        `)
+        .single();
+
+      if (error) throw error;
+
+      setComments(prev => [data, ...prev]);
+      setNewComment('');
+      toast.success('Comentário enviado!');
+    } catch (error: any) {
+      toast.error('Erro ao enviar comentário: ' + error.message);
+    } finally {
+      setIsSubmittingComment(false);
+    }
+  }
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
 
   // Save progress on unmount or lesson change
   useEffect(() => {
@@ -134,7 +236,7 @@ export function CoursePlayer({ courseId, onBack }: CoursePlayerProps) {
       .select('watched_time')
       .eq('user_id', user.id)
       .eq('lesson_id', lessonId)
-      .single();
+      .maybeSingle();
 
     if (data && videoRef.current) {
       videoRef.current.currentTime = data.watched_time;
@@ -270,14 +372,166 @@ export function CoursePlayer({ courseId, onBack }: CoursePlayerProps) {
               {course?.description || "Explore the foundational principles of structural analysis applied to modern robotics. This auteur-series course dives deep into harmonic oscillations, damping coefficients, and real-world implementation of dynamic controls."}
             </p>
 
-            <div className="flex items-center gap-4 pt-4">
-              <button className="h-14 px-8 bg-[#22ff88] text-black font-extrabold rounded-2xl flex items-center gap-3 hover:opacity-90 active:scale-95 transition-all shadow-[0_0_30px_rgba(34,255,136,0.2)] text-xs uppercase tracking-widest">
-                <Download className="w-4 h-4" />
-                Download Materials
-              </button>
-              <button className="h-14 px-8 bg-white/5 text-white font-extrabold rounded-2xl border border-white/10 hover:bg-white/10 active:scale-95 transition-all text-xs uppercase tracking-widest">
-                Share Progress
-              </button>
+            {/* Tabs for Engagement */}
+            <div className="pt-10 border-t border-white/5">
+              <div className="flex gap-8 border-b border-white/5 mb-8">
+                {[
+                  { id: 'about', label: 'Sobre a Aula', icon: FileText },
+                  { id: 'materials', label: 'Materiais', icon: Download, count: attachments.length },
+                  { id: 'comments', label: 'Dúvidas', icon: MessageSquare, count: comments.length },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as any)}
+                    className={cn(
+                      "flex items-center gap-2 pb-4 text-xs font-bold uppercase tracking-widest transition-all relative",
+                      activeTab === tab.id ? "text-[#22ff88]" : "text-[#64748b] hover:text-white"
+                    )}
+                  >
+                    <tab.icon className="w-4 h-4" />
+                    {tab.label}
+                    {tab.count !== undefined && (
+                      <span className={cn(
+                        "ml-1 px-1.5 py-0.5 rounded-md text-[9px]",
+                        activeTab === tab.id ? "bg-[#22ff88]/20 text-[#22ff88]" : "bg-white/5 text-[#64748b]"
+                      )}>
+                        {tab.count}
+                      </span>
+                    )}
+                    {activeTab === tab.id && (
+                      <motion.div 
+                        layoutId="activeTab"
+                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#22ff88]" 
+                      />
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              <AnimatePresence mode="wait">
+                {activeTab === 'about' && (
+                  <motion.div
+                    key="about"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="text-[#94a3b8] text-sm leading-relaxed"
+                  >
+                    <div className="bg-[#1a1c22] p-8 rounded-3xl border border-white/5">
+                      <h4 className="text-white font-bold mb-4">O que você vai aprender:</h4>
+                      <p>{currentLesson?.content || "Nesta aula, exploramos conceitos avançados com aplicações práticas reais. Focamos na resolução de problemas complexos e na implementação de fluxos de trabalho eficientes."}</p>
+                    </div>
+                  </motion.div>
+                )}
+
+                {activeTab === 'materials' && (
+                  <motion.div
+                    key="materials"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="space-y-4"
+                  >
+                    {attachments.length === 0 ? (
+                      <div className="text-center py-12 bg-white/5 rounded-3xl border border-dashed border-white/10">
+                        <Download className="w-12 h-12 text-[#64748b] mx-auto mb-4 opacity-20" />
+                        <p className="text-[#64748b] text-sm">Nenhum material de apoio disponível para esta aula.</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {attachments.map((att) => (
+                          <a
+                            key={att.id}
+                            href={att.file_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-[#1a1c22] p-6 rounded-3xl border border-white/5 flex items-center justify-between group hover:border-[#22ff88]/30 transition-all"
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center group-hover:bg-[#22ff88]/10 transition-colors">
+                                <FileText className="w-6 h-6 text-[#64748b] group-hover:text-[#22ff88] transition-colors" />
+                              </div>
+                              <div>
+                                <p className="font-bold text-white mb-1">{att.title}</p>
+                                <p className="text-[10px] text-[#64748b] uppercase tracking-widest">{att.file_type || 'Arquivo'} • {formatFileSize(att.file_size)}</p>
+                              </div>
+                            </div>
+                            <Download className="w-5 h-5 text-[#64748b] group-hover:text-[#22ff88] transition-all" />
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+
+                {activeTab === 'comments' && (
+                  <motion.div
+                    key="comments"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="space-y-8"
+                  >
+                    {/* Input Area */}
+                    <div className="bg-[#1a1c22] p-8 rounded-3xl border border-white/5 gap-6">
+                      <div className="flex gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-[#22ff88]/10 flex items-center justify-center shrink-0">
+                           <MessageSquare className="w-5 h-5 text-[#22ff88]" />
+                        </div>
+                        <div className="flex-1 space-y-4">
+                          <textarea
+                            value={newComment}
+                            onChange={(e) => setNewComment(e.target.value)}
+                            placeholder="Tire sua dúvida com o professor ou deixe seu insight..."
+                            className="w-full bg-black/20 border border-white/10 rounded-2xl p-4 text-sm text-white focus:outline-none focus:border-[#22ff88]/30 transition-all min-h-[100px] resize-none"
+                          />
+                          <div className="flex justify-end">
+                            <button
+                              onClick={handlePostComment}
+                              disabled={isSubmittingComment || !newComment.trim()}
+                              className="px-8 py-3 bg-[#22ff88] text-black text-[11px] font-black uppercase tracking-widest rounded-xl hover:opacity-90 active:scale-95 disabled:opacity-50 transition-all flex items-center gap-2"
+                            >
+                              {isSubmittingComment ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                              Enviar Pergunta
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Comments List */}
+                    <div className="space-y-6">
+                      {comments.length === 0 ? (
+                        <p className="text-center py-10 text-[#64748b] text-sm italic">Seja o primeiro a comentar nesta aula!</p>
+                      ) : (
+                        comments.map((comment) => (
+                          <div key={comment.id} className="flex gap-4 group">
+                             <div className="w-10 h-10 rounded-xl bg-white/5 overflow-hidden shrink-0 border border-white/10 flex items-center justify-center">
+                              {comment.profiles?.avatar_url ? (
+                                <img src={comment.profiles.avatar_url} className="w-full h-full object-cover" alt="" />
+                              ) : (
+                                <span className="text-xs font-bold text-[#64748b]">{(comment.profiles?.full_name || '?').charAt(0)}</span>
+                              )}
+                            </div>
+                            <div className="flex-1 space-y-2">
+                              <div className="flex justify-between items-center">
+                                <span className="text-xs font-bold text-white">{comment.profiles?.full_name || 'Estudante'}</span>
+                                <span className="text-[10px] text-[#64748b] font-medium">{new Date(comment.created_at).toLocaleDateString('pt-BR')}</span>
+                              </div>
+                              <p className="text-sm text-[#94a3b8] leading-relaxed bg-white/[0.02] p-4 rounded-2xl border border-white/5">{comment.content}</p>
+                              <div className="flex gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest hover:text-[#22ff88] flex items-center gap-1">
+                                  <Reply className="w-3 h-3" /> Responder
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </div>

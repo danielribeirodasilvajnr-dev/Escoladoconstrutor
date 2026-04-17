@@ -20,6 +20,7 @@ import { supabase } from '../lib/supabase';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { ConfirmModal } from './ConfirmModal';
+import { cn } from '../lib/utils';
 
 interface Lesson {
   id: string;
@@ -72,7 +73,9 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
   const [modules, setModules] = useState<Module[]>([]);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadingLessonId, setUploadingLessonId] = useState<string | null>(null);
+  const [uploadingAttachmentLessonId, setUploadingAttachmentLessonId] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [lessonAttachments, setLessonAttachments] = useState<Record<string, any[]>>({});
 
   // Confirm Modal State
   const [confirmConfig, setConfirmConfig] = useState<{
@@ -135,6 +138,22 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
       // Update price input string
       if (courseData.price !== undefined) {
         setPriceInput(courseData.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 }));
+      }
+
+      // Fetch all attachments for these modules
+      const lessonIds = formattedModules.flatMap(m => m.lessons.map(l => l.id));
+      if (lessonIds.length > 0) {
+        const { data: atts } = await supabase
+          .from('lesson_attachments')
+          .select('*')
+          .in('lesson_id', lessonIds);
+        
+        const attMap: Record<string, any[]> = {};
+        atts?.forEach(a => {
+          if (!attMap[a.lesson_id]) attMap[a.lesson_id] = [];
+          attMap[a.lesson_id].push(a);
+        });
+        setLessonAttachments(attMap);
       }
     } catch (error: any) {
       console.error('Erro ao carregar curso:', error.message);
@@ -418,6 +437,71 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
     }
   };
 
+  const handleAttachmentUpload = async (e: React.ChangeEvent<HTMLInputElement>, lessonId: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploadingAttachmentLessonId(lessonId);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${lessonId}-${Math.random()}.${fileExt}`;
+      const filePath = `${lessonId}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('attachments')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('attachments')
+        .getPublicUrl(filePath);
+
+      const { data, error: dbError } = await supabase
+        .from('lesson_attachments')
+        .insert({
+          lesson_id: lessonId,
+          title: file.name,
+          file_url: publicUrl,
+          file_type: fileExt,
+          file_size: file.size
+        })
+        .select()
+        .single();
+
+      if (dbError) throw dbError;
+
+      setLessonAttachments(prev => ({
+        ...prev,
+        [lessonId]: [...(prev[lessonId] || []), data]
+      }));
+      toast.success('Material de apoio adicionado!');
+    } catch (error: any) {
+      toast.error('Erro no upload: ' + error.message);
+    } finally {
+      setUploadingAttachmentLessonId(null);
+    }
+  };
+
+  const handleDeleteAttachment = async (lessonId: string, attachmentId: string) => {
+    try {
+      const { error } = await supabase
+        .from('lesson_attachments')
+        .delete()
+        .eq('id', attachmentId);
+      
+      if (error) throw error;
+
+      setLessonAttachments(prev => ({
+        ...prev,
+        [lessonId]: prev[lessonId].filter(a => a.id !== attachmentId)
+      }));
+      toast.success('Anexo removido');
+    } catch (error: any) {
+      toast.error('Erro ao remover anexo');
+    }
+  };
+
   if (loading) {
     return (
       <div className="h-[calc(100vh-80px)] flex items-center justify-center">
@@ -553,56 +637,94 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                     </div>
                     <div className="p-8 space-y-4">
                       {module.lessons.map((lesson, lIdx) => (
-                        <div key={lesson.id} className="bg-[#0f1115] border border-white/5 rounded-xl p-4 flex items-center justify-between group">
-                          <div className="flex items-center gap-4 flex-1">
-                            <div className="w-12 h-12 rounded-lg overflow-hidden bg-black/40 border border-white/10 flex items-center justify-center shrink-0 group-hover:border-[#22ff88]/30 transition-colors">
-                              {lesson.content_url ? (
-                                <video
-                                  src={lesson.content_url}
-                                  className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity"
-                                  preload="metadata"
-                                />
+                        <div key={lesson.id} className="space-y-2">
+                          <div className="bg-[#0f1115] border border-white/5 rounded-xl p-4 flex items-center justify-between group">
+                            <div className="flex items-center gap-4 flex-1">
+                              <div className="w-12 h-12 rounded-lg overflow-hidden bg-black/40 border border-white/10 flex items-center justify-center shrink-0 group-hover:border-[#22ff88]/30 transition-colors">
+                                {lesson.content_url ? (
+                                  <video
+                                    src={lesson.content_url}
+                                    className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity"
+                                    preload="metadata"
+                                  />
+                                ) : (
+                                  <Upload className="w-4 h-4 text-white/20" />
+                                )}
+                              </div>
+                              <input
+                                type="text"
+                                defaultValue={lesson.title}
+                                onBlur={(e) => handleUpdateLessonTitle(lesson.id, e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    (e.target as HTMLInputElement).blur();
+                                  }
+                                }}
+                                className="bg-transparent border-none text-sm font-bold text-white/60 group-hover:text-white focus:outline-none flex-1 focus:text-[#22ff88]"
+                              />
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <button
+                                onClick={() => handleDeleteLesson(module.id, lesson.id)}
+                                className="opacity-0 group-hover:opacity-100 p-2 text-[#64748b] hover:text-red-400 transition-all"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                              {uploadingLessonId === lesson.id ? (
+                                <div className="flex items-center gap-3">
+                                  <div className="w-24 h-1 bg-white/5 rounded-full overflow-hidden">
+                                    <div className="h-full bg-[#22ff88] transition-all" style={{ width: `${uploadProgress}%` }} />
+                                  </div>
+                                  <span className="text-[10px] text-[#22ff88] font-bold">{uploadProgress}%</span>
+                                </div>
                               ) : (
-                                <Upload className="w-4 h-4 text-white/20" />
+                                <button
+                                  onClick={() => {
+                                    setUploadingLessonId(lesson.id);
+                                    lessonInputRef.current?.click();
+                                  }}
+                                  className="text-[9px] font-bold text-[#64748b] hover:text-[#22ff88] uppercase tracking-widest transition-colors"
+                                >
+                                  {lesson.content_url ? "TROCAR VÍDEO" : "UPLOAD VÍDEO"}
+                                </button>
                               )}
                             </div>
-                            <input
-                              type="text"
-                              defaultValue={lesson.title}
-                              onBlur={(e) => handleUpdateLessonTitle(lesson.id, e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  (e.target as HTMLInputElement).blur();
-                                }
-                              }}
-                              className="bg-transparent border-none text-sm font-bold text-white/60 group-hover:text-white focus:outline-none flex-1 focus:text-[#22ff88]"
-                            />
                           </div>
-                          <div className="flex items-center gap-4">
-                            <button
-                              onClick={() => handleDeleteLesson(module.id, lesson.id)}
-                              className="opacity-0 group-hover:opacity-100 p-2 text-[#64748b] hover:text-red-400 transition-all"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                            {uploadingLessonId === lesson.id ? (
-                              <div className="flex items-center gap-3">
-                                <div className="w-24 h-1 bg-white/5 rounded-full overflow-hidden">
-                                  <div className="h-full bg-[#22ff88] transition-all" style={{ width: `${uploadProgress}%` }} />
-                                </div>
-                                <span className="text-[10px] text-[#22ff88] font-bold">{uploadProgress}%</span>
-                              </div>
-                            ) : (
-                              <button
-                                onClick={() => {
-                                  setUploadingLessonId(lesson.id);
-                                  lessonInputRef.current?.click();
-                                }}
-                                className="text-[9px] font-bold text-[#64748b] hover:text-[#22ff88] uppercase tracking-widest transition-colors"
-                              >
-                                {lesson.content_url ? "TROCAR VÍDEO" : "UPLOAD VÍDEO"}
-                              </button>
-                            )}
+
+                          {/* Attachments Section */}
+                          <div className="ml-16 mt-2 space-y-2">
+                             {lessonAttachments[lesson.id]?.map((att) => (
+                               <div key={att.id} className="flex items-center justify-between py-2 px-4 bg-white/[0.03] rounded-lg border border-white/5">
+                                 <div className="flex items-center gap-2">
+                                   <FileText className="w-3 h-3 text-[#64748b]" />
+                                   <span className="text-[10px] text-white/50">{att.title}</span>
+                                 </div>
+                                 <button 
+                                   onClick={() => handleDeleteAttachment(lesson.id, att.id)}
+                                   className="text-[#64748b] hover:text-red-400 transition-colors"
+                                 >
+                                   <X className="w-3 h-3" />
+                                 </button>
+                               </div>
+                             ))}
+                             <div className="flex items-center gap-4">
+                               <label className="cursor-pointer group">
+                                 <input 
+                                   type="file" 
+                                   className="hidden" 
+                                   onChange={(e) => handleAttachmentUpload(e, lesson.id)}
+                                   disabled={uploadingAttachmentLessonId === lesson.id}
+                                 />
+                                 <span className="text-[9px] font-bold text-[#22ff88]/60 group-hover:text-[#22ff88] uppercase tracking-widest flex items-center gap-2 transition-all">
+                                   {uploadingAttachmentLessonId === lesson.id ? (
+                                     <Loader2 className="w-3 h-3 animate-spin" />
+                                   ) : (
+                                     <Plus className="w-3 h-3" />
+                                   )}
+                                   Anexar Material (PDF, DWG, EXCEL...)
+                                 </span>
+                               </label>
+                             </div>
                           </div>
                         </div>
                       ))}
@@ -735,6 +857,4 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
   );
 }
 
-function cn(...classes: any[]) {
-  return classes.filter(Boolean).join(' ');
-}
+
