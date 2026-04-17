@@ -18,21 +18,23 @@ serve(async (req) => {
       throw new Error("Id do curso é obrigatório");
     }
 
-    // Initialize Supabase Client (authenticated as the user making the request)
+    // Extrair o token do cabeçalho
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      throw new Error("Cabeçalho de autorização ausente. Faça login novamente.");
+    }
+    const token = authHeader.replace('Bearer ', '');
+
+    // Initialize Supabase Client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
-        },
-      }
+      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     );
 
-    // Get User from token
-    const { data: { user } } = await supabaseClient.auth.getUser();
+    // Get User from token properly
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
 
-    if (!user) throw new Error("Usuário não autenticado");
+    if (authError || !user) throw new Error("Usuário não autenticado ou token expirado");
 
     // Use Service Role to bypass RLS and fetch course details safely
     const supabaseAdmin = createClient(
@@ -69,10 +71,12 @@ serve(async (req) => {
         items: [
           {
             id: course.id,
-            title: course.title || "Curso Construtor360",
-            description: course.description || "Acesso Premium",
+            title: course.title ? course.title.substring(0, 250) : "Curso",
+            description: (course.description || "Acesso Premium").substring(0, 250),
             picture_url: course.cover_url || "",
+            category_id: "learnings",
             quantity: 1,
+            currency_id: "BRL",
             unit_price: Number(course.price)
           }
         ],
@@ -81,20 +85,22 @@ serve(async (req) => {
         },
         external_reference: `${user.id}:::${course.id}`, // Custom identifier for Webhook parsing
         back_urls: {
-          success: `${origin}/dashboard`,
-          failure: `${origin}/dashboard`,
-          pending: `${origin}/dashboard`
+          success: `https://construtor360.com.br`,
+          failure: `https://construtor360.com.br`,
+          pending: `https://construtor360.com.br`
         },
         auto_return: "approved",
+        notification_url: "https://bzwlachtgvmfqnjndbna.supabase.co/functions/v1/mp-webhook"
       })
     });
 
-    const preference = await response.json();
-
     if (!response.ok) {
-      console.error("MP API Error:", preference);
-      throw new Error("Erro de comunicação com o Mercado Pago.");
+      const errText = await response.text();
+      console.error("MP API Error:", errText);
+      throw new Error(`Erro Mercado Pago: ${errText}`);
     }
+
+    const preference = await response.json();
 
     // init_point is the live standard checkout URL
     return new Response(
