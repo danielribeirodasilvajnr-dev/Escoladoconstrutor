@@ -148,7 +148,7 @@ export function AdminUsersView() {
       case 'administrador':
         return { label: 'Professor', color: 'bg-[#22ff88]/10 text-[#22ff88] border-[#22ff88]/20', icon: GraduationCap };
       default:
-        return { label: 'Membro', color: 'bg-white/5 text-[#64748b] border-white/10', icon: User };
+        return { label: 'Aluno', color: 'bg-white/5 text-[#64748b] border-white/10', icon: User };
     }
   };
 
@@ -361,7 +361,7 @@ export function AdminUsersView() {
 function RoleDropdown({ currentRole, onUpdate }: { currentRole: string, onUpdate: (role: string) => void }) {
   const [open, setOpen] = useState(false);
   const roles = [
-    { id: 'membro', label: 'Membro', icon: User },
+    { id: 'membro', label: 'Aluno', icon: User },
     { id: 'administrador', label: 'Professor', icon: GraduationCap },
     { id: 'master', label: 'Master', icon: Shield },
   ];

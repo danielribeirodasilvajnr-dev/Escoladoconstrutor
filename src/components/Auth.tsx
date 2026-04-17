@@ -166,7 +166,7 @@ export function Auth({ onSuccess }: AuthProps) {
               accessLevel === 'membro' ? "text-[#22ff88]" : "text-[#64748b]"
             )}
           >
-            Membro
+            Aluno
           </button>
           <button
             onClick={() => setAccessLevel('administrador')}
