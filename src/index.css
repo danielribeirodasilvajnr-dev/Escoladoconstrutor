@@ -6,12 +6,12 @@
   --font-display: "Space Grotesk", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  --color-paper: #ffffff;
-  --color-ink: #0f172a; /* Deep Slate */
-  --color-accent: #6366f1; /* Indigo 600 */
-  --color-accent-foreground: #ffffff;
+  --color-paper: #050505;
+  --color-ink: #ffffff;
+  --color-accent: #22ff88;
+  --color-accent-foreground: #000000;
   --color-muted: #64748b;
-  --color-surface: #f8fafc;
+  --color-surface: #0f1115;
 }
 
 @layer base {
