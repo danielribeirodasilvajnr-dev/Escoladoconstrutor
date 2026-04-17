@@ -18,6 +18,13 @@ export default function App() {
     const handleSession = (session: Session | null) => {
       setSession(session);
       if (session) {
+        // Only allow dashboard if email is confirmed
+        if (!session.user.email_confirmed_at) {
+          setUserData(null);
+          setView('auth');
+          return;
+        }
+
         setUserData({
           id: session.user.id,
           email: session.user.email,
