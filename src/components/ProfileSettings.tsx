@@ -97,17 +97,23 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
         {/* Avatar Upload Selection */}
         <section className="bg-[#1a1c22] p-8 rounded-3xl border border-white/5 flex flex-col items-center gap-6">
           <div className="relative group">
-            <div className="w-32 h-32 rounded-3xl bg-[#0f1115] overflow-hidden border-2 border-white/5 relative">
+            <div className="w-32 h-32 rounded-3xl bg-[#0f1115] overflow-hidden border-2 border-white/5 relative flex items-center justify-center">
               {uploading ? (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/60 z-10">
                   <Loader2 className="w-8 h-8 text-[#22ff88] animate-spin" />
                 </div>
               ) : null}
-              <img 
-                src={avatarUrl || `https://i.pravatar.cc/100?u=${userData?.email}`}
-                className="w-full h-full object-cover"
-                alt="Profile Preview"
-              />
+              {avatarUrl ? (
+                <img 
+                  src={avatarUrl}
+                  className="w-full h-full object-cover"
+                  alt="Profile Preview"
+                />
+              ) : (
+                <span className="text-4xl font-bold text-[#64748b]">
+                  {userData?.name?.charAt(0) || userData?.email?.charAt(0) || '?'}
+                </span>
+              )}
             </div>
             <button 
               type="button"
