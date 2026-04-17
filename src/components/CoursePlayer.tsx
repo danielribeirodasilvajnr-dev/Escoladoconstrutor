@@ -19,7 +19,8 @@ import {
   FileText,
   Send,
   Trash2,
-  Reply
+  Reply,
+  Edit3
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { toast } from 'sonner';
@@ -62,9 +63,10 @@ interface Module {
 interface CoursePlayerProps {
   courseId: string;
   onBack: () => void;
+  session: any;
 }
 
-export function CoursePlayer({ courseId, onBack }: CoursePlayerProps) {
+export function CoursePlayer({ courseId, onBack, session }: CoursePlayerProps) {
   const [course, setCourse] = useState<any>(null);
   const [modules, setModules] = useState<Module[]>([]);
   const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null);
@@ -75,6 +77,8 @@ export function CoursePlayer({ courseId, onBack }: CoursePlayerProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editingContent, setEditingContent] = useState('');
   const videoRef = useRef<HTMLVideoElement>(null);
   const [lastSavedTime, setLastSavedTime] = useState(0);
   const currentTimeRef = useRef(0);
@@ -209,6 +213,43 @@ export function CoursePlayer({ courseId, onBack }: CoursePlayerProps) {
       setIsSubmittingComment(false);
     }
   }
+
+  const handleDeleteComment = async (commentId: string) => {
+    try {
+      const { error } = await supabase
+        .from('lesson_comments')
+        .delete()
+        .eq('id', commentId);
+
+      if (error) throw error;
+
+      setComments(prev => prev.filter(c => c.id !== commentId));
+      toast.success('Comentário removido');
+    } catch (error: any) {
+      toast.error('Erro ao remover: ' + error.message);
+    }
+  };
+
+  const handleUpdateComment = async (commentId: string) => {
+    if (!editingContent.trim()) return;
+
+    try {
+      const { error } = await supabase
+        .from('lesson_comments')
+        .update({ content: editingContent.trim() })
+        .eq('id', commentId);
+
+      if (error) throw error;
+
+      setComments(prev => prev.map(c => 
+        c.id === commentId ? { ...c, content: editingContent.trim() } : c
+      ));
+      setEditingCommentId(null);
+      toast.success('Comentário atualizado!');
+    } catch (error: any) {
+      toast.error('Erro ao atualizar: ' + error.message);
+    }
+  };
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 B';
@@ -504,29 +545,87 @@ export function CoursePlayer({ courseId, onBack }: CoursePlayerProps) {
                       {comments.length === 0 ? (
                         <p className="text-center py-10 text-[#64748b] text-sm italic">Seja o primeiro a comentar nesta aula!</p>
                       ) : (
-                        comments.map((comment) => (
-                          <div key={comment.id} className="flex gap-4 group">
-                             <div className="w-10 h-10 rounded-xl bg-white/5 overflow-hidden shrink-0 border border-white/10 flex items-center justify-center">
-                              {comment.profiles?.avatar_url ? (
-                                <img src={comment.profiles.avatar_url} className="w-full h-full object-cover" alt="" />
-                              ) : (
-                                <span className="text-xs font-bold text-[#64748b]">{(comment.profiles?.full_name || '?').charAt(0)}</span>
-                              )}
-                            </div>
-                            <div className="flex-1 space-y-2">
-                              <div className="flex justify-between items-center">
-                                <span className="text-xs font-bold text-white">{comment.profiles?.full_name || 'Estudante'}</span>
-                                <span className="text-[10px] text-[#64748b] font-medium">{new Date(comment.created_at).toLocaleDateString('pt-BR')}</span>
+                        comments.map((comment) => {
+                          const isAuthor = comment.user_id === session?.user?.id;
+                          const isEditing = editingCommentId === comment.id;
+
+                          return (
+                            <div key={comment.id} className="flex gap-4 group">
+                               <div className="w-10 h-10 rounded-xl bg-white/5 overflow-hidden shrink-0 border border-white/10 flex items-center justify-center">
+                                {comment.profiles?.avatar_url ? (
+                                  <img src={comment.profiles.avatar_url} className="w-full h-full object-cover" alt="" />
+                                ) : (
+                                  <span className="text-xs font-bold text-[#64748b]">{(comment.profiles?.full_name || '?').charAt(0)}</span>
+                                )}
                               </div>
-                              <p className="text-sm text-[#94a3b8] leading-relaxed bg-white/[0.02] p-4 rounded-2xl border border-white/5">{comment.content}</p>
-                              <div className="flex gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest hover:text-[#22ff88] flex items-center gap-1">
-                                  <Reply className="w-3 h-3" /> Responder
-                                </button>
+                              <div className="flex-1 space-y-2">
+                                <div className="flex justify-between items-center">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs font-bold text-white">{comment.profiles?.full_name || 'Estudante'}</span>
+                                    {isAuthor && (
+                                      <span className="px-1.5 py-0.5 bg-[#22ff88]/10 text-[#22ff88] text-[8px] font-black rounded uppercase tracking-tighter border border-[#22ff88]/20">Você</span>
+                                    )}
+                                  </div>
+                                  <span className="text-[10px] text-[#64748b] font-medium">{new Date(comment.created_at).toLocaleDateString('pt-BR')}</span>
+                                </div>
+                                
+                                {isEditing ? (
+                                  <div className="space-y-3">
+                                    <textarea
+                                      value={editingContent}
+                                      onChange={(e) => setEditingContent(e.target.value)}
+                                      className="w-full bg-black/40 border border-[#22ff88]/30 rounded-2xl p-4 text-sm text-white focus:outline-none min-h-[80px] resize-none"
+                                      autoFocus
+                                    />
+                                    <div className="flex gap-2 justify-end">
+                                      <button 
+                                        onClick={() => setEditingCommentId(null)}
+                                        className="px-4 py-2 text-[10px] font-bold text-[#64748b] uppercase tracking-widest hover:text-white transition-colors"
+                                      >
+                                        Cancelar
+                                      </button>
+                                      <button 
+                                        onClick={() => handleUpdateComment(comment.id)}
+                                        className="px-4 py-2 bg-[#22ff88] text-black text-[10px] font-black uppercase tracking-widest rounded-lg hover:opacity-90 transition-all"
+                                      >
+                                        Salvar
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <>
+                                    <p className="text-sm text-[#94a3b8] leading-relaxed bg-white/[0.02] p-4 rounded-2xl border border-white/5">{comment.content}</p>
+                                    <div className="flex gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <button className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest hover:text-[#22ff88] flex items-center gap-1 transition-colors">
+                                        <Reply className="w-3 h-3" /> Responder
+                                      </button>
+                                      
+                                      {isAuthor && (
+                                        <>
+                                          <button 
+                                            onClick={() => {
+                                              setEditingCommentId(comment.id);
+                                              setEditingContent(comment.content);
+                                            }}
+                                            className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest hover:text-white flex items-center gap-1 transition-colors"
+                                          >
+                                            <Edit3 className="w-3 h-3" /> Editar
+                                          </button>
+                                          <button 
+                                            onClick={() => handleDeleteComment(comment.id)}
+                                            className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest hover:text-red-400 flex items-center gap-1 transition-colors"
+                                          >
+                                            <Trash2 className="w-3 h-3" /> Excluir
+                                          </button>
+                                        </>
+                                      )}
+                                    </div>
+                                  </>
+                                )}
                               </div>
                             </div>
-                          </div>
-                        ))
+                          );
+                        })
                       )}
                     </div>
                   </motion.div>

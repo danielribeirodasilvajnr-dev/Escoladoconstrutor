@@ -26,9 +26,10 @@ type DashboardView =
 
 interface DashboardProps {
   userData: any;
+  session: any;
 }
 
-export function Dashboard({ userData }: DashboardProps) {
+export function Dashboard({ userData, session }: DashboardProps) {
   const [activeView, setActiveView] = useState<DashboardView>('overview');
   const [activeCourseId, setActiveCourseId] = useState<string | null>(null);
   const [examContext, setExamContext] = useState<{ courseId: string; moduleId: string | null } | null>(null);
@@ -54,6 +55,7 @@ export function Dashboard({ userData }: DashboardProps) {
           <CoursePlayer
             courseId={activeCourseId}
             onBack={() => setActiveView('overview')}
+            session={session}
           />
         ) : null;
       case 'admin-overview':

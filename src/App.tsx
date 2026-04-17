@@ -128,7 +128,7 @@ export default function App() {
           transition={{ duration: 0.5, ease: 'easeOut' }}
           className="h-screen w-full"
         >
-          <Dashboard userData={userData} />
+          <Dashboard userData={userData} session={session} />
         </motion.div>
       )}
       <Toaster 
