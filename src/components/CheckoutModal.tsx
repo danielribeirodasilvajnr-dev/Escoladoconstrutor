@@ -36,19 +36,18 @@ export function CheckoutModal({ course, userId, onClose, onSuccess }: CheckoutMo
         await new Promise(resolve => setTimeout(resolve, 1500));
         setStep('success');
       } else {
-        // Stripe Minimum Amount Validation (R$ 0,50 in Brazil)
+        // Minimum Amount validation (R$ 1,00 in Mercado Pago for some operations, but we can bypass this or leave 0.50 if fine)
         if (Number(course.price) < 0.50) {
-          throw new Error('O valor mínimo para pagamentos via Stripe é R$ 0,50. Por favor, ajuste o valor do curso ou mude para R$ 0,00.');
+          throw new Error('O valor mínimo para pagamentos é R$ 0,50. Por favor, ajuste o valor do curso ou mude para R$ 0,00.');
         }
 
-        // Stripe Checkout Integration
-        const { data, error } = await supabase.functions.invoke('create-checkout', {
+        // Mercado Pago Checkout Integration
+        const { data, error } = await supabase.functions.invoke('create-mp-preference', {
           body: { courseId: course.id }
         });
 
         if (error) {
-          // Try to extract the detailed JSON error from the body if available
-          let detail = 'Erro no servidor de pagamento.';
+          let detail = 'Erro no servidor de pagamento do Mercado Pago.';
           try {
             const body = await error.context.json();
             detail = body.error || body.message || detail;
@@ -59,9 +58,10 @@ export function CheckoutModal({ course, userId, onClose, onSuccess }: CheckoutMo
         }
 
         if (data?.url) {
+          // Redirect the user to the Mercado Pago checkout
           window.location.href = data.url;
         } else {
-          throw new Error('Não foi possível gerar link de pagamento.');
+          throw new Error('Não foi possível gerar link do Mercado Pago.');
         }
       }
     } catch (error: any) {
@@ -142,7 +142,7 @@ export function CheckoutModal({ course, userId, onClose, onSuccess }: CheckoutMo
                     {isFree ? 'Liberação Imediata' : 'Pagamento Seguro'}
                   </p>
                   <p className="text-[11px] text-[#64748b]">
-                    {isFree ? 'Você terá acesso total à Masterclass instantaneamente.' : 'Processado com segurança via Stripe (Cartão ou Pix).'}
+                    {isFree ? 'Você terá acesso total à Masterclass instantaneamente.' : 'Processado com segurança via Mercado Pago (Cartão ou Pix).'}
                   </p>
                 </div>
               </div>
