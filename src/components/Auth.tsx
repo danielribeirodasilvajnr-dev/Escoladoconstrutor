@@ -59,12 +59,16 @@ export function Auth({ onSuccess }: AuthProps) {
         if (error) throw error;
         toast.success(`Bem-vindo de volta, ${email.split('@')[0]}!`);
       } else {
-        // Validation for Teacher Code
-        if (accessLevel === 'administrador' && teacherCode !== 'ESCOLA2026') {
-          throw new Error('Código de acesso de professor inválido.');
+        // Validation for Teacher Code via RPC
+        if (accessLevel === 'administrador') {
+          const { data: isValid, error: checkError } = await supabase
+            .rpc('verify_professor_code', { input_code: teacherCode });
+          
+          if (checkError) throw new Error('Erro ao validar código: ' + checkError.message);
+          if (!isValid) throw new Error('Código de acesso de professor inválido ou já utilizado.');
         }
 
-        const { error } = await supabase.auth.signUp({
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -74,11 +78,17 @@ export function Auth({ onSuccess }: AuthProps) {
             },
           },
         });
-        if (error) {
-          // If user already exists but isn't confirmed, Supabase might return an error
-          // or just send another email depending on settings.
-          throw error;
+
+        if (signUpError) throw signUpError;
+
+        // If it's a teacher, consume the code now
+        if (accessLevel === 'administrador' && signUpData.user) {
+          await supabase.rpc('consume_professor_code', { 
+            input_code: teacherCode, 
+            input_user_id: signUpData.user.id 
+          });
         }
+
         setVerificationSent(true);
         toast.success('Confirme seu e-mail para ativar sua conta.');
         return; // Don't call onSuccess
