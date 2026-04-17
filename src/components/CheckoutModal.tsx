@@ -36,12 +36,28 @@ export function CheckoutModal({ course, userId, onClose, onSuccess }: CheckoutMo
         await new Promise(resolve => setTimeout(resolve, 1500));
         setStep('success');
       } else {
+        // Stripe Minimum Amount Validation (R$ 0,50 in Brazil)
+        if (Number(course.price) < 0.50) {
+          throw new Error('O valor mínimo para pagamentos via Stripe é R$ 0,50. Por favor, ajuste o valor do curso ou mude para R$ 0,00.');
+        }
+
         // Stripe Checkout Integration
         const { data, error } = await supabase.functions.invoke('create-checkout', {
           body: { courseId: course.id }
         });
 
-        if (error) throw error;
+        if (error) {
+          // Try to extract the detailed JSON error from the body if available
+          let detail = 'Erro no servidor de pagamento.';
+          try {
+            const body = await error.context.json();
+            detail = body.error || body.message || detail;
+          } catch {
+            detail = error.message || detail;
+          }
+          throw new Error(detail);
+        }
+
         if (data?.url) {
           window.location.href = data.url;
         } else {
@@ -49,7 +65,7 @@ export function CheckoutModal({ course, userId, onClose, onSuccess }: CheckoutMo
         }
       }
     } catch (error: any) {
-      toast.error('Erro ao processar: ' + (error.message || 'Verifique sua conexão.'));
+      toast.error('Ocorreu um problema: ' + (error.message || 'Verifique sua conexão.'));
       setStep('details');
     } finally {
       setLoading(false);

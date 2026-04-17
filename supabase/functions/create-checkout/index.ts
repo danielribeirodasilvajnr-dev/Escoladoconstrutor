@@ -3,7 +3,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import Stripe from "https://esm.sh/stripe@14?target=deno";
 
-const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", {
+const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+const stripe = new Stripe(stripeKey ?? "", {
   apiVersion: "2023-10-16",
   httpClient: Stripe.createFetchHttpClient(),
 });
@@ -14,72 +15,105 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  console.log("--- CREATE CHECKOUT DIAGNOSTICS ---");
+  
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   try {
+    // 1. Initial Checks
+    if (!stripeKey) {
+      throw new Error("Configuração ausente: STRIPE_SECRET_KEY não foi encontrada nos segredos do Supabase. Por favor, adicione-a no site do Supabase.");
+    }
+
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      throw new Error("Não autorizado: Cabeçalho ausente");
+    }
+
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
       {
         global: {
-          headers: { Authorization: req.headers.get("Authorization")! },
+          headers: { Authorization: authHeader },
         },
       }
     );
 
-    const {
-      data: { user },
-    } = await supabaseClient.auth.getUser();
+    // 2. Auth Check
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+    if (authError || !user) {
+      throw new Error("Não autorizado: Sua sessão expirou. Por favor, faça login novamente.");
+    }
 
-    if (!user) throw new Error("Não autorizado");
+    // 3. Payload Parsing
+    const body = await req.json().catch(() => ({}));
+    const { courseId } = body;
+    
+    if (!courseId) {
+      throw new Error("ID do curso não informado.");
+    }
 
-    const { courseId } = await req.json();
+    console.log(`User ID: ${user.id}, email: ${user.email}`);
 
-    // Fetch course details
+    // 4. Data Extraction
     const { data: course, error: courseError } = await supabaseClient
       .from("courses")
-      .select("*")
+      .select("id, title, description, price")
       .eq("id", courseId)
       .single();
 
-    if (courseError || !course) throw new Error("Curso não encontrado");
+    if (courseError || !course) {
+      throw new Error(`Curso não encontrado (ID: ${courseId}). Erro DB: ${courseError?.message}`);
+    }
 
-    // Create Stripe Checkout Session
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card", "pix"],
-      line_items: [
-        {
-          price_data: {
-            currency: "brl",
-            product_data: {
-              name: course.title,
-              description: course.description,
+    const amount = Math.round(Number(course.price) * 100);
+    console.log(`Course Found: ${course.title}, Price: BRL ${course.price}`);
+
+    if (amount < 50) {
+      throw new Error(`O preço (R$ ${course.price}) é menor que o mínimo exigido pelo Stripe (R$ 0,50).`);
+    }
+
+    // 5. Stripe Session Creation
+    console.log("Initializing Stripe session (Card only for compatibility)...");
+    try {
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"], // Removed 'pix' temporarily
+        line_items: [
+          {
+            price_data: {
+              currency: "brl",
+              product_data: {
+                name: course.title,
+                description: course.description || `Inscrição para o curso: ${course.title}`,
+              },
+              unit_amount: amount,
             },
-            unit_amount: Math.round(Number(course.price) * 100),
+            quantity: 1,
           },
-          quantity: 1,
-        },
-      ],
-      mode: "payment",
-      success_url: `${req.headers.get("origin")}/dashboard?success=true`,
-      cancel_url: `${req.headers.get("origin")}/dashboard?canceled=true`,
-      client_reference_id: `${user.id}:${courseId}`,
-      payment_intent_data: {
-        description: `Matrícula: ${course.title}`,
-        metadata: {
-          userId: user.id,
-          courseId: courseId,
-        },
-      },
-    });
+        ],
+        mode: "payment",
+        customer_email: user.email,
+        success_url: `${req.headers.get("origin")}/dashboard?success=true`,
+        cancel_url: `${req.headers.get("origin")}/dashboard?canceled=true`,
+        client_reference_id: `${user.id}:${courseId}`,
+      });
 
-    return new Response(JSON.stringify({ url: session.url }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
+      console.log(`SUCCESS: Created session ${session.id}`);
+      return new Response(JSON.stringify({ url: session.url }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    } catch (stripeError: any) {
+      console.error("Stripe API Error:", stripeError);
+      throw new Error(`Erro do Stripe: ${stripeError.raw?.message || stripeError.message}`);
+    }
+
   } catch (error: any) {
+    console.error(`CATCH ERROR: ${error.message}`);
+    
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 400,
