@@ -88,9 +88,9 @@ serve(async (req) => {
         },
         external_reference: `${user.id}:::${course.id}`, // Custom identifier for Webhook parsing
         back_urls: {
-          success: `${origin}?payment_success=true`,
-          failure: `${origin}?payment_error=true`,
-          pending: `${origin}?payment_pending=true`
+          success: `https://construtor360.com.br/?payment_success=true`,
+          failure: `https://construtor360.com.br/?payment_error=true`,
+          pending: `https://construtor360.com.br/?payment_pending=true`
         },
         auto_return: "approved",
         notification_url: "https://bzwlachtgvmfqnjndbna.supabase.co/functions/v1/mp-webhook"

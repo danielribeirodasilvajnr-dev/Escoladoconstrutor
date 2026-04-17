@@ -143,7 +143,6 @@ export default function App() {
           <Dashboard userData={userData} session={session} />
         </motion.div>
       )}
-      )}
       
       {/* Payment Success Modal */}
       <AnimatePresence>
