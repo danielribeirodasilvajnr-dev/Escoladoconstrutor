@@ -7,6 +7,7 @@ import { CourseManager } from './CourseManager';
 import { ProfileSettings } from './ProfileSettings';
 import { Vitrine } from './Vitrine';
 import { CoursePlayer } from './CoursePlayer';
+import { AdminUsersView } from './AdminUsersView';
 
 type DashboardView =
   | 'vitrine'
@@ -17,6 +18,7 @@ type DashboardView =
   | 'admin-overview'
   | 'admin-provas'
   | 'admin-cursos'
+  | 'admin-usuarios'
   | 'settings'
   | 'player';
 
@@ -74,6 +76,8 @@ export function Dashboard({ userData }: DashboardProps) {
             onOpenExam={handleOpenExam}
           />
         );
+      case "admin-usuarios":
+        return <AdminUsersView />;
       case 'settings':
         return <ProfileSettings userData={userData} />;
       default:

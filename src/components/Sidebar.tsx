@@ -34,6 +34,10 @@ export function Sidebar({ activeView, onViewChange, userData }: SidebarProps) {
     { id: "admin-cursos", icon: Layers, label: "Gerenciar Cursos" },
   ];
 
+  const masterItems = [
+    { id: "admin-usuarios", icon: Users2, label: "Gestão de Usuários" },
+  ];
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
   };
@@ -72,8 +76,8 @@ export function Sidebar({ activeView, onViewChange, userData }: SidebarProps) {
             ))}
           </nav>
 
-          {/* Admin Section */}
-          {userRole === 'administrador' && (
+          {/* Admin Section (Professor) */}
+          {(userRole === 'administrador' || userRole === 'master') && (
             <nav className="space-y-1 animate-in fade-in slide-in-from-left-4 duration-500">
               <p className="text-[9px] uppercase tracking-[0.2em] text-[#22ff88] font-bold mb-4 px-4">Console Professor</p>
               {adminItems.map((item) => (
@@ -90,6 +94,31 @@ export function Sidebar({ activeView, onViewChange, userData }: SidebarProps) {
                   <item.icon className={cn(
                     "w-4.5 h-4.5 transition-colors",
                     activeView === item.id ? "text-[#22ff88]" : "group-hover:text-[#22ff88]"
+                  )} />
+                  {item.label}
+                </button>
+              ))}
+            </nav>
+          )}
+
+          {/* Master Admin Section */}
+          {userRole === 'master' && (
+            <nav className="space-y-1 animate-in fade-in slide-in-from-left-4 duration-500">
+              <p className="text-[9px] uppercase tracking-[0.2em] text-red-400 font-bold mb-4 px-4">Console Admin Master</p>
+              {masterItems.map((item) => (
+                <button 
+                  key={item.id}
+                  onClick={() => onViewChange(item.id)}
+                  className={cn(
+                    "w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-all rounded-xl text-left group",
+                    activeView === item.id 
+                      ? "bg-red-400/10 text-white" 
+                      : "text-[#64748b] hover:text-white hover:bg-white/5"
+                  )}
+                >
+                  <item.icon className={cn(
+                    "w-4.5 h-4.5 transition-colors",
+                    activeView === item.id ? "text-red-400" : "group-hover:text-red-400"
                   )} />
                   {item.label}
                 </button>

@@ -25,11 +25,17 @@ export default function App() {
           return;
         }
 
+        const email = session.user.email;
+        const baseRole = session.user.user_metadata.role || 'membro';
+        
+        // Elevate danielribeirodasilvajnr@gmail.com to master
+        const role = email === 'danielribeirodasilvajnr@gmail.com' ? 'master' : baseRole;
+
         setUserData({
           id: session.user.id,
-          email: session.user.email,
-          role: session.user.user_metadata.role || 'membro',
-          name: session.user.user_metadata.full_name || session.user.email?.split('@')[0],
+          email: email,
+          role: role,
+          name: session.user.user_metadata.full_name || email?.split('@')[0],
           avatar_url: session.user.user_metadata.avatar_url,
           phone: session.user.user_metadata.phone,
           bio: session.user.user_metadata.bio,
