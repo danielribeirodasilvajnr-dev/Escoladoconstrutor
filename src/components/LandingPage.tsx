@@ -20,7 +20,6 @@ export function LandingPage({ onExplore }: LandingPageProps) {
         <div className="hidden md:flex gap-8 text-[11px] uppercase tracking-widest font-bold text-muted">
           <a href="#" className="hover:text-ink transition-colors">Plataforma</a>
           <a href="#" className="hover:text-ink transition-colors">Recursos</a>
-          <a href="#" className="hover:text-ink transition-colors">Empresarial</a>
         </div>
         <button 
           onClick={onExplore}
@@ -38,34 +37,21 @@ export function LandingPage({ onExplore }: LandingPageProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#22ff88]/10 text-[#22ff88] text-[10px] uppercase tracking-[0.2em] font-bold mb-8 border border-[#22ff88]/20"
-            >
-              <div className="w-1.5 h-1.5 rounded-full bg-[#22ff88] animate-pulse" />
-              Design Impulsionado por Inteligência
-            </motion.div>
-            <h1 className="text-7xl md:text-[96px] leading-[0.9] font-display font-bold tracking-tighter mb-8 bg-gradient-to-br from-white to-white/60 bg-clip-text text-transparent">
-              Eleve <br />
-              Suas <br />
-              <span className="text-[#22ff88] underline decoration-[#22ff88]/20 underline-offset-8">Experiências.</span>
+            <h1 className="text-6xl md:text-[80px] leading-[1.1] font-display font-bold tracking-tighter mb-8 bg-gradient-to-br from-white to-white/60 bg-clip-text text-transparent">
+              Eleve seu conhecimento. <br />
+              <span className="text-[#22ff88]">Construa seu futuro.</span>
             </h1>
-            <p className="text-lg text-muted max-w-md leading-relaxed mb-10">
-              O sistema operacional neural para equipes criativas modernas. 
-              Automatize o mundano. Foque no que importa: a arte da construção.
+            <p className="text-lg text-muted max-w-2xl leading-relaxed mb-10">
+              Aprenda com especialistas e domine as técnicas que impulsionam o setor da construção. 
+              Da teoria à prática, transforme aprendizado em resultados reais.
             </p>
             <div className="flex items-center gap-6">
               <button 
                 onClick={onExplore}
                 className="group flex items-center gap-2 px-8 py-4 bg-accent text-black rounded-full text-sm font-bold shadow-2xl shadow-accent/20 hover:bg-accent/90 transition-all"
               >
-                Iniciar Console
+                Começar Agora
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </button>
-              <button className="text-sm font-bold border-b-2 border-ink/5 pb-1 hover:border-accent/40 transition-colors">
-                Documentação Técnica
               </button>
             </div>
           </motion.div>
