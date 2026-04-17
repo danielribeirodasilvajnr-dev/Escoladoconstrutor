@@ -14,7 +14,9 @@ import {
   Plus,
   Trash2,
   Copy,
-  Clock
+  Clock,
+  UserPlus,
+  Send
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { toast } from 'sonner';
@@ -35,6 +37,9 @@ export function AdminUsersView() {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [codes, setCodes] = useState<any[]>([]);
   const [isGeneratingCode, setIsGeneratingCode] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [isInviting, setIsInviting] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -133,6 +138,28 @@ export function AdminUsersView() {
     toast.success('Código copiado!');
   };
 
+  async function handleInviteProfessor(e: React.FormEvent) {
+    e.preventDefault();
+    if (!inviteEmail) return;
+
+    try {
+      setIsInviting(true);
+      const { data, error } = await supabase.functions.invoke('invite-professor', {
+        body: { email: inviteEmail }
+      });
+
+      if (error) throw error;
+      
+      toast.success('Convite enviado para ' + inviteEmail);
+      setShowInviteModal(false);
+      setInviteEmail('');
+    } catch (error: any) {
+      toast.error('Erro ao enviar convite: ' + error.message);
+    } finally {
+      setIsInviting(false);
+    }
+  }
+
   const filteredUsers = users.filter(user => {
     if (!searchTerm) return true;
     const searchLower = searchTerm.toLowerCase();
@@ -154,9 +181,18 @@ export function AdminUsersView() {
 
   return (
     <div className="p-10 max-w-[1600px] mx-auto space-y-10 pb-20">
-      <header className="mb-12">
-        <h1 className="text-4xl font-bold text-white mb-2">Gestão de Usuários</h1>
-        <p className="text-[#64748b] text-base">Controle de acessos, permissões e cargos da plataforma.</p>
+      <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <h1 className="text-4xl font-bold text-white mb-2">Gestão de Usuários</h1>
+          <p className="text-[#64748b] text-base">Controle de acessos, permissões e cargos da plataforma.</p>
+        </div>
+        <button
+          onClick={() => setShowInviteModal(true)}
+          className="flex items-center gap-2 px-6 py-3.5 bg-[#22ff88] text-black font-bold rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-[0_8px_20px_rgba(34,255,136,0.2)]"
+        >
+          <UserPlus className="w-5 h-5" />
+          Novo Professor
+        </button>
       </header>
 
       {/* Filters and Stats */}
@@ -354,6 +390,78 @@ export function AdminUsersView() {
           </div>
         </div>
       </div>
+
+      {/* Invite Modal */}
+      <AnimatePresence>
+        {showInviteModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowInviteModal(false)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-md bg-[#1a1c22] border border-white/5 rounded-[2.5rem] p-8 shadow-2xl"
+            >
+              <div className="flex items-center gap-4 mb-8">
+                <div className="w-12 h-12 rounded-2xl bg-[#22ff88]/10 flex items-center justify-center border border-[#22ff88]/20">
+                  <GraduationCap className="w-6 h-6 text-[#22ff88]" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-white">Convidar Professor</h3>
+                  <p className="text-xs text-[#64748b]">O professor receberá um e-mail com as instruções.</p>
+                </div>
+              </div>
+
+              <form onSubmit={handleInviteProfessor} className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] uppercase tracking-widest font-bold text-[#64748b] ml-1">E-mail do Professor</label>
+                  <div className="relative group">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#64748b] group-focus-within:text-[#22ff88] transition-colors" />
+                    <input
+                      type="email"
+                      required
+                      placeholder="ex: professor@escoladoconstrutor.com"
+                      value={inviteEmail}
+                      onChange={(e) => setInviteEmail(e.target.value)}
+                      className="w-full bg-[#0f1115] border border-white/5 rounded-2xl pl-12 pr-4 py-4 text-white focus:outline-none focus:border-[#22ff88]/30 transition-all font-medium"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowInviteModal(false)}
+                    className="flex-1 px-6 py-4 bg-white/5 text-white font-bold rounded-2xl hover:bg-white/10 transition-all"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isInviting}
+                    className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-[#22ff88] text-black font-bold rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-[0_8px_20px_rgba(34,255,136,0.2)] disabled:opacity-50"
+                  >
+                    {isInviting ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <>
+                        <Send className="w-5 h-5" />
+                        Enviar Convite
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

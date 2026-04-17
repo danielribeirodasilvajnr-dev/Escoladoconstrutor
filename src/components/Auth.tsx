@@ -20,7 +20,6 @@ export function Auth({ onSuccess }: AuthProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [verificationSent, setVerificationSent] = useState(false);
-  const [teacherCode, setTeacherCode] = useState('');
 
   const handleGoogleLogin = async () => {
     setLoading(true);
@@ -59,15 +58,6 @@ export function Auth({ onSuccess }: AuthProps) {
         if (error) throw error;
         toast.success(`Bem-vindo de volta, ${email.split('@')[0]}!`);
       } else {
-        // Validation for Teacher Code via RPC
-        if (accessLevel === 'administrador') {
-          const { data: isValid, error: checkError } = await supabase
-            .rpc('verify_professor_code', { input_code: teacherCode });
-          
-          if (checkError) throw new Error('Erro ao validar código: ' + checkError.message);
-          if (!isValid) throw new Error('Código de acesso de professor inválido ou já utilizado.');
-        }
-
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
@@ -80,14 +70,6 @@ export function Auth({ onSuccess }: AuthProps) {
         });
 
         if (signUpError) throw signUpError;
-
-        // If it's a teacher, consume the code now
-        if (accessLevel === 'administrador' && signUpData.user) {
-          await supabase.rpc('consume_professor_code', { 
-            input_code: teacherCode, 
-            input_user_id: signUpData.user.id 
-          });
-        }
 
         setVerificationSent(true);
         toast.success('Confirme seu e-mail para ativar sua conta.');
@@ -169,7 +151,10 @@ export function Auth({ onSuccess }: AuthProps) {
             Aluno
           </button>
           <button
-            onClick={() => setAccessLevel('administrador')}
+            onClick={() => {
+              setAccessLevel('administrador');
+              setMode('login'); // Force login mode for professors
+            }}
             className={cn(
               "flex-1 py-2 text-sm font-medium relative z-10 transition-colors uppercase tracking-wider",
               accessLevel === 'administrador' ? "text-[#22ff88]" : "text-[#64748b]"
@@ -224,25 +209,6 @@ export function Auth({ onSuccess }: AuthProps) {
                 />
               </div>
 
-              {mode === 'register' && accessLevel === 'administrador' && (
-                <motion.div 
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  className="space-y-1"
-                >
-                  <input
-                    type="text"
-                    placeholder="Código de Acesso Professor"
-                    required={accessLevel === 'administrador'}
-                    value={teacherCode}
-                    onChange={(e) => setTeacherCode(e.target.value)}
-                    className="w-full bg-[#2a2d35]/50 border border-[#22ff88]/20 rounded-lg px-4 py-3.5 text-white placeholder:text-[#64748b] focus:outline-none focus:border-[#22ff88] transition-all"
-                  />
-                  <p className="text-[10px] text-[#22ff88]/60 px-1 py-1 italic">
-                    Exclusivo para docentes autorizados.
-                  </p>
-                </motion.div>
-              )}
 
               <AnimatePresence mode="wait">
                 {error && (
@@ -318,15 +284,21 @@ export function Auth({ onSuccess }: AuthProps) {
         </div>
 
         <div className="mt-10 pt-8 border-t border-white/5 text-center">
-          <p className="text-sm text-[#94a3b8]">
-            {mode === 'login' ? 'Novo na plataforma?' : 'Já tem uma conta?'}
-            <button 
-              onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
-              className="ml-2 text-white font-bold hover:text-[#22ff88] transition-colors"
-            >
-              {mode === 'login' ? 'Criar conta' : 'Fazer login'}
-            </button>
-          </p>
+          {accessLevel === 'membro' ? (
+            <p className="text-sm text-[#94a3b8]">
+              {mode === 'login' ? 'Novo na plataforma?' : 'Já tem uma conta?'}
+              <button 
+                onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
+                className="ml-2 text-white font-bold hover:text-[#22ff88] transition-colors"
+              >
+                {mode === 'login' ? 'Criar conta' : 'Fazer login'}
+              </button>
+            </p>
+          ) : (
+            <p className="text-sm text-[#94a3b8]">
+              Área de acesso restrito. Novos professores só podem acessar através de convite oficial.
+            </p>
+          )}
           <p className="mt-6 text-[10px] text-[#64748b] leading-relaxed">
             Esta página é protegida por Google reCAPTCHA para garantir que você não é um robô. 
             <button className="text-[#22ff88] ml-1">Saiba mais.</button>
