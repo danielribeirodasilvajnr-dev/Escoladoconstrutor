@@ -48,9 +48,9 @@ export function Sidebar({ activeView, onViewChange, userData }: SidebarProps) {
     <aside className="w-64 bg-[#0f1115] text-white flex flex-col h-screen sticky top-0 z-40 border-r border-white/5">
       <div className="p-8 pb-4">
         <div className="mb-10">
-          <h1 className="text-xl font-bold tracking-tight text-white flex flex-col leading-none">
-            Escola do
-            <span className="text-[10px] uppercase tracking-[0.3em] text-[#22ff88] mt-1 font-medium font-mono">Construtor</span>
+          <h1 className="text-2xl font-bold tracking-tight text-white flex items-baseline gap-0.5 leading-none">
+            Construtor
+            <span className="text-lg text-[#22ff88] font-black font-display tracking-normal">360</span>
           </h1>
         </div>
         

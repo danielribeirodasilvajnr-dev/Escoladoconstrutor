@@ -283,7 +283,7 @@ export function AdminUsersView() {
                     <input
                       type="email"
                       required
-                      placeholder="ex: professor@escoladoconstrutor.com"
+                      placeholder="ex: professor@construtor360.com"
                       value={inviteEmail}
                       onChange={(e) => setInviteEmail(e.target.value)}
                       className="w-full bg-[#0f1115] border border-white/5 rounded-2xl pl-12 pr-4 py-4 text-white focus:outline-none focus:border-[#22ff88]/30 transition-all font-medium"

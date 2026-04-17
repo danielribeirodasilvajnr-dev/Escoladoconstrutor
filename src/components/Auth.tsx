@@ -114,7 +114,7 @@ export function Auth({ onSuccess }: AuthProps) {
         className="absolute top-12 left-12 z-20"
       >
         <h1 className="text-[28px] font-bold tracking-tight text-[#22ff88] font-display">
-          Escola do Construtor
+          Construtor360
         </h1>
       </motion.div>
 
@@ -318,7 +318,7 @@ export function Auth({ onSuccess }: AuthProps) {
             <Globe className="w-3 h-3" />
             Português (BR)
           </button>
-          <span>© 2026 Escola do Construtor</span>
+          <span>© 2026 Construtor360</span>
         </div>
       </div>
     </div>
