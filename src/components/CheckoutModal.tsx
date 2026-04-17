@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, CreditCard, ShieldCheck, CheckCircle2, Loader2, Award } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { toast } from 'sonner';
 
 interface CheckoutModalProps {
   course: any;
@@ -13,34 +14,42 @@ interface CheckoutModalProps {
 export function CheckoutModal({ course, userId, onClose, onSuccess }: CheckoutModalProps) {
   const [step, setStep] = useState<'details' | 'processing' | 'success'>('details');
   const [loading, setLoading] = useState(false);
+  const isFree = Number(course.price) === 0;
 
   const handlePayment = async () => {
     setLoading(true);
     setStep('processing');
 
-    // Simulate payment delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
     try {
-      const { error } = await supabase
-        .from('enrollments')
-        .insert({
-          user_id: userId,
-          course_id: course.id
+      if (isFree) {
+        // Immediate enrollment for free courses
+        const { error } = await supabase
+          .from('enrollments')
+          .insert({
+            user_id: userId,
+            course_id: course.id,
+            payment_status: 'paid'
+          });
+
+        if (error && error.code !== '23505') throw error;
+        
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        setStep('success');
+      } else {
+        // Stripe Checkout Integration
+        const { data, error } = await supabase.functions.invoke('create-checkout', {
+          body: { courseId: course.id }
         });
 
-      if (error) {
-        if (error.code === '23505') {
-          // Already enrolled
-          setStep('success');
-          return;
+        if (error) throw error;
+        if (data?.url) {
+          window.location.href = data.url;
+        } else {
+          throw new Error('Não foi possível gerar link de pagamento.');
         }
-        throw error;
       }
-
-      setStep('success');
     } catch (error: any) {
-      alert('Erro ao processar inscrição: ' + error.message);
+      toast.error('Erro ao processar: ' + (error.message || 'Verifique sua conexão.'));
       setStep('details');
     } finally {
       setLoading(false);
@@ -74,8 +83,8 @@ export function CheckoutModal({ course, userId, onClose, onSuccess }: CheckoutMo
               className="p-12"
             >
               <div className="flex gap-8 mb-10">
-                <div className="w-48 aspect-video rounded-2xl overflow-hidden shrink-0 border border-white/5">
-                  <img src={course.cover_url} className="w-full h-full object-cover" alt={course.title} />
+                <div className="w-48 aspect-video rounded-2xl overflow-hidden shrink-0 border border-white/5 bg-[#0f1115]">
+                  <img src={course.cover_url} className="w-full h-full object-cover object-center" alt={course.title} />
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-2 text-[#22ff88]">
@@ -90,15 +99,21 @@ export function CheckoutModal({ course, userId, onClose, onSuccess }: CheckoutMo
               <div className="space-y-6 mb-12">
                 <div className="flex justify-between items-center py-4 border-b border-white/5">
                   <span className="text-white font-medium">Preço da Inscrição</span>
-                  <span className="text-xl font-bold text-white">R$ {course.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                  <span className="text-xl font-bold text-white">
+                    {isFree ? 'GRATUITO' : `R$ ${course.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                  </span>
                 </div>
-                <div className="flex justify-between items-center py-4 border-b border-white/5">
-                  <span className="text-white font-medium">Taxas e Encargos</span>
-                  <span className="text-[#22ff88] font-bold text-sm tracking-widest uppercase">Isento</span>
-                </div>
+                {!isFree && (
+                  <div className="flex justify-between items-center py-4 border-b border-white/5">
+                    <span className="text-white font-medium">Parcelamento</span>
+                    <span className="text-[#22ff88] font-bold text-sm tracking-widest uppercase">Até 12x no Cartão</span>
+                  </div>
+                )}
                 <div className="flex justify-between items-center pt-4">
                   <span className="text-lg font-bold text-white">Total</span>
-                  <span className="text-3xl font-bold text-[#22ff88]">R$ {course.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                  <span className="text-3xl font-bold text-[#22ff88]">
+                    {isFree ? 'R$ 0,00' : `R$ ${course.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                  </span>
                 </div>
               </div>
 
@@ -107,8 +122,12 @@ export function CheckoutModal({ course, userId, onClose, onSuccess }: CheckoutMo
                   <CreditCard className="w-6 h-6 text-[#22ff88]" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-white uppercase tracking-wider">Simulação de Pagamento</p>
-                  <p className="text-[11px] text-[#64748b]">Nenhuma cobrança real será feita neste ambiente de testes.</p>
+                  <p className="text-sm font-bold text-white uppercase tracking-wider">
+                    {isFree ? 'Liberação Imediata' : 'Pagamento Seguro'}
+                  </p>
+                  <p className="text-[11px] text-[#64748b]">
+                    {isFree ? 'Você terá acesso total à Masterclass instantaneamente.' : 'Processado com segurança via Stripe (Cartão ou Pix).'}
+                  </p>
                 </div>
               </div>
 
@@ -119,7 +138,7 @@ export function CheckoutModal({ course, userId, onClose, onSuccess }: CheckoutMo
               >
                 {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : (
                   <>
-                    CONFIRMAR INSCRIÇÃO AGORA
+                    {isFree ? 'INICIAR ACESSO GRÁTIS' : 'PAGAR E INICIAR AGORA'}
                     <motion.div
                       animate={{ x: [0, 5, 0] }}
                       transition={{ repeat: Infinity, duration: 1.5 }}
