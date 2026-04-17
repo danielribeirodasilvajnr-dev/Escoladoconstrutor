@@ -58,7 +58,10 @@ serve(async (req) => {
     }
 
     // Allow testing locally if they use localhost, otherwise use production domain
-    const origin = req.headers.get('origin') || 'https://construtor360.com.br';
+    let origin = req.headers.get('origin');
+    if (!origin || origin === 'null' || origin === 'undefined') {
+      origin = 'https://construtor360.com.br';
+    }
 
     // Create Preference in Mercado Pago
     const response = await fetch("https://api.mercadopago.com/checkout/preferences", {
@@ -85,9 +88,9 @@ serve(async (req) => {
         },
         external_reference: `${user.id}:::${course.id}`, // Custom identifier for Webhook parsing
         back_urls: {
-          success: `https://construtor360.com.br`,
-          failure: `https://construtor360.com.br`,
-          pending: `https://construtor360.com.br`
+          success: `${origin}?payment_success=true`,
+          failure: `${origin}?payment_error=true`,
+          pending: `${origin}?payment_pending=true`
         },
         auto_return: "approved",
         notification_url: "https://bzwlachtgvmfqnjndbna.supabase.co/functions/v1/mp-webhook"

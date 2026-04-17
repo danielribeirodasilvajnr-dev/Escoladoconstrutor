@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import Confetti from 'react-confetti';
 import { LandingPage } from './components/LandingPage';
 import { Dashboard } from './components/Dashboard';
 import { Auth } from './components/Auth';
@@ -15,10 +16,21 @@ export default function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [userData, setUserData] = useState<any>(null);
   const [publicCourseId, setPublicCourseId] = useState<string | null>(null);
+  const [showPaymentSuccess, setShowPaymentSuccess] = useState(false);
 
   useEffect(() => {
-    // Check for public course ID in URL
     const params = new URLSearchParams(window.location.search);
+    
+    // Check for payment success parameter
+    if (params.get('payment_success') === 'true') {
+      setShowPaymentSuccess(true);
+      // Remove it from URL cleanly so it doesn't trigger again on refresh
+      const url = new URL(window.location.href);
+      url.searchParams.delete('payment_success');
+      window.history.replaceState({}, '', url);
+    }
+
+    // Check for public course ID in URL
     const courseId = params.get('c');
     if (courseId) {
       setPublicCourseId(courseId);
@@ -131,15 +143,60 @@ export default function App() {
           <Dashboard userData={userData} session={session} />
         </motion.div>
       )}
+      )}
+      
+      {/* Payment Success Modal */}
+      <AnimatePresence>
+        {showPaymentSuccess && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md px-4"
+          >
+            <Confetti 
+              width={window.innerWidth} 
+              height={window.innerHeight} 
+              recycle={false} 
+              numberOfPieces={600} 
+              gravity={0.12} 
+              colors={['#22ff88', '#00ffcc', '#ffffff', '#10b981']}
+            />
+            <motion.div
+              initial={{ scale: 0.8, y: 50 }}
+              animate={{ scale: 1, y: 0 }}
+              transition={{ type: "spring", bounce: 0.5 }}
+              className="bg-[#050505] border border-[#22ff88]/30 p-10 rounded-3xl shadow-[0_0_50px_rgba(34,255,136,0.15)] max-w-md w-full text-center relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#22ff88]/50 via-[#22ff88] to-[#22ff88]/50"></div>
+              <div className="w-24 h-24 bg-[#22ff88]/10 rounded-full flex items-center justify-center mx-auto mb-8 relative">
+                  <div className="absolute inset-0 rounded-full animate-ping bg-[#22ff88]/20 opacity-75"></div>
+                  <svg className="w-12 h-12 text-[#22ff88] relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"></path></svg>
+              </div>
+              <h2 className="text-3xl font-extrabold text-white mb-4 tracking-tight">Pagamento Aprovado!</h2>
+              <p className="text-zinc-400 mb-8 max-w-sm mx-auto text-[1.05rem] leading-relaxed">
+                Sua matrícula foi concluída com sucesso. O seu <strong>The Creator Masterclass</strong> acaba de ser destrancado.
+              </p>
+              <button
+                  onClick={() => setShowPaymentSuccess(false)}
+                  className="w-full bg-[#22ff88] hover:bg-[#1ee077] text-black font-bold py-4 rounded-2xl transition-all shadow-lg shadow-[#22ff88]/20 hover:shadow-[#22ff88]/40 active:scale-[0.98] text-lg uppercase tracking-wider"
+              >
+                  Acessar meu Treinamento
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <Toaster 
         theme="dark" 
         position="top-right" 
         closeButton 
         toastOptions={{
           style: {
-            background: 'rgba(10, 11, 14, 0.8)',
+            background: 'rgba(5, 5, 5, 0.9)',
             backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
+            border: '1px solid rgba(34, 255, 136, 0.2)',
             color: '#fff',
             borderRadius: '1rem',
           },
