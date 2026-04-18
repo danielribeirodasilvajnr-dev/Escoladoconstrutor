@@ -65,7 +65,6 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setSuccess(false);
 
     try {
       const { error } = await supabase.auth.updateUser({
@@ -87,10 +86,10 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
   };
 
   return (
-    <div className="p-4 md:p-10 max-w-[800px] mx-auto space-y-6 md:space-y-10 pb-20 mt-2 md:mt-0">
-      <header className="mb-6 md:mb-12">
-        <h1 className="text-xl md:text-2xl lg:text-4xl font-bold text-white mb-1 md:mb-2 leading-tight">Configurações</h1>
-        <p className="text-[#64748b] text-[10px] md:text-base tracking-wide uppercase font-bold">Perfil e Preferências</p>
+    <div className="p-4 md:p-10 max-w-[800px] mx-auto space-y-6 md:space-y-12 pb-32 mt-2 md:mt-0">
+      <header className="mb-8 md:mb-12">
+        <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-2 leading-tight">Configurações</h1>
+        <p className="text-[10px] md:text-sm tracking-[0.2em] uppercase font-bold text-[#22ff88]/60">Perfil e Preferências</p>
       </header>
 
       <form onSubmit={handleSave} className="space-y-10">
@@ -191,11 +190,11 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
         </div>
 
         {/* Footer Actions */}
-        <div className="pt-6 flex items-center justify-end border-t border-white/5">
+        <div className="pt-8 flex items-center justify-end border-t border-white/5">
           <button
             type="submit"
             disabled={loading || uploading}
-            className="w-full md:w-auto px-10 py-3 bg-[#22ff88] text-black text-[10px] md:text-xs font-black uppercase tracking-widest rounded-xl md:rounded-2xl hover:opacity-90 active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(34,255,136,0.1)]"
+            className="w-full md:w-auto px-12 py-4 bg-[#22ff88] text-black text-[11px] md:text-xs font-black uppercase tracking-widest rounded-2xl hover:opacity-90 active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-3 shadow-[0_10px_40px_rgba(34,255,136,0.15)]"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar Alterações'}
           </button>
