@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
-import { ArrowRight, Sparkles, Layout, Zap, Shield, MousePointer2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, Sparkles, Layout, Zap, Shield, MousePointer2, ChevronLeft, ChevronRight, Trophy, TrendingUp, Users } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { supabase } from '../lib/supabase';
 
@@ -235,18 +235,40 @@ export function LandingPage({ onExplore }: LandingPageProps) {
 
         {/* Grid Features - Recipe 8/1 Pattern */}
         <section className="px-8 py-32 max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-1px bg-white/5 border border-white/5 rounded-3xl overflow-hidden">
+          <div className="flex flex-col items-center mb-16 space-y-4 text-center">
+            <h2 className="text-3xl md:text-5xl font-bold font-display tracking-tight text-white mb-2">
+              Por que a <span className="text-[#22ff88]">Construtor360</span>?
+            </h2>
+            <p className="text-[#64748b] text-lg max-w-2xl">
+              Não somos apenas uma plataforma de cursos. Somos o seu acelerador definitivo de carreira e negócios na construção civil.
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-1px bg-white/5 border border-white/5 rounded-3xl overflow-hidden shadow-2xl shadow-black/50">
             {[
-              { icon: Sparkles, title: "IA Aprimorada", desc: "Nossa ferramenta neural prevê seu próximo passo, sugerindo recursos e estilos enquanto você cria." },
-              { icon: Shield, title: "Nível Corporativo", desc: "Segurança de nível bancário para seu PI mais valioso. Funções, permissões e logs de auditoria incluídos." },
-              { icon: MousePointer2, title: "Colaborativo", desc: "A experiência de colaboração em tempo real mais suave já construída para ferramentas de engenharia." }
+              { 
+                icon: Trophy, 
+                title: "Expertise de Mercado", 
+                desc: "Diga adeus à teoria vazia. Aprenda o que funciona na vida real com metodologias de gestão testadas e aprovadas em canteiros de alto padrão." 
+              },
+              { 
+                icon: TrendingUp, 
+                title: "Foco em Lucratividade", 
+                desc: "Evolua de um técnico para um empresário. Domine orçamentos precisos, contratos blindados e técnicas de captação de clientes premium." 
+              },
+              { 
+                icon: Users, 
+                title: "Networking de Elite", 
+                desc: "Você não está sozinho. Faça parte de uma comunidade exclusiva de profissionais da construção civil e estabeleça parcerias que valem ouro." 
+              }
             ].map((feature, i) => (
-              <div key={i} className="bg-[#050505] p-12 hover:bg-[#0f1115] transition-colors group">
-                <div className="w-12 h-12 rounded-2xl bg-[#22ff88]/10 text-[#22ff88] flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
-                  <feature.icon className="w-6 h-6" />
+              <div key={i} className="bg-[#050505] p-12 hover:bg-[#0a0c0f] transition-all duration-500 group relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-[#22ff88] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500" />
+                <div className="w-14 h-14 rounded-2xl bg-[#22ff88]/5 border border-[#22ff88]/20 text-[#22ff88] flex items-center justify-center mb-8 group-hover:bg-[#22ff88] group-hover:text-black transition-all duration-500 shadow-xl shadow-[#22ff88]/0 group-hover:shadow-[0_0_30px_rgba(34,255,136,0.3)]">
+                  <feature.icon className="w-7 h-7" />
                 </div>
-                <h3 className="text-2xl mb-4 font-display font-bold text-white">{feature.title}</h3>
-                <p className="text-[#64748b] leading-relaxed">{feature.desc}</p>
+                <h3 className="text-2xl mb-4 font-display font-bold text-white group-hover:text-[#22ff88] transition-colors">{feature.title}</h3>
+                <p className="text-[#64748b] leading-relaxed text-[15px] group-hover:text-white/70 transition-colors">{feature.desc}</p>
               </div>
             ))}
           </div>
