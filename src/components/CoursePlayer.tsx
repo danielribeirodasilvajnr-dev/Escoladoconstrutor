@@ -251,6 +251,25 @@ export function CoursePlayer({ courseId, onBack, session }: CoursePlayerProps) {
     }
   };
 
+  const handleDownload = async (url: string, filename: string) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Error downloading file:', error);
+      // Fallback: open in new tab if blob fetch fails
+      window.open(url, '_blank');
+    }
+  };
+
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 B';
     const k = 1024;
@@ -481,12 +500,10 @@ export function CoursePlayer({ courseId, onBack, session }: CoursePlayerProps) {
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {attachments.map((att) => (
-                          <a
+                          <button
                             key={att.id}
-                            href={att.file_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="bg-[#1a1c22] p-4 md:p-6 rounded-2xl border border-white/5 flex items-center justify-between group hover:border-[#22ff88]/30 transition-all"
+                            onClick={() => handleDownload(att.file_url, att.title)}
+                            className="bg-[#1a1c22] p-4 md:p-6 rounded-2xl border border-white/5 flex items-center justify-between group hover:border-[#22ff88]/30 transition-all text-left w-full"
                           >
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center group-hover:bg-[#22ff88]/10 transition-colors">
@@ -498,7 +515,7 @@ export function CoursePlayer({ courseId, onBack, session }: CoursePlayerProps) {
                               </div>
                             </div>
                             <Download className="w-4 h-4 text-[#64748b] group-hover:text-[#22ff88] transition-all" />
-                          </a>
+                          </button>
                         ))}
                       </div>
                     )}
