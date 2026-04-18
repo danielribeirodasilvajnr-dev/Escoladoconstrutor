@@ -34,11 +34,11 @@ export function LandingPage({ onExplore }: LandingPageProps) {
   const categories = ['Todos', 'Gestão', 'Orçamentos', 'Projetos BIM', 'Tecnologia', 'Execução'];
 
   const filteredCourses = courses.filter(course => {
-    const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          (course.description && course.description.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesCategory = selectedCategory === 'Todos' || 
-                            course.title.toLowerCase().includes(selectedCategory.toLowerCase()) || 
-                            (course.description && course.description.toLowerCase().includes(selectedCategory.toLowerCase()));
+    const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (course.description && course.description.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesCategory = selectedCategory === 'Todos' ||
+      course.title.toLowerCase().includes(selectedCategory.toLowerCase()) ||
+      (course.description && course.description.toLowerCase().includes(selectedCategory.toLowerCase()));
     return matchesSearch && matchesCategory;
   });
 
@@ -75,7 +75,7 @@ export function LandingPage({ onExplore }: LandingPageProps) {
       <main className="pt-32">
         {/* Hero Section */}
         <section className="px-8 max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center min-h-[80vh]">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
@@ -90,7 +90,7 @@ export function LandingPage({ onExplore }: LandingPageProps) {
             </p>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, delay: 0.4 }}
@@ -227,7 +227,7 @@ export function LandingPage({ onExplore }: LandingPageProps) {
             <h2 className="text-3xl font-bold font-display tracking-tight text-white">
               Explorar Catálogo
             </h2>
-            
+
             <div className="flex flex-col xl:flex-row gap-6 items-start xl:items-center justify-between w-full">
               {/* Categorias */}
               <div className="flex gap-3 overflow-x-auto w-full pb-2 scrollbar-hide snap-x">
@@ -237,8 +237,8 @@ export function LandingPage({ onExplore }: LandingPageProps) {
                     onClick={() => setSelectedCategory(category)}
                     className={cn(
                       "px-6 py-3.5 rounded-full text-sm font-bold whitespace-nowrap transition-all snap-start border",
-                      selectedCategory === category 
-                        ? "bg-[#22ff88] text-black border-[#22ff88] shadow-[0_0_20px_rgba(34,255,136,0.3)]" 
+                      selectedCategory === category
+                        ? "bg-[#22ff88] text-black border-[#22ff88] shadow-[0_0_20px_rgba(34,255,136,0.3)]"
                         : "bg-[#0f1115] text-[#64748b] border-white/5 hover:bg-white/5 hover:text-white"
                     )}
                   >
@@ -265,34 +265,34 @@ export function LandingPage({ onExplore }: LandingPageProps) {
           {filteredCourses.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredCourses.map(course => (
-                 <div key={course.id} className="bg-[#0f1115] rounded-3xl overflow-hidden border border-white/5 group hover:border-[#22ff88]/30 transition-all flex flex-col hover:-translate-y-1 hover:shadow-2xl hover:shadow-[#22ff88]/5 cursor-pointer" onClick={() => window.location.search = `?c=${course.id}`}>
-                    <div className="relative aspect-[16/10] overflow-hidden bg-black/50">
-                      <img 
-                        src={course.cover_url || "https://picsum.photos/seed/placeholder/800/450"} 
-                        alt={course.title} 
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100"
-                        referrerPolicy="no-referrer"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#0f1115] via-[#0f1115]/20 to-transparent" />
-                    </div>
-                    <div className="p-6 pt-4 flex flex-col flex-1">
-                      <h3 className="text-lg font-bold font-display text-white mb-2 line-clamp-2 transition-colors leading-tight group-hover:text-[#22ff88]">
-                        {course.title}
-                      </h3>
-                      <p className="text-sm text-[#64748b] leading-relaxed line-clamp-2 h-10 mb-6 flex-1">
-                        {course.description || "Aprenda e domine as melhores práticas nesta masterclass focada totalmente pro desenvolvimento prático."}
-                      </p>
-                      
-                      <div className="flex items-center justify-between mt-auto border-t border-white/5 pt-4">
-                        <div className="text-white font-bold font-display">
-                          {Number(course.price) === 0 ? 'Grátis' : `R$ ${Number(course.price).toFixed(2).replace('.', ',')}`}
-                        </div>
-                        <span className="text-[#22ff88] text-[10px] uppercase tracking-widest font-bold group-hover:underline">
-                          Saiba Mais
-                        </span>
+                <div key={course.id} className="bg-[#0f1115] rounded-3xl overflow-hidden border border-white/5 group hover:border-[#22ff88]/30 transition-all flex flex-col hover:-translate-y-1 hover:shadow-2xl hover:shadow-[#22ff88]/5 cursor-pointer" onClick={() => window.location.search = `?c=${course.id}`}>
+                  <div className="relative aspect-[16/10] overflow-hidden bg-black/50">
+                    <img
+                      src={course.cover_url || "https://picsum.photos/seed/placeholder/800/450"}
+                      alt={course.title}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100"
+                      referrerPolicy="no-referrer"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0f1115] via-[#0f1115]/20 to-transparent" />
+                  </div>
+                  <div className="p-6 pt-4 flex flex-col flex-1">
+                    <h3 className="text-lg font-bold font-display text-white mb-2 line-clamp-2 transition-colors leading-tight group-hover:text-[#22ff88]">
+                      {course.title}
+                    </h3>
+                    <p className="text-sm text-[#64748b] leading-relaxed line-clamp-2 h-10 mb-6 flex-1">
+                      {course.description || "Aprenda e domine as melhores práticas nesta masterclass focada totalmente pro desenvolvimento prático."}
+                    </p>
+
+                    <div className="flex items-center justify-between mt-auto border-t border-white/5 pt-4">
+                      <div className="text-white font-bold font-display">
+                        {Number(course.price) === 0 ? 'Grátis' : `R$ ${Number(course.price).toFixed(2).replace('.', ',')}`}
                       </div>
+                      <span className="text-[#22ff88] text-[10px] uppercase tracking-widest font-bold group-hover:underline">
+                        Saiba Mais
+                      </span>
                     </div>
                   </div>
+                </div>
               ))}
             </div>
           ) : (
@@ -306,7 +306,7 @@ export function LandingPage({ onExplore }: LandingPageProps) {
               <p className="text-[#64748b] text-base mb-6 max-w-sm mx-auto">
                 Não conseguimos encontrar nenhum resultado para essa busca ou categoria.
               </p>
-              <button 
+              <button
                 onClick={() => { setSearchQuery(''); setSelectedCategory('Todos'); }}
                 className="px-6 py-2.5 bg-white/5 hover:bg-white/10 text-white font-bold rounded-lg transition-all"
               >
