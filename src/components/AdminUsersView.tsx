@@ -120,48 +120,48 @@ export function AdminUsersView() {
   };
 
   return (
-    <div className="p-4 md:p-10 max-w-[1600px] mx-auto space-y-6 md:space-y-10 pb-20">
-      <header className="mb-8 md:mb-12 flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6">
+    <div className="p-3 md:p-10 max-w-[1600px] mx-auto space-y-5 md:space-y-10 pb-20 mt-2 md:mt-0">
+      <header className="mb-6 md:mb-12 flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6">
         <div>
-          <h1 className="text-2xl md:text-2xl lg:text-4xl font-bold text-white mb-1 md:mb-2">Gestão de Usuários</h1>
-          <p className="text-[#64748b] text-sm md:text-base">Controle de acessos e permissões.</p>
+          <h1 className="text-xl md:text-2xl lg:text-4xl font-bold text-white mb-1 md:mb-2 leading-tight">Gestão de Usuários</h1>
+          <p className="text-[#64748b] text-[10px] md:text-base tracking-wide uppercase font-bold">Controle de acessos e permissões</p>
         </div>
         <button
           onClick={() => setShowInviteModal(true)}
-          className="flex items-center justify-center gap-2 px-6 py-3 bg-[#22ff88] text-black text-sm md:text-base font-bold rounded-xl md:rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-[0_8px_20px_rgba(34,255,136,0.2)]"
+          className="flex items-center justify-center gap-2 px-6 py-3.5 bg-[#22ff88] text-black text-[10px] md:text-base font-black uppercase tracking-widest rounded-xl md:rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-[0_10px_30px_rgba(34,255,136,0.1)]"
         >
-          <UserPlus className="w-5 h-5" />
+          <UserPlus className="w-4 h-4 md:w-5 md:h-5" />
           Novo Professor
         </button>
       </header>
 
       {/* Filters and Stats */}
-      <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
+      <div className="flex flex-col md:flex-row gap-5 items-center justify-between">
         <div className="relative group w-full md:max-w-md">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748b] group-focus-within:text-[#22ff88] transition-colors" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#64748b] group-focus-within:text-[#22ff88] transition-colors" />
           <input
             type="text"
             placeholder="Buscar usuário..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-[#1a1c22] border border-white/5 rounded-xl md:rounded-2xl pl-11 pr-4 py-3 md:py-4 text-sm text-white focus:outline-none focus:border-[#22ff88]/30 transition-all font-medium"
+            className="w-full bg-[#1a1c22] border border-white/5 rounded-xl md:rounded-2xl pl-11 pr-4 py-3 md:py-3.5 text-xs md:text-sm text-white focus:outline-none focus:border-[#22ff88]/30 transition-all font-medium placeholder:text-[#64748b]/50"
           />
         </div>
 
-        <div className="flex gap-4">
-          <div className="bg-[#1a1c22] border border-white/5 px-6 py-3 rounded-2xl flex items-center gap-3">
-            <Users className="w-5 h-5 text-[#22ff88]" />
+        <div className="flex gap-4 w-full md:w-auto">
+          <div className="flex-1 md:flex-none bg-[#1a1c22] border border-white/5 px-5 py-2.5 rounded-xl md:rounded-2xl flex items-center gap-3">
+            <Users className="w-4 h-4 text-[#22ff88]" />
             <div>
-              <p className="text-[10px] uppercase tracking-widest text-[#64748b] font-bold">Total</p>
-              <p className="text-xl font-bold text-white leading-none">{users.length}</p>
+              <p className="text-[8px] md:text-[10px] uppercase tracking-widest text-[#64748b] font-bold">Total de Usuários</p>
+              <p className="text-lg md:text-xl font-black text-white leading-none">{users.length}</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="bg-[#1a1c22]/50 md:bg-[#1a1c22] rounded-2xl md:rounded-[2.5rem] border border-white/5 overflow-hidden shadow-2xl">
+      <div className="bg-[#1a1c22]/50 md:bg-[#1a1c22] rounded-2xl md:rounded-[2.5rem] border border-white/5 overflow-visible shadow-2xl">
         {/* Mobile Cards (sm/md only) */}
-        <div className="md:hidden space-y-1 bg-transparent">
+        <div className="md:hidden divide-y divide-white/5 bg-transparent">
           {loading ? (
             [1, 2, 3].map(i => (
               <div key={i} className="p-4 bg-white/[0.02] animate-pulse rounded-xl" />
@@ -173,35 +173,37 @@ export function AdminUsersView() {
              </div>
           ) : (
             filteredUsers.map(user => (
-              <div key={user.id} className="p-4 border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center overflow-hidden border border-white/10">
+              <div key={user.id} className="p-3.5 border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors relative">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="w-9 h-9 rounded-lg bg-[#0f1115] flex items-center justify-center overflow-hidden border border-white/5 shrink-0">
                        {user.avatar_url ? (
                          <img src={user.avatar_url} alt="" className="w-full h-full object-cover" />
                        ) : (
-                         <span className="text-sm font-bold text-[#64748b]">{(user.full_name || user.email).charAt(0)}</span>
+                         <span className="text-xs font-bold text-[#64748b]">{(user.full_name || user.email).charAt(0)}</span>
                        )}
                     </div>
-                    <div>
-                      <p className="text-sm font-bold text-white truncate max-w-[150px]">{user.full_name || 'Sem nome'}</p>
-                      <p className="text-[10px] text-[#64748b] font-mono">ID: {user.id.slice(0, 8)}</p>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-white truncate pr-2">{user.full_name || 'Sem nome'}</p>
+                      <p className="text-[8px] text-[#64748b] font-mono tracking-tighter">ID: {user.id.slice(0, 8)}</p>
                     </div>
                   </div>
-                  <RoleDropdown
-                    currentRole={user.role}
-                    onUpdate={(role) => handleUpdateRole(user.id, role)}
-                  />
+                  <div className="shrink-0 ml-2">
+                    <RoleDropdown
+                      currentRole={user.role}
+                      onUpdate={(role) => handleUpdateRole(user.id, role)}
+                    />
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-[11px] text-[#94a3b8]">
-                    <Mail className="w-3 h-3" />
-                    <span className="truncate max-w-[120px]">{user.email}</span>
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-1.5 text-[9px] font-medium text-[#64748b] truncate flex-1">
+                    <Mail className="w-2.5 h-2.5 shrink-0" />
+                    <span className="truncate">{user.email}</span>
                   </div>
                   {(() => {
                     const badge = getRoleBadge(user.role);
                     return (
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[9px] font-bold uppercase tracking-wider ${badge.color}`}>
+                      <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md border text-[8px] font-black uppercase tracking-widest shrink-0 ${badge.color}`}>
                         {badge.label}
                       </span>
                     );
@@ -316,30 +318,30 @@ export function AdminUsersView() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-md bg-[#1a1c22] border border-white/5 rounded-[2.5rem] p-8 shadow-2xl"
+              className="relative w-full max-w-md bg-[#1a1c22] border border-white/5 rounded-2xl md:rounded-[2.5rem] p-6 md:p-8 shadow-2xl"
             >
-              <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 rounded-2xl bg-[#22ff88]/10 flex items-center justify-center border border-[#22ff88]/20">
-                  <GraduationCap className="w-6 h-6 text-[#22ff88]" />
+              <div className="flex items-center gap-4 mb-6 md:mb-8">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-[#22ff88]/10 flex items-center justify-center border border-[#22ff88]/20">
+                  <GraduationCap className="w-5 h-5 md:w-6 md:h-6 text-[#22ff88]" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-white">Convidar Professor</h3>
-                  <p className="text-xs text-[#64748b]">O professor receberá um e-mail com as instruções.</p>
+                  <h3 className="text-lg md:text-xl font-bold text-white">Convidar Professor</h3>
+                  <p className="text-[10px] md:text-xs text-[#64748b]">Convite via e-mail corporativo.</p>
                 </div>
               </div>
 
-              <form onSubmit={handleInviteProfessor} className="space-y-6">
+                <form onSubmit={handleInviteProfessor} className="space-y-5">
                 <div className="space-y-2">
-                  <label className="text-[10px] uppercase tracking-widest font-bold text-[#64748b] ml-1">E-mail do Professor</label>
+                  <label className="text-[9px] md:text-[10px] uppercase tracking-widest font-bold text-[#64748b] ml-1">E-mail do Professor</label>
                   <div className="relative group">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#64748b] group-focus-within:text-[#22ff88] transition-colors" />
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748b] group-focus-within:text-[#22ff88] transition-colors" />
                     <input
                       type="email"
                       required
                       placeholder="ex: professor@construtor360.com"
                       value={inviteEmail}
                       onChange={(e) => setInviteEmail(e.target.value)}
-                      className="w-full bg-[#0f1115] border border-white/5 rounded-2xl pl-12 pr-4 py-4 text-white focus:outline-none focus:border-[#22ff88]/30 transition-all font-medium"
+                      className="w-full bg-[#0f1115] border border-white/5 rounded-xl md:rounded-2xl pl-11 pr-4 py-3.5 md:py-4 text-xs md:text-sm text-white focus:outline-none focus:border-[#22ff88]/30 transition-all font-medium"
                     />
                   </div>
                 </div>
@@ -348,21 +350,21 @@ export function AdminUsersView() {
                   <button
                     type="button"
                     onClick={() => setShowInviteModal(false)}
-                    className="flex-1 px-6 py-4 bg-white/5 text-white font-bold rounded-2xl hover:bg-white/10 transition-all"
+                    className="flex-1 px-6 py-3.5 bg-white/5 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-white/10 transition-all"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
                     disabled={isInviting}
-                    className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-[#22ff88] text-black font-bold rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-[0_8px_20px_rgba(34,255,136,0.2)] disabled:opacity-50"
+                    className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-[#22ff88] text-black text-[10px] font-black uppercase tracking-widest rounded-xl md:rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-[0_10px_30px_rgba(34,255,136,0.1)] disabled:opacity-50"
                   >
                     {isInviting ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
                       <>
-                        <Send className="w-5 h-5" />
-                        Enviar Convite
+                        <Send className="w-4 h-4" />
+                        Convidar
                       </>
                     )}
                   </button>
@@ -398,12 +400,12 @@ function RoleDropdown({ currentRole, onUpdate }: { currentRole: string, onUpdate
           <>
             <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              initial={{ opacity: 0, scale: 0.95, y: -10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="absolute right-0 bottom-full mb-2 w-48 bg-[#1a1c22] border border-white/5 rounded-2xl shadow-2xl z-50 p-2 text-left"
+              exit={{ opacity: 0, scale: 0.95, y: -10 }}
+              className="absolute right-0 top-full mt-2 w-44 bg-[#1a1c22] border border-white/10 rounded-xl shadow-2xl z-50 p-1.5 text-left backdrop-blur-xl"
             >
-              <p className="px-4 py-2 text-[10px] uppercase font-bold text-[#64748b] tracking-widest border-b border-white/5 mb-2">Alterar Cargo</p>
+              <p className="px-3 py-1.5 text-[8px] uppercase font-black text-[#64748b] tracking-widest border-b border-white/5 mb-1.5">Alterar Cargo</p>
               {roles.map((role) => (
                 <button
                   key={role.id}
@@ -411,16 +413,16 @@ function RoleDropdown({ currentRole, onUpdate }: { currentRole: string, onUpdate
                     if (role.id !== currentRole) onUpdate(role.id);
                     setOpen(false);
                   }}
-                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold transition-all ${role.id === currentRole
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-[11px] font-bold transition-all ${role.id === currentRole
                       ? 'bg-[#22ff88]/10 text-[#22ff88]'
                       : 'text-[#64748b] hover:bg-white/5 hover:text-white'
                     }`}
                 >
                   <div className="flex items-center gap-2">
-                    <role.icon className="w-4 h-4" />
+                    <role.icon className="w-3.5 h-3.5" />
                     {role.label}
                   </div>
-                  {role.id === currentRole && <Check className="w-4 h-4" />}
+                  {role.id === currentRole && <Check className="w-3.5 h-3.5" />}
                 </button>
               ))}
             </motion.div>
