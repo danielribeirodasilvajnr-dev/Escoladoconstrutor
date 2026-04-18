@@ -1,12 +1,34 @@
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
-import { ArrowRight, Sparkles, Layout, Zap, Shield, MousePointer2 } from 'lucide-react';
+import { ArrowRight, Sparkles, Layout, Zap, Shield, MousePointer2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { supabase } from '../lib/supabase';
 
 interface LandingPageProps {
   onExplore: () => void;
 }
 
 export function LandingPage({ onExplore }: LandingPageProps) {
+  const [courses, setCourses] = useState<any[]>([]);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    supabase.from('courses').select('*').order('created_at', { ascending: false }).then(({ data }) => {
+      if (data) setCourses(data);
+    });
+  }, []);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const { scrollLeft, clientWidth } = scrollRef.current;
+      const scrollAmount = clientWidth * 0.8;
+      scrollRef.current.scrollTo({
+        left: direction === 'left' ? scrollLeft - scrollAmount : scrollLeft + scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#050505] text-white overflow-hidden selection:bg-[#22ff88] selection:text-black">
       {/* Navigation */}
@@ -108,8 +130,87 @@ export function LandingPage({ onExplore }: LandingPageProps) {
           </motion.div>
         </section>
 
+        {/* Vitrine de Cursos Pública */}
+        {courses.length > 0 && (
+          <section className="px-8 max-w-7xl mx-auto mt-24 mb-10 relative">
+            <div className="flex items-end justify-between mb-8">
+              <div>
+                <h2 className="text-3xl md:text-5xl font-bold font-display tracking-tight text-white mb-4">
+                  Cursos em <span className="text-[#22ff88]">Destaque</span>
+                </h2>
+                <p className="text-[#64748b] text-lg max-w-xl">
+                  Inscreva-se nos nossos treinamentos mais avançados e experimente a melhor plataforma da engenharia.
+                </p>
+              </div>
+              <div className="hidden md:flex items-center gap-3">
+                <button 
+                  onClick={() => scroll('left')} 
+                  className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5 hover:border-white/20 active:scale-95 transition-all text-white"
+                >
+                   <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button 
+                  onClick={() => scroll('right')} 
+                  className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5 hover:border-white/20 active:scale-95 transition-all text-white"
+                >
+                   <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="relative group/slider">
+              {/* Fade Spans for Edges */}
+              <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-[#050505] to-transparent z-10 pointer-events-none" />
+              <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-[#050505] to-transparent z-10 pointer-events-none" />
+
+              <div 
+                ref={scrollRef}
+                className="flex gap-6 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-8 pt-4 -mx-4 px-4"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                {courses.map(course => (
+                  <div key={course.id} className="min-w-[320px] md:min-w-[360px] w-[320px] md:w-[360px] bg-[#0f1115] rounded-[2rem] overflow-hidden border border-white/5 group hover:border-white/10 transition-all snap-center md:snap-start flex flex-col hover:-translate-y-1 hover:shadow-2xl hover:shadow-[#22ff88]/5">
+                    <div className="relative aspect-[16/10] overflow-hidden bg-black/50">
+                      <img 
+                        src={course.cover_url || "https://picsum.photos/seed/placeholder/800/450"} 
+                        alt={course.title} 
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90 group-hover:opacity-100"
+                        referrerPolicy="no-referrer"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#0f1115] via-transparent to-transparent" />
+                      <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase text-[#22ff88]">
+                        Mais Vendido
+                      </div>
+                    </div>
+                    <div className="p-8 pt-6 flex flex-col flex-1">
+                      <h3 className="text-xl font-bold font-display text-white mb-3 line-clamp-2 transition-colors leading-tight">
+                        {course.title}
+                      </h3>
+                      <p className="text-sm text-[#64748b] leading-relaxed line-clamp-2 mb-8 flex-1">
+                        {course.description || "Aprenda e domine as melhores práticas nesta masterclass focada totalmente pro desenvolvimento prático."}
+                      </p>
+                      
+                      <div className="flex items-center justify-between mt-auto">
+                        <div className="text-white font-bold font-display text-xl">
+                          {Number(course.price) === 0 ? 'Grátis' : `R$ ${Number(course.price).toFixed(2).replace('.', ',')}`}
+                        </div>
+                        <button 
+                          onClick={() => window.location.search = `?c=${course.id}`}
+                          className="px-6 py-3 bg-[#22ff88]/10 hover:bg-[#22ff88] text-[#22ff88] hover:text-black font-bold text-sm tracking-wide rounded-xl transition-all shadow-lg shadow-[#22ff88]/0 hover:shadow-[#22ff88]/20"
+                        >
+                          Experimentar 
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Scrolling Rail - Recipe 11 */}
-        <div className="relative py-20 overflow-hidden border-y border-ink/5 mt-20">
+        <div className="relative py-20 overflow-hidden border-y border-ink/5 mt-10">
           <motion.div 
             animate={{ x: [0, -1000] }}
             transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
@@ -154,13 +255,20 @@ export function LandingPage({ onExplore }: LandingPageProps) {
 
       <footer className="px-8 py-12 border-t border-ink/5 max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
         <div className="flex items-center gap-2 grayscale-0">
-          <Sparkles className="w-4 h-4 text-accent" />
+          <Sparkles className="w-4 h-4 text-[#22ff88]" />
           <span className="font-display text-lg font-bold">Construtor360</span>
         </div>
-        <div className="text-[10px] uppercase tracking-widest text-muted font-bold">
+        <div className="text-[10px] uppercase tracking-widest text-[#64748b] font-bold">
           © 2026 Construtor360. Todos os direitos reservados.
         </div>
       </footer>
+
+      {/* Hide Scrollbar Styles via Inline Tags since globals css isn't verified here */}
+      <style dangerouslySetInnerHTML={{__html: `
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+      `}} />
     </div>
   );
 }
