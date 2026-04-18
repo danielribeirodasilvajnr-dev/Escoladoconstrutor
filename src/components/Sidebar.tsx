@@ -131,17 +131,6 @@ export function Sidebar({ activeView, onViewChange, userData }: SidebarProps) {
       </div>
 
       <div className="mt-auto p-6 space-y-6">
-        {/* Next Lesson Card */}
-        {userRole !== 'administrador' && (
-          <div className="bg-[#1a1c22] rounded-2xl p-4 border border-white/5">
-            <p className="text-[10px] uppercase tracking-widest text-[#64748b] font-bold mb-2">Próxima Aula</p>
-            <h4 className="text-sm font-bold mb-4 text-white">Dinâmica Estrutural II</h4>
-            <button className="w-full py-2.5 bg-[#22ff88] text-black text-[11px] font-bold rounded-lg hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2">
-              Continuar Assistindo
-            </button>
-          </div>
-        )}
-
         <button 
           onClick={handleLogout}
           className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#64748b] hover:text-white transition-colors group"
