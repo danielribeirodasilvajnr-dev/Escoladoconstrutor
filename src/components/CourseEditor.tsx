@@ -641,13 +641,18 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                         <div key={lesson.id} className="space-y-2">
                           <div className="bg-[#0f1115] border border-white/5 rounded-xl p-3 md:p-4 flex items-center justify-between group">
                             <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
-                              <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg overflow-hidden bg-black/40 border border-white/10 flex items-center justify-center shrink-0 group-hover:border-[#22ff88]/30 transition-colors">
+                              <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg overflow-hidden bg-black/40 border border-white/10 flex items-center justify-center shrink-0 group-hover:border-[#22ff88]/30 transition-colors relative">
                                 {lesson.content_url ? (
-                                  <video
-                                    src={lesson.content_url}
-                                    className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity"
-                                    preload="metadata"
-                                  />
+                                  <>
+                                    <video
+                                      src={lesson.content_url + '#t=0.001'}
+                                      className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity"
+                                      preload="metadata"
+                                    />
+                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                      <Play className="w-3 h-3 text-white/40 group-hover:text-white transition-colors" />
+                                    </div>
+                                  </>
                                 ) : (
                                   <Upload className="w-4 h-4 text-white/20" />
                                 )}
