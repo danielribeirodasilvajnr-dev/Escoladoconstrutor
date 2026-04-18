@@ -62,7 +62,9 @@ export function HeroSection({ lastWatched, onContinue }: HeroSectionProps) {
             className="flex items-center gap-3 px-8 py-4 bg-[#22ff88] text-black rounded-xl font-bold hover:opacity-90 active:scale-95 transition-all shadow-xl shadow-[#22ff88]/20 group/btn"
           >
             <Play className="w-5 h-5 fill-current group-hover/btn:scale-110 transition-transform" />
-            {lastWatched ? `Continuar em ${formatTime(lastWatched.watched_time)}` : 'Começar Agora'}
+            {lastWatched 
+              ? (lastWatched.watched_time > 5 ? `Continuar em ${formatTime(lastWatched.watched_time)}` : 'Continuar Assistindo') 
+              : 'Começar Agora'}
           </button>
           <button className="flex items-center gap-3 px-8 py-4 bg-white/5 text-white rounded-xl font-bold hover:bg-white/10 active:scale-95 transition-all backdrop-blur-md border border-white/10">
             <Info className="w-5 h-5" />
