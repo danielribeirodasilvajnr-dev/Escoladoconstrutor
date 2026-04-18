@@ -9,7 +9,8 @@ import {
   ChevronRight,
   ShieldCheck,
   Layers,
-  DollarSign
+  DollarSign,
+  X
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { supabase } from '../lib/supabase';
@@ -18,9 +19,11 @@ interface SidebarProps {
   activeView: string;
   onViewChange: (view: string) => void;
   userData: any;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-export function Sidebar({ activeView, onViewChange, userData }: SidebarProps) {
+export function Sidebar({ activeView, onViewChange, userData, isOpen, onClose }: SidebarProps) {
   const userRole = userData?.role || 'membro';
   const menuItems = [
     { id: "vitrine", icon: PlaySquare, label: "Vitrine" },
@@ -45,8 +48,20 @@ export function Sidebar({ activeView, onViewChange, userData }: SidebarProps) {
   };
 
   return (
-    <aside className="w-64 bg-[#0f1115] text-white flex flex-col h-screen sticky top-0 z-40 border-r border-white/5">
-      <div className="p-8 pb-4">
+    <aside className={cn(
+      "fixed inset-y-0 left-0 lg:static w-64 bg-[#0f1115] text-white flex flex-col h-screen z-50 border-r border-white/5 transition-transform duration-300 ease-in-out lg:translate-x-0",
+      isOpen ? "translate-x-0" : "-translate-x-full"
+    )}>
+      <div className="p-8 pb-4 relative">
+        {onClose && (
+          <button 
+            onClick={onClose}
+            className="lg:hidden absolute top-6 right-6 text-[#64748b] hover:text-white transition-colors p-2"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        )}
+
         <div className="mb-10">
           <h1 className="text-2xl font-bold tracking-tight text-white flex items-baseline gap-0.5 leading-none">
             Construtor
@@ -54,7 +69,7 @@ export function Sidebar({ activeView, onViewChange, userData }: SidebarProps) {
           </h1>
         </div>
         
-        <div className="space-y-8">
+        <div className="space-y-8 overflow-y-auto max-h-[calc(100vh-200px)] custom-scrollbar pr-2">
           {/* Main Navigation */}
           <nav className="space-y-1">
             <p className="text-[9px] uppercase tracking-[0.2em] text-[#64748b] font-bold mb-4 px-4">Navegação</p>

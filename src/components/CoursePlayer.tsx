@@ -355,10 +355,10 @@ export function CoursePlayer({ courseId, onBack, session }: CoursePlayerProps) {
   }
 
   return (
-    <div className="flex h-[calc(100vh-80px)] overflow-hidden bg-[#0a0b0e]">
+    <div className="flex flex-col lg:flex-row h-screen lg:h-[calc(100vh-80px)] overflow-hidden bg-[#0a0b0e]">
       {/* Main Player Area */}
       <div className="flex-1 overflow-y-auto custom-scrollbar">
-        <div className="p-12 max-w-[1200px] mx-auto">
+        <div className="p-4 md:p-12 max-w-[1200px] mx-auto">
           {/* Back Button */}
           <button 
             onClick={onBack}
@@ -405,19 +405,19 @@ export function CoursePlayer({ courseId, onBack, session }: CoursePlayerProps) {
               </div>
             </div>
 
-            <h1 className="text-5xl font-black text-white leading-tight">
+            <h1 className="text-2xl md:text-5xl font-black text-white leading-tight">
               {course?.title || "Advanced Structural Dynamics for Robotic Systems"}
             </h1>
 
-            <p className="text-[#64748b] text-lg leading-relaxed max-w-3xl">
+            <p className="text-[#64748b] text-base md:text-lg leading-relaxed max-w-3xl">
               {course?.description || "Explore the foundational principles of structural analysis applied to modern robotics. This auteur-series course dives deep into harmonic oscillations, damping coefficients, and real-world implementation of dynamic controls."}
             </p>
 
             {/* Tabs for Engagement */}
             <div className="pt-10 border-t border-white/5">
-              <div className="flex gap-8 border-b border-white/5 mb-8">
+              <div className="flex gap-4 md:gap-8 border-b border-white/5 mb-8 overflow-x-auto scrollbar-hide">
                 {[
-                  { id: 'about', label: 'Sobre a Aula', icon: FileText },
+                  { id: 'about', label: 'Sobre', icon: FileText },
                   { id: 'materials', label: 'Materiais', icon: Download, count: attachments.length },
                   { id: 'comments', label: 'Dúvidas', icon: MessageSquare, count: comments.length },
                 ].map((tab) => (
@@ -514,8 +514,8 @@ export function CoursePlayer({ courseId, onBack, session }: CoursePlayerProps) {
                     className="space-y-8"
                   >
                     {/* Input Area */}
-                    <div className="bg-[#1a1c22] p-8 rounded-3xl border border-white/5 gap-6">
-                      <div className="flex gap-4">
+                    <div className="bg-[#1a1c22] p-6 md:p-8 rounded-3xl border border-white/5 gap-6">
+                      <div className="flex flex-col md:flex-row gap-4">
                         <div className="w-10 h-10 rounded-xl bg-[#22ff88]/10 flex items-center justify-center shrink-0">
                            <MessageSquare className="w-5 h-5 text-[#22ff88]" />
                         </div>
@@ -523,14 +523,14 @@ export function CoursePlayer({ courseId, onBack, session }: CoursePlayerProps) {
                           <textarea
                             value={newComment}
                             onChange={(e) => setNewComment(e.target.value)}
-                            placeholder="Tire sua dúvida com o professor ou deixe seu insight..."
+                            placeholder="Tire sua dúvida..."
                             className="w-full bg-black/20 border border-white/10 rounded-2xl p-4 text-sm text-white focus:outline-none focus:border-[#22ff88]/30 transition-all min-h-[100px] resize-none"
                           />
                           <div className="flex justify-end">
                             <button
                               onClick={handlePostComment}
                               disabled={isSubmittingComment || !newComment.trim()}
-                              className="px-8 py-3 bg-[#22ff88] text-black text-[11px] font-black uppercase tracking-widest rounded-xl hover:opacity-90 active:scale-95 disabled:opacity-50 transition-all flex items-center gap-2"
+                              className="w-full md:w-auto px-8 py-3 bg-[#22ff88] text-black text-[11px] font-black uppercase tracking-widest rounded-xl hover:opacity-90 active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
                             >
                               {isSubmittingComment ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                               Enviar Pergunta
@@ -637,7 +637,7 @@ export function CoursePlayer({ courseId, onBack, session }: CoursePlayerProps) {
       </div>
 
       {/* Curriculum Sidebar */}
-      <div className="w-[450px] bg-[#0f1115] border-l border-white/5 flex flex-col">
+      <div className="w-full lg:w-[450px] bg-[#0f1115] border-t lg:border-t-0 lg:border-l border-white/5 flex flex-col h-[50vh] lg:h-full">
         <div className="p-8 border-b border-white/5">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-xl font-bold text-white">Conteúdo do Curso</h2>
