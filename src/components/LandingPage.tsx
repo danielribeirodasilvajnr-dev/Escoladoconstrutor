@@ -59,13 +59,13 @@ export function LandingPage({ onExplore }: LandingPageProps) {
         <div className="flex gap-4">
           <button
             onClick={() => { window.location.hash = 'login'; }}
-            className="hidden md:flex px-6 py-2 bg-white/5 text-white rounded-full text-[11px] uppercase tracking-widest font-bold hover:bg-white/10 active:scale-95 transition-all"
+            className="hidden md:flex px-6 py-2 bg-[#22ff88] text-black rounded-full text-[11px] uppercase tracking-widest font-bold hover:scale-105 active:scale-95 shadow-xl shadow-[#22ff88]/10 transition-all"
           >
             Fazer Login
           </button>
           <button
             onClick={() => { window.location.hash = 'register'; }}
-            className="px-6 py-2 bg-[#22ff88] text-black rounded-full text-[11px] uppercase tracking-widest font-bold hover:scale-105 active:scale-95 shadow-xl shadow-[#22ff88]/10 transition-all"
+            className="px-6 py-2 bg-white/5 text-white rounded-full text-[11px] uppercase tracking-widest font-bold hover:bg-white/10 active:scale-95 transition-all"
           >
             Inscreva-se
           </button>
@@ -97,43 +97,12 @@ export function LandingPage({ onExplore }: LandingPageProps) {
             className="relative"
           >
             {/* Immersive Image Display - Recipe 12 Style */}
-            <div className="relative aspect-[4/5] rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl">
+            <div className="relative aspect-square sm:aspect-[4/5] rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl bg-white/5 flex items-center justify-center p-8">
               <img
-                src="https://picsum.photos/seed/aurora-abstract/1200/1500"
-                alt="Abstract Creative"
-                className="w-full h-full object-cover opacity-60 grayscale hover:opacity-100 transition-opacity duration-1000"
-                referrerPolicy="no-referrer"
+                src="/sticker_transparent.png"
+                alt="Sticker de Sucesso"
+                className="w-full h-full object-contain transition-transform duration-700 hover:scale-105 drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent" />
-
-              {/* Floating Feature Bubble - Recipe 11 */}
-              <motion.div
-                animate={{ y: [0, -10, 0], rotate: [-6, -4, -6] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute top-12 -left-12 p-6 bg-[#0f1115] border border-white/5 rounded-3xl shadow-2xl hidden md:flex items-center gap-4"
-              >
-                <div className="w-12 h-12 bg-[#22ff88]/10 rounded-2xl flex items-center justify-center text-[#22ff88]">
-                  <Layout className="w-6 h-6" />
-                </div>
-                <div>
-                  <div className="text-[10px] uppercase tracking-wider text-[#64748b] font-bold">Workspace</div>
-                  <div className="text-sm font-medium text-white">Smart Canvas v2.0</div>
-                </div>
-              </motion.div>
-
-              <motion.div
-                animate={{ y: [0, 10, 0], rotate: [2, 4, 2] }}
-                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                className="absolute bottom-12 -right-12 p-6 bg-[#0f1115] border border-white/5 rounded-3xl shadow-2xl hidden md:flex items-center gap-4"
-              >
-                <div className="w-12 h-12 bg-[#22ff88]/10 rounded-2xl flex items-center justify-center text-[#22ff88]">
-                  <Zap className="w-6 h-6" />
-                </div>
-                <div>
-                  <div className="text-[10px] uppercase tracking-wider text-[#64748b] font-bold">Performance</div>
-                  <div className="text-sm font-medium text-white">99.9% Faster Rendering</div>
-                </div>
-              </motion.div>
             </div>
 
             {/* Background elements */}
@@ -221,100 +190,6 @@ export function LandingPage({ onExplore }: LandingPageProps) {
           </section>
         )}
 
-        {/* Categoria e Busca - Novo Repositório de Cursos */}
-        <section className="px-8 max-w-7xl mx-auto mt-20 mb-20">
-          <div className="flex flex-col gap-6 mb-12">
-            <h2 className="text-3xl font-bold font-display tracking-tight text-white">
-              Explorar Catálogo
-            </h2>
-
-            <div className="flex flex-col xl:flex-row gap-6 items-start xl:items-center justify-between w-full">
-              {/* Categorias */}
-              <div className="flex gap-3 overflow-x-auto w-full pb-2 scrollbar-hide snap-x">
-                {categories.map(category => (
-                  <button
-                    key={category}
-                    onClick={() => setSelectedCategory(category)}
-                    className={cn(
-                      "px-6 py-3.5 rounded-full text-sm font-bold whitespace-nowrap transition-all snap-start border",
-                      selectedCategory === category
-                        ? "bg-[#22ff88] text-black border-[#22ff88] shadow-[0_0_20px_rgba(34,255,136,0.3)]"
-                        : "bg-[#0f1115] text-[#64748b] border-white/5 hover:bg-white/5 hover:text-white"
-                    )}
-                  >
-                    {category}
-                  </button>
-                ))}
-              </div>
-
-              {/* Busca */}
-              <div className="relative group w-full xl:w-[400px] shrink-0">
-                <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#64748b] group-focus-within:text-[#22ff88] transition-colors" />
-                <input
-                  type="text"
-                  placeholder="Pesquisar ferramentas, cursos, áreas..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-[#1a1c22] border border-white/5 rounded-full pl-14 pr-6 py-4 text-white focus:outline-none focus:border-[#22ff88]/50 transition-all font-medium shadow-2xl shadow-black/50"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Grid de Resultados */}
-          {filteredCourses.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredCourses.map(course => (
-                <div key={course.id} className="bg-[#0f1115] rounded-3xl overflow-hidden border border-white/5 group hover:border-[#22ff88]/30 transition-all flex flex-col hover:-translate-y-1 hover:shadow-2xl hover:shadow-[#22ff88]/5 cursor-pointer" onClick={() => window.location.search = `?c=${course.id}`}>
-                  <div className="relative aspect-[16/10] overflow-hidden bg-black/50">
-                    <img
-                      src={course.cover_url || "https://picsum.photos/seed/placeholder/800/450"}
-                      alt={course.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100"
-                      referrerPolicy="no-referrer"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0f1115] via-[#0f1115]/20 to-transparent" />
-                  </div>
-                  <div className="p-6 pt-4 flex flex-col flex-1">
-                    <h3 className="text-lg font-bold font-display text-white mb-2 line-clamp-2 transition-colors leading-tight group-hover:text-[#22ff88]">
-                      {course.title}
-                    </h3>
-                    <p className="text-sm text-[#64748b] leading-relaxed line-clamp-2 h-10 mb-6 flex-1">
-                      {course.description || "Aprenda e domine as melhores práticas nesta masterclass focada totalmente pro desenvolvimento prático."}
-                    </p>
-
-                    <div className="flex items-center justify-between mt-auto border-t border-white/5 pt-4">
-                      <div className="text-white font-bold font-display">
-                        {Number(course.price) === 0 ? 'Grátis' : `R$ ${Number(course.price).toFixed(2).replace('.', ',')}`}
-                      </div>
-                      <span className="text-[#22ff88] text-[10px] uppercase tracking-widest font-bold group-hover:underline">
-                        Saiba Mais
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-20 bg-[#0f1115] rounded-[2rem] border border-white/5">
-              <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Search className="w-8 h-8 text-[#64748b]" />
-              </div>
-              <h2 className="text-xl font-bold font-display tracking-tight text-white mb-2">
-                Nenhum curso encontrado
-              </h2>
-              <p className="text-[#64748b] text-base mb-6 max-w-sm mx-auto">
-                Não conseguimos encontrar nenhum resultado para essa busca ou categoria.
-              </p>
-              <button
-                onClick={() => { setSearchQuery(''); setSelectedCategory('Todos'); }}
-                className="px-6 py-2.5 bg-white/5 hover:bg-white/10 text-white font-bold rounded-lg transition-all"
-              >
-                Limpar Filtros
-              </button>
-            </div>
-          )}
-        </section>
 
         {/* Scrolling Rail - Recipe 11 */}
         <div className="relative py-20 overflow-hidden border-y border-ink/5 mt-10">
