@@ -20,7 +20,9 @@ import {
   Send,
   Trash2,
   Reply,
-  Edit3
+  Edit3,
+  Award,
+  ShieldCheck
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { toast } from 'sonner';
@@ -65,14 +67,16 @@ interface CoursePlayerProps {
   courseId: string;
   onBack: () => void;
   session: any;
+  onTakeExam?: (examId: string) => void;
 }
 
-export function CoursePlayer({ courseId, onBack, session }: CoursePlayerProps) {
+export function CoursePlayer({ courseId, onBack, session, onTakeExam }: CoursePlayerProps) {
   const [course, setCourse] = useState<any>(null);
   const [modules, setModules] = useState<Module[]>([]);
   const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [finalExam, setFinalExam] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'about' | 'materials' | 'comments'>('about');
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -131,6 +135,18 @@ export function CoursePlayer({ courseId, onBack, session }: CoursePlayerProps) {
       }));
 
       setModules(formattedModules);
+      
+      // Fetch final exam
+      const { data: examData } = await supabase
+        .from('exams')
+        .select('id, title, is_final')
+        .eq('course_id', courseId)
+        .eq('is_final', true)
+        .single();
+      
+      if (examData) {
+        setFinalExam(examData);
+      }
       
       // Set first lesson as default
       if (formattedModules.length > 0 && formattedModules[0].lessons.length > 0) {
@@ -734,6 +750,29 @@ export function CoursePlayer({ courseId, onBack, session }: CoursePlayerProps) {
               })}
             </div>
           ))}
+
+          {/* Final Exam Card */}
+          {finalExam && (
+            <div className="pt-6">
+              <button
+                onClick={() => onTakeExam?.(finalExam.id)}
+                className="w-full group p-6 rounded-[2rem] bg-[#22ff88]/5 border border-[#22ff88]/20 hover:border-[#22ff88]/50 transition-all text-left relative overflow-hidden"
+              >
+                <div className="absolute -top-12 -right-12 w-24 h-24 bg-[#22ff88]/10 blur-[40px] rounded-full" />
+                <div className="relative z-10">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Award className="w-5 h-5 text-[#22ff88]" />
+                    <span className="text-[10px] font-black text-[#22ff88] uppercase tracking-[0.2em]">Certificação Final</span>
+                  </div>
+                  <h4 className="text-white font-black text-base md:text-lg leading-tight mb-2 group-hover:text-[#22ff88] transition-colors">{finalExam.title}</h4>
+                  <p className="text-[#64748b] text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    Basta atingir a nota mínima para emitir seu certificado
+                  </p>
+                </div>
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="p-8 mt-auto border-t border-white/5">

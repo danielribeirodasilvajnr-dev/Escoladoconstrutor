@@ -9,6 +9,8 @@ import { Vitrine } from './Vitrine';
 import { CoursePlayer } from './CoursePlayer';
 import { AdminUsersView } from './AdminUsersView';
 import { AdminFinanceView } from './AdminFinanceView';
+import { ExamPlayer } from './ExamPlayer';
+import { CertificateView } from './CertificateView';
 
 type DashboardView =
   | 'vitrine'
@@ -22,7 +24,9 @@ type DashboardView =
   | 'admin-usuarios'
   | 'admin-financeiro'
   | 'settings'
-  | 'player';
+  | 'player'
+  | 'exam-player'
+  | 'certificate-view';
 
 interface DashboardProps {
   userData: any;
@@ -33,6 +37,8 @@ export function Dashboard({ userData, session }: DashboardProps) {
   const [activeView, setActiveView] = useState<DashboardView>('overview');
   const [activeCourseId, setActiveCourseId] = useState<string | null>(null);
   const [examContext, setExamContext] = useState<{ courseId: string; moduleId: string | null } | null>(null);
+  const [currentExamId, setCurrentExamId] = useState<string | null>(null);
+  const [currentCertificateId, setCurrentCertificateId] = useState<string | null>(null);
 
   const handleOpenExam = (courseId: string, moduleId: string | null) => {
     setExamContext({ courseId, moduleId });
@@ -56,6 +62,10 @@ export function Dashboard({ userData, session }: DashboardProps) {
             courseId={activeCourseId}
             onBack={() => setActiveView('overview')}
             session={session}
+            onTakeExam={(examId) => {
+              setCurrentExamId(examId);
+              setActiveView('exam-player');
+            }}
           />
         ) : null;
       case 'admin-overview':
@@ -86,6 +96,29 @@ export function Dashboard({ userData, session }: DashboardProps) {
         return <AdminFinanceView />;
       case 'settings':
         return <ProfileSettings userData={userData} />;
+      case 'exam-player':
+        return currentExamId ? (
+          <ExamPlayer
+            examId={currentExamId}
+            userData={userData}
+            onBack={() => setActiveView('player')}
+            onFinish={(score, passed, certId) => {
+              if (certId) {
+                setCurrentCertificateId(certId);
+                setActiveView('certificate-view');
+              } else {
+                setActiveView('player');
+              }
+            }}
+          />
+        ) : null;
+      case 'certificate-view':
+        return currentCertificateId ? (
+          <CertificateView
+            certificateId={currentCertificateId}
+            onBack={() => setActiveView('overview')}
+          />
+        ) : null;
       default:
         return (
           <div className="p-12 flex items-center justify-center h-[calc(100vh-80px)]">
