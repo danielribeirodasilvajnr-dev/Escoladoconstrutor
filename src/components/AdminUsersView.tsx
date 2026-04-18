@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Users, 
-  Search, 
-  Mail, 
-  Shield, 
-  GraduationCap, 
-  User, 
-  MoreVertical, 
+import {
+  Users,
+  Search,
+  Mail,
+  Shield,
+  GraduationCap,
+  User,
+  MoreVertical,
   Check,
   Loader2,
   Key,
@@ -68,7 +68,7 @@ export function AdminUsersView() {
         .eq('id', userId);
 
       if (error) throw error;
-      
+
       setUsers(users.map(u => u.id === userId ? { ...u, role: newRole } : u));
       toast.success('Cargo atualizado com sucesso!');
     } catch (error: any) {
@@ -89,7 +89,7 @@ export function AdminUsersView() {
       });
 
       if (error) throw error;
-      
+
       toast.success('Convite enviado para ' + inviteEmail);
       setShowInviteModal(false);
       setInviteEmail('');
@@ -147,7 +147,7 @@ export function AdminUsersView() {
             className="w-full bg-[#1a1c22] border border-white/5 rounded-2xl pl-12 pr-4 py-4 text-white focus:outline-none focus:border-[#22ff88]/30 transition-all font-medium"
           />
         </div>
-        
+
         <div className="flex gap-4">
           <div className="bg-[#1a1c22] border border-white/5 px-6 py-3 rounded-2xl flex items-center gap-3">
             <Users className="w-5 h-5 text-[#22ff88]" />
@@ -162,91 +162,91 @@ export function AdminUsersView() {
       <div className="bg-[#1a1c22] rounded-[2.5rem] border border-white/5 overflow-hidden shadow-2xl">
         <div className="overflow-x-auto">
           {/* Users Table */}
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="text-[10px] uppercase tracking-widest text-[#64748b] border-b border-white/5">
-                    <th className="px-10 py-6 font-bold">Usuário</th>
-                    <th className="px-10 py-6 font-bold">Contato</th>
-                    <th className="px-10 py-6 font-bold">Cargo Atual</th>
-                    <th className="px-10 py-6 font-bold text-right">Ações</th>
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="text-[10px] uppercase tracking-widest text-[#64748b] border-b border-white/5">
+                <th className="px-10 py-6 font-bold">Usuário</th>
+                <th className="px-10 py-6 font-bold">Contato</th>
+                <th className="px-10 py-6 font-bold">Cargo Atual</th>
+                <th className="px-10 py-6 font-bold text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {loading ? (
+                [1, 2, 3, 4, 5].map(i => (
+                  <tr key={i} className="animate-pulse">
+                    <td colSpan={4} className="px-10 py-8 bg-white/[0.02]" />
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                  {loading ? (
-                    [1, 2, 3, 4, 5].map(i => (
-                      <tr key={i} className="animate-pulse">
-                        <td colSpan={4} className="px-10 py-8 bg-white/[0.02]" />
-                      </tr>
-                    ))
-                  ) : filteredUsers.length === 0 ? (
-                    <tr>
-                      <td colSpan={4} className="px-10 py-20 text-center">
-                        <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/10 text-[#64748b]">
-                           <Users className="w-8 h-8" />
-                        </div>
-                        <p className="text-white font-bold">Nenhum usuário encontrado</p>
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredUsers.map((user) => (
-                      <tr key={user.id} className="hover:bg-white/[0.02] transition-colors group">
-                        <td className="px-10 py-6">
-                          <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#2a2d35] to-[#1a1c22] border border-white/10 flex items-center justify-center overflow-hidden">
-                              {user.avatar_url ? (
-                                <img src={user.avatar_url} alt="" className="w-full h-full object-cover" />
-                              ) : (
-                                <span className="text-xl font-bold text-[#64748b]">
-                                  {user.full_name?.charAt(0) || user.email.charAt(0)}
-                                </span>
-                              )}
-                            </div>
-                            <div>
-                              <p className="font-bold text-white group-hover:text-[#22ff88] transition-colors">
-                                {user.full_name || 'Usuário sem nome'}
-                              </p>
-                              <p className="text-[10px] text-[#64748b] uppercase tracking-tighter">
-                                ID: {user.id.slice(0, 8)}...
-                              </p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-10 py-6">
-                          <div className="flex items-center gap-2 text-[#94a3b8] text-sm font-medium">
-                            <Mail className="w-4 h-4" />
-                            {user.email}
-                          </div>
-                        </td>
-                        <td className="px-10 py-6">
-                          {(() => {
-                            const badge = getRoleBadge(user.role);
-                            return (
-                              <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[11px] font-bold uppercase tracking-wider ${badge.color}`}>
-                                <badge.icon className="w-3.5 h-3.5" />
-                                {badge.label}
-                              </span>
-                            );
-                          })()}
-                        </td>
-                        <td className="px-10 py-6 text-right">
-                          {updatingId === user.id ? (
-                            <Loader2 className="w-5 h-5 animate-spin ml-auto text-[#22ff88]" />
+                ))
+              ) : filteredUsers.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="px-10 py-20 text-center">
+                    <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/10 text-[#64748b]">
+                      <Users className="w-8 h-8" />
+                    </div>
+                    <p className="text-white font-bold">Nenhum usuário encontrado</p>
+                  </td>
+                </tr>
+              ) : (
+                filteredUsers.map((user) => (
+                  <tr key={user.id} className="hover:bg-white/[0.02] transition-colors group">
+                    <td className="px-10 py-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#2a2d35] to-[#1a1c22] border border-white/10 flex items-center justify-center overflow-hidden">
+                          {user.avatar_url ? (
+                            <img src={user.avatar_url} alt="" className="w-full h-full object-cover" />
                           ) : (
-                            <div className="flex justify-end gap-2">
-                              <RoleDropdown 
-                                currentRole={user.role} 
-                                onUpdate={(role) => handleUpdateRole(user.id, role)} 
-                              />
-                            </div>
+                            <span className="text-xl font-bold text-[#64748b]">
+                              {user.full_name?.charAt(0) || user.email.charAt(0)}
+                            </span>
                           )}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                        </div>
+                        <div>
+                          <p className="font-bold text-white group-hover:text-[#22ff88] transition-colors">
+                            {user.full_name || 'Usuário sem nome'}
+                          </p>
+                          <p className="text-[10px] text-[#64748b] uppercase tracking-tighter">
+                            ID: {user.id.slice(0, 8)}...
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-10 py-6">
+                      <div className="flex items-center gap-2 text-[#94a3b8] text-sm font-medium">
+                        <Mail className="w-4 h-4" />
+                        {user.email}
+                      </div>
+                    </td>
+                    <td className="px-10 py-6">
+                      {(() => {
+                        const badge = getRoleBadge(user.role);
+                        return (
+                          <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[11px] font-bold uppercase tracking-wider ${badge.color}`}>
+                            <badge.icon className="w-3.5 h-3.5" />
+                            {badge.label}
+                          </span>
+                        );
+                      })()}
+                    </td>
+                    <td className="px-10 py-6 text-right">
+                      {updatingId === user.id ? (
+                        <Loader2 className="w-5 h-5 animate-spin ml-auto text-[#22ff88]" />
+                      ) : (
+                        <div className="flex justify-end gap-2">
+                          <RoleDropdown
+                            currentRole={user.role}
+                            onUpdate={(role) => handleUpdateRole(user.id, role)}
+                          />
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       {/* Invite Modal */}
       <AnimatePresence>
@@ -333,7 +333,7 @@ function RoleDropdown({ currentRole, onUpdate }: { currentRole: string, onUpdate
 
   return (
     <div className="relative">
-      <button 
+      <button
         onClick={() => setOpen(!open)}
         className="p-2 hover:bg-white/10 rounded-lg transition-colors text-[#64748b] hover:text-white"
       >
@@ -358,11 +358,10 @@ function RoleDropdown({ currentRole, onUpdate }: { currentRole: string, onUpdate
                     if (role.id !== currentRole) onUpdate(role.id);
                     setOpen(false);
                   }}
-                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold transition-all ${
-                    role.id === currentRole 
-                      ? 'bg-[#22ff88]/10 text-[#22ff88]' 
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold transition-all ${role.id === currentRole
+                      ? 'bg-[#22ff88]/10 text-[#22ff88]'
                       : 'text-[#64748b] hover:bg-white/5 hover:text-white'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-2">
                     <role.icon className="w-4 h-4" />

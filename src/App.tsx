@@ -81,7 +81,30 @@ export default function App() {
       handleSession(session);
     });
 
-    return () => subscription.unsubscribe();
+    const handlePopState = () => {
+      const hash = window.location.hash;
+      if (hash === '#login' || hash === '#register') {
+        // We only switch to auth if we are not authenticated
+        supabase.auth.getSession().then(({ data: { session } }) => {
+           if (!session) setView('auth');
+        });
+      } else if (!hash && !new URLSearchParams(window.location.search).get('c')) {
+        // If hash is cleared (user clicked back button), go back to landing
+        supabase.auth.getSession().then(({ data: { session } }) => {
+           if (!session) setView('landing');
+        });
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    // Initial hash check
+    handlePopState();
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('popstate', handlePopState);
+    };
   }, []);
 
   return (

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { motion } from 'motion/react';
 import { User, Mail, Phone, Upload, Loader2, Camera, CheckCircle2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -22,7 +22,7 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, '');
     if (value.length > 11) value = value.slice(0, 11);
-    
+
     if (value.length > 7) {
       value = `(${value.slice(0, 2)}) ${value.slice(2, 7)}-${value.slice(7)}`;
     } else if (value.length > 2) {
@@ -65,6 +65,7 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setSuccess(false);
 
     try {
       const { error } = await supabase.auth.updateUser({
@@ -103,7 +104,7 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
                 </div>
               ) : null}
               {avatarUrl ? (
-                <img 
+                <img
                   src={avatarUrl}
                   className="w-full h-full object-cover"
                   alt="Profile Preview"
@@ -114,18 +115,18 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
                 </span>
               )}
             </div>
-            <button 
+            <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
               className="absolute -bottom-2 -right-2 w-10 h-10 bg-[#22ff88] rounded-2xl flex items-center justify-center border-4 border-[#1a1c22] hover:scale-110 active:scale-95 transition-all text-black"
             >
               <Camera className="w-5 h-5" />
             </button>
-            <input 
-              type="file" 
+            <input
+              type="file"
               ref={fileInputRef}
               onChange={handleFileUpload}
-              className="hidden" 
+              className="hidden"
               accept="image/*"
             />
           </div>
@@ -141,7 +142,7 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
             <label className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest px-1">Nome Completo</label>
             <div className="relative group">
               <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748b] group-focus-within:text-[#22ff88] transition-colors" />
-              <input 
+              <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -155,7 +156,7 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
             <label className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest px-1">E-mail (Identificador)</label>
             <div className="relative">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748b]" />
-              <input 
+              <input
                 type="email"
                 readOnly
                 value={userData?.email || ''}
@@ -168,7 +169,7 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
             <label className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest px-1">Telefone (Brasil)</label>
             <div className="relative group">
               <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748b] group-focus-within:text-[#22ff88] transition-colors" />
-              <input 
+              <input
                 type="text"
                 value={phone}
                 onChange={handlePhoneChange}
@@ -180,7 +181,7 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
 
           <div className="space-y-2 md:col-span-2">
             <label className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest px-1">Resumo do Perfil (Bio)</label>
-            <textarea 
+            <textarea
               value={bio}
               onChange={(e) => setBio(e.target.value)}
               placeholder="Descreva sua experiência e especialidades..."
@@ -191,7 +192,7 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
 
         {/* Footer Actions */}
         <div className="pt-10 flex items-center justify-end border-t border-white/5">
-          <button 
+          <button
             type="submit"
             disabled={loading || uploading}
             className="px-10 py-4 bg-[#22ff88] text-black font-bold rounded-2xl hover:opacity-90 active:scale-95 disabled:opacity-50 transition-all flex items-center gap-3 shadow-[0_0_20px_rgba(34,255,136,0.2)]"

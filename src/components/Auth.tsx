@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { supabase } from '../lib/supabase';
 import { cn } from '../lib/utils';
-import { Globe, AlertCircle, Loader2 } from 'lucide-react';
+import { Globe, AlertCircle, Loader2, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface AuthProps {
@@ -13,13 +13,27 @@ type AuthMode = 'login' | 'register';
 type AccessLevel = 'membro' | 'administrador';
 
 export function Auth({ onSuccess }: AuthProps) {
-  const [mode, setMode] = useState<AuthMode>('login');
+  const initialMode = window.location.hash === '#register' ? 'register' : 'login';
+  const [mode, setMode] = useState<AuthMode>(initialMode);
   const [accessLevel, setAccessLevel] = useState<AccessLevel>('membro');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [verificationSent, setVerificationSent] = useState(false);
+
+  // Sync mode if hash changes while already on Auth view
+  React.useEffect(() => {
+    const handleHash = () => {
+      if (window.location.hash === '#register') setMode('register');
+      if (window.location.hash === '#login') setMode('login');
+      if (!window.location.hash) {
+        // Handle physical UI back button clearing hash to return via App view logic
+      }
+    };
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
 
   const handleGoogleLogin = async () => {
     setLoading(true);
@@ -58,25 +72,27 @@ export function Auth({ onSuccess }: AuthProps) {
         if (error) throw error;
         toast.success(`Bem-vindo de volta, ${email.split('@')[0]}!`);
       } else {
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        const isMaster = email === 'danielribeirodasilvajnr@gmail.com';
+        const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             data: {
-              role: accessLevel,
-              email: email,
+              role: isMaster ? 'master' : accessLevel,
+              full_name: email.split('@')[0],
+              pending_professor: accessLevel === 'administrador'
             },
+            emailRedirectTo: window.location.origin,
           },
         });
-
-        if (signUpError) throw signUpError;
-
+        if (error) throw error;
         setVerificationSent(true);
-        toast.success('Confirme seu e-mail para ativar sua conta.');
+        toast.success('Quase lá! Verifique seu e-mail para confirmar a conta.');
         return; // Don't call onSuccess
       }
       onSuccess();
     } catch (err: any) {
+      console.error('Auth error:', err);
       let message = err.message || 'Ocorreu um erro na autenticação.';
       
       // Tradução de erros comuns do Supabase
@@ -111,9 +127,16 @@ export function Auth({ onSuccess }: AuthProps) {
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="absolute top-12 left-12 z-20"
+        className="absolute top-8 left-8 md:top-12 md:left-12 z-20 flex items-center gap-4"
       >
-        <h1 className="text-[28px] font-bold tracking-tight text-[#22ff88] font-display">
+        <button 
+          onClick={() => { window.location.hash = ''; }}
+          className="w-10 h-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-white/10 transition-all hover:-translate-x-1"
+          title="Voltar para a página inicial"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+        <h1 className="text-[24px] md:text-[28px] font-bold tracking-tight text-[#22ff88] font-display">
           Construtor360
         </h1>
       </motion.div>
