@@ -84,27 +84,10 @@ export function LandingPage({ onExplore }: LandingPageProps) {
               Eleve seu conhecimento. <br />
               <span className="text-[#22ff88]">Construa seu futuro.</span>
             </h1>
-            <p className="text-lg text-[#64748b] max-w-2xl leading-relaxed mb-10">
+            <p className="text-lg text-[#64748b] max-w-2xl leading-relaxed mb-6">
               Aprenda com especialistas e domine as técnicas que impulsionam o setor da construção.
               Da teoria à prática, transforme aprendizado em resultados reais.
             </p>
-            <div className="flex flex-col sm:flex-row items-center gap-4">
-              <button
-                onClick={() => { window.location.hash = 'register'; }}
-                className="w-full sm:w-auto group flex justify-center items-center gap-2 px-8 py-4 bg-[#22ff88] text-black rounded-2xl text-sm font-bold shadow-2xl shadow-[#22ff88]/20 hover:bg-[#22ff88]/90 transition-all"
-              >
-                <UserPlus className="w-5 h-5 opacity-70" />
-                Inscreva-se
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </button>
-              <button
-                onClick={() => { window.location.hash = 'login'; }}
-                className="w-full sm:w-auto group flex justify-center items-center gap-2 px-8 py-4 bg-white/5 border border-white/10 text-white rounded-2xl text-sm font-bold hover:bg-white/10 transition-all"
-              >
-                <User className="w-5 h-5 text-[#64748b]" />
-                Fazer Login
-              </button>
-            </div>
           </motion.div>
 
           <motion.div 
