@@ -17,16 +17,16 @@ export function FeaturedCard({ image, category, title }: FeaturedCardProps) {
       />
       <div className="absolute inset-0 bg-gradient-to-t from-[#0f1115] via-[#0f1115]/20 to-transparent" />
       
-      <div className="absolute inset-0 p-8 flex flex-col justify-end">
-        <span className="text-[10px] font-bold text-[#22ff88] uppercase tracking-[0.2em] mb-3">
+      <div className="absolute inset-0 p-5 md:p-8 flex flex-col justify-end">
+        <span className="text-[8px] md:text-[10px] font-bold text-[#22ff88] uppercase tracking-[0.2em] mb-2 md:mb-3">
           {category}
         </span>
-        <h3 className="text-2xl font-bold text-white mb-6 leading-tight group-hover:translate-x-1 transition-transform">
+        <h3 className="text-lg md:text-2xl font-bold text-white mb-4 md:mb-6 leading-tight group-hover:translate-x-1 transition-transform line-clamp-2">
           {title}
         </h3>
-        <div className="flex items-center gap-2 text-[11px] font-bold text-white group-hover:text-[#22ff88] transition-colors">
-          Ver Detalhes
-          <ArrowRight className="w-4 h-4" />
+        <div className="flex items-center gap-2 text-[9px] md:text-[11px] font-bold text-white group-hover:text-[#22ff88] transition-colors">
+          Detalhes
+          <ArrowRight className="w-3.5 h-3.5 md:w-4 md:h-4" />
         </div>
       </div>
     </div>

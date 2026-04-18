@@ -120,15 +120,15 @@ export function AdminUsersView() {
   };
 
   return (
-    <div className="p-10 max-w-[1600px] mx-auto space-y-10 pb-20">
-      <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <div className="p-4 md:p-10 max-w-[1600px] mx-auto space-y-6 md:space-y-10 pb-20">
+      <header className="mb-8 md:mb-12 flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6">
         <div>
-          <h1 className="text-4xl font-bold text-white mb-2">Gestão de Usuários</h1>
-          <p className="text-[#64748b] text-base">Controle de acessos, permissões e cargos da plataforma.</p>
+          <h1 className="text-2xl md:text-2xl lg:text-4xl font-bold text-white mb-1 md:mb-2">Gestão de Usuários</h1>
+          <p className="text-[#64748b] text-sm md:text-base">Controle de acessos e permissões.</p>
         </div>
         <button
           onClick={() => setShowInviteModal(true)}
-          className="flex items-center gap-2 px-6 py-3.5 bg-[#22ff88] text-black font-bold rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-[0_8px_20px_rgba(34,255,136,0.2)]"
+          className="flex items-center justify-center gap-2 px-6 py-3 bg-[#22ff88] text-black text-sm md:text-base font-bold rounded-xl md:rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-[0_8px_20px_rgba(34,255,136,0.2)]"
         >
           <UserPlus className="w-5 h-5" />
           Novo Professor
@@ -138,13 +138,13 @@ export function AdminUsersView() {
       {/* Filters and Stats */}
       <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
         <div className="relative group w-full md:max-w-md">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#64748b] group-focus-within:text-[#22ff88] transition-colors" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748b] group-focus-within:text-[#22ff88] transition-colors" />
           <input
             type="text"
-            placeholder="Buscar por nome ou e-mail..."
+            placeholder="Buscar usuário..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-[#1a1c22] border border-white/5 rounded-2xl pl-12 pr-4 py-4 text-white focus:outline-none focus:border-[#22ff88]/30 transition-all font-medium"
+            className="w-full bg-[#1a1c22] border border-white/5 rounded-xl md:rounded-2xl pl-11 pr-4 py-3 md:py-4 text-sm text-white focus:outline-none focus:border-[#22ff88]/30 transition-all font-medium"
           />
         </div>
 
@@ -159,8 +159,61 @@ export function AdminUsersView() {
         </div>
       </div>
 
-      <div className="bg-[#1a1c22] rounded-[2.5rem] border border-white/5 overflow-hidden shadow-2xl">
-        <div className="overflow-x-auto">
+      <div className="bg-[#1a1c22]/50 md:bg-[#1a1c22] rounded-2xl md:rounded-[2.5rem] border border-white/5 overflow-hidden shadow-2xl">
+        {/* Mobile Cards (sm/md only) */}
+        <div className="md:hidden space-y-1 bg-transparent">
+          {loading ? (
+            [1, 2, 3].map(i => (
+              <div key={i} className="p-4 bg-white/[0.02] animate-pulse rounded-xl" />
+            ))
+          ) : filteredUsers.length === 0 ? (
+             <div className="p-10 text-center">
+                <Users className="w-8 h-8 text-[#64748b] mx-auto mb-2 opacity-20" />
+                <p className="text-sm text-[#64748b]">Nenhum usuário</p>
+             </div>
+          ) : (
+            filteredUsers.map(user => (
+              <div key={user.id} className="p-4 border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center overflow-hidden border border-white/10">
+                       {user.avatar_url ? (
+                         <img src={user.avatar_url} alt="" className="w-full h-full object-cover" />
+                       ) : (
+                         <span className="text-sm font-bold text-[#64748b]">{(user.full_name || user.email).charAt(0)}</span>
+                       )}
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-white truncate max-w-[150px]">{user.full_name || 'Sem nome'}</p>
+                      <p className="text-[10px] text-[#64748b] font-mono">ID: {user.id.slice(0, 8)}</p>
+                    </div>
+                  </div>
+                  <RoleDropdown
+                    currentRole={user.role}
+                    onUpdate={(role) => handleUpdateRole(user.id, role)}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-[11px] text-[#94a3b8]">
+                    <Mail className="w-3 h-3" />
+                    <span className="truncate max-w-[120px]">{user.email}</span>
+                  </div>
+                  {(() => {
+                    const badge = getRoleBadge(user.role);
+                    return (
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[9px] font-bold uppercase tracking-wider ${badge.color}`}>
+                        {badge.label}
+                      </span>
+                    );
+                  })()}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Desktop Table (Lg and above) */}
+        <div className="hidden md:block overflow-x-auto">
           {/* Users Table */}
           <table className="w-full text-left border-collapse">
             <thead>

@@ -358,18 +358,18 @@ export function CoursePlayer({ courseId, onBack, session }: CoursePlayerProps) {
     <div className="flex flex-col lg:flex-row h-screen lg:h-[calc(100vh-80px)] overflow-hidden bg-[#0a0b0e]">
       {/* Main Player Area */}
       <div className="flex-1 overflow-y-auto custom-scrollbar">
-        <div className="p-4 md:p-12 max-w-[1200px] mx-auto">
+        <div className="p-3 md:p-12 max-w-[1200px] mx-auto">
           {/* Back Button */}
           <button 
             onClick={onBack}
-            className="flex items-center gap-2 text-[#64748b] hover:text-white transition-colors mb-8 group"
+            className="flex items-center gap-1.5 text-[#64748b] hover:text-white transition-colors mb-4 md:mb-8 group"
           >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            <span className="text-xs font-bold uppercase tracking-widest">Voltar para o Console</span>
+            <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
+            <span className="text-[9px] font-bold uppercase tracking-widest">Painel</span>
           </button>
 
           {/* Video Player */}
-          <div className="relative aspect-video rounded-[2.5rem] bg-black border border-white/5 overflow-hidden shadow-2xl group mb-10">
+          <div className="relative aspect-video rounded-xl md:rounded-[2.5rem] bg-black border border-white/5 overflow-hidden shadow-2xl group mb-6 md:mb-10">
             {currentLesson?.content_url ? (
               <video 
                 ref={videoRef}
@@ -394,28 +394,28 @@ export function CoursePlayer({ courseId, onBack, session }: CoursePlayerProps) {
           </div>
 
           {/* Course Info */}
-          <div className="space-y-6">
-            <div className="flex items-center gap-4">
-              <span className="px-3 py-1 bg-[#22ff88]/10 text-[#22ff88] text-[10px] font-black rounded-lg uppercase tracking-widest border border-[#22ff88]/20">
-                Advanced Tier
+          <div className="space-y-4 md:space-y-6">
+            <div className="flex items-center gap-3">
+              <span className="px-2 py-0.5 bg-[#22ff88]/10 text-[#22ff88] text-[8px] md:text-[10px] font-black rounded-lg uppercase tracking-widest border border-[#22ff88]/20">
+                Advanced
               </span>
-              <div className="flex items-center gap-1.5 text-white/60">
-                <Star className="w-3.5 h-3.5 text-[#22ff88] fill-[#22ff88]" />
-                <span className="text-xs font-bold">{course?.rating ? Number(course.rating).toFixed(1) : '4.8'} Rating</span>
+              <div className="flex items-center gap-1 text-white/60">
+                <Star className="w-3 h-3 text-[#22ff88] fill-[#22ff88]" />
+                <span className="text-[10px] font-bold">{course?.rating ? Number(course.rating).toFixed(1) : '4.8'}</span>
               </div>
             </div>
 
-            <h1 className="text-2xl md:text-5xl font-black text-white leading-tight">
-              {course?.title || "Advanced Structural Dynamics for Robotic Systems"}
+            <h1 className="text-xl md:text-5xl font-black text-white leading-tight">
+              {course?.title}
             </h1>
 
-            <p className="text-[#64748b] text-base md:text-lg leading-relaxed max-w-3xl">
-              {course?.description || "Explore the foundational principles of structural analysis applied to modern robotics. This auteur-series course dives deep into harmonic oscillations, damping coefficients, and real-world implementation of dynamic controls."}
+            <p className="text-[#64748b] text-sm md:text-lg leading-relaxed max-w-3xl line-clamp-2 md:line-clamp-none">
+              {course?.description}
             </p>
 
             {/* Tabs for Engagement */}
-            <div className="pt-10 border-t border-white/5">
-              <div className="flex gap-4 md:gap-8 border-b border-white/5 mb-8 overflow-x-auto scrollbar-hide">
+            <div className="pt-6 md:pt-10 border-t border-white/5">
+              <div className="flex gap-4 md:gap-8 border-b border-white/5 mb-6 md:mb-8 overflow-x-auto scrollbar-hide">
                 {[
                   { id: 'about', label: 'Sobre', icon: FileText },
                   { id: 'materials', label: 'Materiais', icon: Download, count: attachments.length },
@@ -425,15 +425,15 @@ export function CoursePlayer({ courseId, onBack, session }: CoursePlayerProps) {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
                     className={cn(
-                      "flex items-center gap-2 pb-4 text-xs font-bold uppercase tracking-widest transition-all relative",
+                      "flex items-center gap-2 pb-3 md:pb-4 text-[9px] md:text-xs font-bold uppercase tracking-widest transition-all relative shrink-0",
                       activeTab === tab.id ? "text-[#22ff88]" : "text-[#64748b] hover:text-white"
                     )}
                   >
-                    <tab.icon className="w-4 h-4" />
+                    <tab.icon className="w-3.5 h-3.5 md:w-4 md:h-4" />
                     {tab.label}
                     {tab.count !== undefined && (
                       <span className={cn(
-                        "ml-1 px-1.5 py-0.5 rounded-md text-[9px]",
+                        "ml-1 px-1 py-0.5 rounded-md text-[8px]",
                         activeTab === tab.id ? "bg-[#22ff88]/20 text-[#22ff88]" : "bg-white/5 text-[#64748b]"
                       )}>
                         {tab.count}
@@ -458,9 +458,9 @@ export function CoursePlayer({ courseId, onBack, session }: CoursePlayerProps) {
                     exit={{ opacity: 0, y: -10 }}
                     className="text-[#94a3b8] text-sm leading-relaxed"
                   >
-                    <div className="bg-[#1a1c22] p-8 rounded-3xl border border-white/5">
-                      <h4 className="text-white font-bold mb-4">O que você vai aprender:</h4>
-                      <p>{currentLesson?.content || "Nesta aula, exploramos conceitos avançados com aplicações práticas reais. Focamos na resolução de problemas complexos e na implementação de fluxos de trabalho eficientes."}</p>
+                    <div className="bg-[#1a1c22] p-6 md:p-8 rounded-2xl md:rounded-3xl border border-white/5">
+                      <h4 className="text-xs md:text-sm font-bold text-white mb-3">O que você vai aprender:</h4>
+                      <p className="text-xs md:text-sm">{currentLesson?.content || "Nesta aula, exploramos conceitos avançados com aplicações práticas reais."}</p>
                     </div>
                   </motion.div>
                 )}
@@ -486,18 +486,18 @@ export function CoursePlayer({ courseId, onBack, session }: CoursePlayerProps) {
                             href={att.file_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="bg-[#1a1c22] p-6 rounded-3xl border border-white/5 flex items-center justify-between group hover:border-[#22ff88]/30 transition-all"
+                            className="bg-[#1a1c22] p-4 md:p-6 rounded-2xl border border-white/5 flex items-center justify-between group hover:border-[#22ff88]/30 transition-all"
                           >
-                            <div className="flex items-center gap-4">
-                              <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center group-hover:bg-[#22ff88]/10 transition-colors">
-                                <FileText className="w-6 h-6 text-[#64748b] group-hover:text-[#22ff88] transition-colors" />
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center group-hover:bg-[#22ff88]/10 transition-colors">
+                                <FileText className="w-5 h-5 text-[#64748b] group-hover:text-[#22ff88] transition-colors" />
                               </div>
                               <div>
-                                <p className="font-bold text-white mb-1">{att.title}</p>
-                                <p className="text-[10px] text-[#64748b] uppercase tracking-widest">{att.file_type || 'Arquivo'} • {formatFileSize(att.file_size)}</p>
+                                <p className="font-bold text-xs text-white mb-1 truncate max-w-[150px]">{att.title}</p>
+                                <p className="text-[8px] text-[#64748b] uppercase tracking-widest">{att.file_type || 'PDF'} • {formatFileSize(att.file_size)}</p>
                               </div>
                             </div>
-                            <Download className="w-5 h-5 text-[#64748b] group-hover:text-[#22ff88] transition-all" />
+                            <Download className="w-4 h-4 text-[#64748b] group-hover:text-[#22ff88] transition-all" />
                           </a>
                         ))}
                       </div>
@@ -637,19 +637,19 @@ export function CoursePlayer({ courseId, onBack, session }: CoursePlayerProps) {
       </div>
 
       {/* Curriculum Sidebar */}
-      <div className="w-full lg:w-[450px] bg-[#0f1115] border-t lg:border-t-0 lg:border-l border-white/5 flex flex-col h-[50vh] lg:h-full">
-        <div className="p-8 border-b border-white/5">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-xl font-bold text-white">Conteúdo do Curso</h2>
+      <div className="w-full lg:w-[400px] bg-[#0f1115] border-t lg:border-t-0 lg:border-l border-white/5 flex flex-col h-[50vh] lg:h-full">
+        <div className="p-5 md:p-8 border-b border-white/5">
+          <div className="flex items-center justify-between mb-4 md:mb-8">
+            <h2 className="text-lg md:text-xl font-bold text-white">Conteúdo</h2>
           </div>
 
-          <div className="space-y-4">
-            <div className="flex justify-between items-baseline mb-2">
-              <p className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest">
-                {modules.length} Módulos • {modules.reduce((acc, m) => acc + m.lessons.length, 0)} Aulas totais
+          <div className="space-y-3">
+            <div className="flex justify-between items-baseline mb-1">
+              <p className="text-[9px] font-bold text-[#64748b] uppercase tracking-widest">
+                {modules.length} Mód • {modules.reduce((acc, m) => acc + m.lessons.length, 0)} Aulas
               </p>
             </div>
-            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+            <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
                <motion.div 
                  initial={{ width: 0 }}
                  animate={{ width: '45%' }}
@@ -674,38 +674,38 @@ export function CoursePlayer({ courseId, onBack, session }: CoursePlayerProps) {
                   <button
                     key={lesson.id}
                     onClick={() => !isLocked && setCurrentLesson(lesson)}
-                    className={`w-full group p-5 rounded-2xl border text-left transition-all ${
+                    className={`w-full group p-4 md:p-5 rounded-xl md:rounded-2xl border text-left transition-all ${
                       isActive 
-                        ? 'bg-[#22ff88]/5 border-[#22ff88]/20 shadow-[0_0_20px_rgba(34,255,136,0.05)]' 
+                        ? 'bg-[#22ff88]/5 border-[#22ff88]/20' 
                         : 'bg-[#1a1c22] border-white/5 hover:border-white/10'
                     } ${isLocked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                   >
-                    <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start justify-between gap-3">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-2 mb-1">
                           {isActive ? (
-                            <span className="px-2 py-0.5 bg-[#22ff88] text-[9px] font-black text-black rounded uppercase tracking-tighter">Assistindo</span>
+                            <span className="px-1.5 py-0.5 bg-[#22ff88] text-[8px] font-black text-black rounded uppercase tracking-tighter">Live</span>
                           ) : (
-                            <span className="text-[10px] font-bold text-[#64748b] uppercase">Aula {lIdx + 1 < 10 ? `0${lIdx + 1}` : lIdx + 1}</span>
+                            <span className="text-[8px] md:text-[10px] font-bold text-[#64748b] uppercase">{lIdx + 1 < 10 ? `0${lIdx + 1}` : lIdx + 1}</span>
                           )}
                         </div>
-                        <h4 className={`text-sm font-bold transition-colors mb-2 ${isActive ? 'text-[#22ff88]' : 'text-white/80 group-hover:text-white'}`}>
+                        <h4 className={`text-xs md:text-sm font-bold transition-colors mb-1.5 ${isActive ? 'text-[#22ff88]' : 'text-white/80 group-hover:text-white'}`}>
                           {lesson.title}
                         </h4>
-                        <div className="flex items-center gap-2 text-[#64748b]">
-                          <Play className={`w-3 h-3 ${isActive ? 'text-[#22ff88] fill-[#22ff88]' : ''}`} />
-                          <span className="text-[10px] font-bold tracking-widest uppercase">{lesson.duration || '--:--'}</span>
+                        <div className="flex items-center gap-1.5 text-[#64748b]">
+                          <Play className={`w-2.5 h-2.5 ${isActive ? 'text-[#22ff88] fill-[#22ff88]' : ''}`} />
+                          <span className="text-[8px] md:text-[10px] font-bold tracking-widest uppercase">{lesson.duration || '--:--'}</span>
                         </div>
                       </div>
-                      <div className="mt-1">
+                      <div className="mt-1 shrink-0">
                         {isLocked ? (
-                          <Lock className="w-4 h-4 text-[#334155]" />
+                          <Lock className="w-3.5 h-3.5 text-[#334155]" />
                         ) : isActive ? (
-                          <div className="w-5 h-5 rounded-full border-2 border-[#22ff88] flex items-center justify-center">
-                            <div className="w-2 h-2 rounded-full bg-[#22ff88] animate-pulse" />
+                          <div className="w-4 h-4 rounded-full border border-[#22ff88] flex items-center justify-center">
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#22ff88] animate-pulse" />
                           </div>
                         ) : (
-                          <CheckCircle2 className="w-4.5 h-4.5 text-[#334155]" />
+                          <CheckCircle2 className="w-3.5 h-3.5 text-[#334155]" />
                         )}
                       </div>
                     </div>

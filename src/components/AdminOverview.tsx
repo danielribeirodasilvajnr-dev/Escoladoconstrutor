@@ -154,11 +154,11 @@ export function AdminOverview({ userData, onViewChange }: AdminOverviewProps) {
   }
 
   return (
-    <div className="p-10 max-w-[1600px] mx-auto space-y-10 pb-20">
-      <header className="flex justify-between items-start mb-12">
+    <div className="p-3 md:p-10 max-w-[1600px] mx-auto space-y-5 md:space-y-10 pb-20 mt-2 md:mt-0">
+      <header className="flex justify-between items-start mb-6 md:mb-12">
         <div>
-          <h1 className="text-4xl font-bold text-white mb-2">Painel do Professor</h1>
-          <p className="text-[#64748b] text-base">Relatório de performance editorial e métricas de engajamento.</p>
+          <h1 className="text-xl md:text-2xl lg:text-4xl font-bold text-white mb-1 md:mb-2 leading-tight">Painel do Professor</h1>
+          <p className="text-[#64748b] text-[10px] md:text-base tracking-wide uppercase font-bold">Performance e Engajamento</p>
         </div>
       </header>
 
@@ -169,34 +169,34 @@ export function AdminOverview({ userData, onViewChange }: AdminOverviewProps) {
       ) : (
         <>
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {stats.map((stat, i) => (
               <motion.div
                 key={stat.label}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
-                className="bg-[#1a1c22] p-8 rounded-3xl border border-white/5 relative overflow-hidden group"
+                className="bg-[#1a1c22] p-6 md:p-8 rounded-2xl md:rounded-3xl border border-white/5 relative overflow-hidden group"
               >
-                <div className="flex justify-between items-start mb-6">
-                  <div className="p-3 bg-white/5 rounded-2xl group-hover:scale-110 transition-transform">
-                    <stat.icon className={cn("w-6 h-6", stat.color)} />
+                <div className="flex justify-between items-start mb-3 md:mb-6">
+                  <div className="p-2 bg-white/5 rounded-xl group-hover:scale-110 transition-transform">
+                    <stat.icon className={cn("w-4 h-4 md:w-6 md:h-6", stat.color)} />
                   </div>
                   {stat.change && (
-                    <span className="px-2 py-1 bg-[#22ff88]/10 text-[#22ff88] text-[10px] font-bold rounded-md">
+                    <span className="px-1.5 py-0.5 md:px-2 md:py-1 bg-[#22ff88]/10 text-[#22ff88] text-[9px] md:text-[10px] font-bold rounded-md">
                       {stat.change}
                     </span>
                   )}
                   {stat.status && (
-                    <span className="px-2 py-1 bg-white/5 text-[#64748b] text-[10px] font-bold rounded-md">
+                    <span className="px-1.5 py-0.5 md:px-2 md:py-1 bg-white/5 text-[#64748b] text-[9px] md:text-[10px] font-bold rounded-md">
                       {stat.status}
                     </span>
                   )}
                 </div>
-                <p className="text-[#64748b] text-sm font-medium mb-1">{stat.label}</p>
-                <p className="text-4xl font-bold text-white tracking-tight">{stat.value}</p>
+                <p className="text-[#64748b] text-[9px] md:text-sm font-bold uppercase tracking-widest mb-1">{stat.label}</p>
+                <p className="text-2xl md:text-4xl font-extrabold text-white tracking-tight">{stat.value}</p>
 
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/5">
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 md:h-1 bg-white/5">
                   <div className={cn("h-full opacity-50 transition-all duration-1000", stat.color === 'text-[#22ff88]' ? 'bg-[#22ff88]' : 'bg-[#00ffcc]')} style={{ width: '60%' }} />
                 </div>
               </motion.div>
@@ -205,37 +205,33 @@ export function AdminOverview({ userData, onViewChange }: AdminOverviewProps) {
 
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Growth Dynamics */}
-            <div className="lg:col-span-2 bg-[#1a1c22] p-8 rounded-3xl border border-white/5">
-              <div className="flex justify-between items-center mb-10">
+            <div className="lg:col-span-2 bg-[#1a1c22] p-6 md:p-8 rounded-2xl md:rounded-3xl border border-white/5">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 md:mb-10">
                 <div>
-                  <h2 className="text-xl font-bold text-white mb-1">Dinâmica de Crescimento</h2>
-                  <p className="text-[#64748b] text-xs">Visualização semestral de novos ingressantes.</p>
+                  <h2 className="text-lg md:text-xl font-bold text-white mb-1">Crescimento</h2>
+                  <p className="text-[#64748b] text-[10px] md:text-xs">Visualização semestral de novos ingressantes.</p>
                 </div>
-                <div className="flex gap-4 text-[10px] uppercase tracking-widest font-bold">
-                  <div className="flex items-center gap-2 text-[#22ff88]">
-                    <div className="w-2 h-2 rounded-full bg-[#22ff88]" />
-                    Novos Usuários
-                  </div>
-                  <div className="flex items-center gap-2 text-[#64748b]">
-                    <div className="w-2 h-2 rounded-full bg-[#33353b]" />
-                    Média
+                <div className="flex gap-4 text-[9px] md:text-[10px] uppercase tracking-widest font-bold">
+                  <div className="flex items-center gap-1.5 text-[#22ff88]">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#22ff88]" />
+                    <span>Novos Usuários</span>
                   </div>
                 </div>
               </div>
 
-              <div className="h-64 flex items-end justify-between gap-4 px-4">
+              <div className="h-48 md:h-64 flex items-end justify-between gap-2 md:gap-4 px-2 md:px-4">
                 {growthData.map((data, i) => (
-                  <div key={data.month} className="flex-1 flex flex-col items-center gap-4">
+                  <div key={data.month} className="flex-1 flex flex-col items-center gap-2 md:gap-4">
                     <motion.div
                       initial={{ height: 0 }}
-                      animate={{ height: `${data.value || 5}%` }} // Min 5% height for visibility
+                      animate={{ height: `${data.value || 5}%` }} 
                       transition={{ duration: 1, delay: i * 0.1 }}
                       className={cn(
-                        "w-full rounded-lg transition-colors",
-                        data.active ? "bg-[#22ff88] shadow-[0_0_20px_rgba(34,255,136,0.3)]" : "bg-[#2a2d35]"
+                        "w-full max-w-[20px] md:max-w-none rounded-sm md:rounded-lg transition-colors",
+                        data.active ? "bg-[#22ff88] shadow-[0_0_15px_rgba(34,255,136,0.3)]" : "bg-[#2a2d35]"
                       )}
                     />
-                    <span className="text-[10px] font-bold text-[#64748b]">{data.month}</span>
+                    <span className="text-[8px] md:text-[10px] font-bold text-[#64748b]">{data.month}</span>
                   </div>
                 ))}
               </div>
@@ -245,40 +241,40 @@ export function AdminOverview({ userData, onViewChange }: AdminOverviewProps) {
             <div className="space-y-6">
               <div
                 onClick={() => onViewChange?.('admin-cursos')}
-                className="bg-[#22ff88] p-6 rounded-3xl border border-[#22ff88] flex items-center justify-between group cursor-pointer hover:opacity-90 active:scale-[0.98] transition-all"
+                className="bg-[#22ff88] p-5 md:p-6 rounded-2xl md:rounded-3xl border border-[#22ff88] flex items-center justify-between group cursor-pointer hover:opacity-90 active:scale-[0.98] transition-all"
               >
                 <div>
-                  <h3 className="text-black font-bold text-lg mb-1">Criar Novo Curso</h3>
-                  <p className="text-black/60 text-xs font-medium">Lançar novo conteúdo autoral</p>
+                  <h3 className="text-black font-black text-sm md:text-lg mb-0.5">Criar Curso</h3>
+                  <p className="text-black/60 text-[9px] font-bold uppercase tracking-wider">Lançar conteúdo</p>
                 </div>
-                <div className="w-12 h-12 bg-black/10 rounded-2xl flex items-center justify-center">
-                  <Plus className="w-6 h-6 text-black" />
+                <div className="w-10 h-10 md:w-12 md:h-12 bg-black/10 rounded-xl md:rounded-2xl flex items-center justify-center">
+                  <Plus className="w-5 h-5 md:w-6 md:h-6 text-black" />
                 </div>
               </div>
 
-              <div className="bg-[#1a1c22] p-6 rounded-3xl border border-white/5 flex items-center justify-between group cursor-pointer hover:bg-white/5 transition-all">
+              <div className="bg-[#1a1c22] p-5 md:p-6 rounded-2xl md:rounded-3xl border border-white/5 flex items-center justify-between group cursor-pointer hover:bg-white/5 transition-all">
                 <div>
-                  <h3 className="text-white font-bold text-lg mb-1">Gerenciar Alunos</h3>
-                  <p className="text-[#64748b] text-xs font-medium">Controle de acesso e permissões</p>
+                  <h3 className="text-white font-black text-sm md:text-lg mb-0.5">Gerenciar Alunos</h3>
+                  <p className="text-[#64748b] text-[9px] font-bold uppercase tracking-wider">Acessos e Permissões</p>
                 </div>
-                <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center">
-                  <ArrowUpRight className="w-6 h-6 text-white" />
+                <div className="w-10 h-10 md:w-12 md:h-12 bg-white/5 rounded-xl md:rounded-2xl flex items-center justify-center">
+                  <ArrowUpRight className="w-5 h-5 md:w-6 md:h-6 text-white" />
                 </div>
               </div>
 
               {/* Faturamento Mensal */}
-              <div className="bg-[#1a1c22] p-8 rounded-3xl border border-white/5">
-                <div className="flex items-center gap-2 mb-6">
+              <div className="bg-[#1a1c22] p-6 md:p-8 rounded-2xl md:rounded-3xl border border-white/5">
+                <div className="flex items-center gap-2 mb-4 md:mb-6">
                   <div className="w-2 h-2 rounded-full bg-[#22ff88]" />
-                  <span className="text-[10px] uppercase tracking-widest font-bold text-white">Faturamento Mensal</span>
+                  <span className="text-[9px] md:text-[10px] uppercase tracking-widest font-bold text-white">Faturamento Mensal</span>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-3 md:space-y-4">
                   {[
                     { label: "Este Mês", value: `R$ ${revenueStats.currentMonth.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`, color: "text-[#22ff88]" },
                     { label: "Mês Anterior", value: `R$ ${revenueStats.lastMonth.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}` },
-                    { label: "Ticket Médio", value: `R$ ${revenueStats.averageTicket.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` },
+                    { label: "Ticket ?", value: `R$ ${revenueStats.averageTicket.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` },
                   ].map((item) => (
-                    <div key={item.label} className="flex justify-between items-center text-sm">
+                    <div key={item.label} className="flex justify-between items-center text-xs md:text-sm">
                       <span className="text-[#64748b]">{item.label}</span>
                       <span className={cn("font-bold", item.color || "text-white")}>{item.value}</span>
                     </div>
@@ -288,16 +284,34 @@ export function AdminOverview({ userData, onViewChange }: AdminOverviewProps) {
             </div>
           </div>
 
-          {/* Recent Activity Table */}
+          {/* Recent Activity Card List (Mobile) */}
           {recentActivities.length > 0 && (
-            <section className="mt-12 bg-[#1a1c22] rounded-3xl border border-white/5 overflow-hidden">
-              <div className="p-8 border-b border-white/5 flex justify-between items-center">
-                <h2 className="text-xl font-bold text-white">Atividades Recentes de Cursos</h2>
-                <button className="text-[11px] font-bold text-[#22ff88] uppercase tracking-widest hover:underline transition-all">
-                  Ver todos os logs
+            <section className="mt-8 md:mt-12 bg-[#1a1c22] rounded-2xl md:rounded-3xl border border-white/5 overflow-hidden">
+              <div className="p-6 md:p-8 border-b border-white/5 flex justify-between items-center">
+                <h2 className="text-lg md:text-xl font-bold text-white">Atividades Recentes</h2>
+                <button className="text-[10px] font-bold text-[#22ff88] uppercase tracking-widest hover:underline transition-all">
+                  Ver tudo
                 </button>
               </div>
-              <div className="overflow-x-auto">
+              
+              {/* Mobile View */}
+              <div className="md:hidden divide-y divide-white/5">
+                {recentActivities.map((act, i) => (
+                  <div key={i} className="p-4 flex items-center gap-4">
+                    <img src={act.image} className="w-12 h-12 rounded-xl object-cover shrink-0" alt="" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-white text-sm truncate">{act.course}</p>
+                      <div className="flex justify-between items-center mt-1">
+                        <span className="text-[#22ff88] text-xs font-bold">{act.enrollments} Insc.</span>
+                        <span className="text-white text-xs font-bold">{act.revenue}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop View */}
+              <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
                     <tr className="text-[10px] uppercase tracking-widest text-[#64748b] border-b border-white/5">

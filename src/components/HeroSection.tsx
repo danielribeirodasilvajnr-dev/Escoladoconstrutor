@@ -22,7 +22,7 @@ export function HeroSection({ lastWatched, onContinue }: HeroSectionProps) {
   const moduleInfo = lesson?.module ? `Módulo ${String(lesson.module.order_index + 1).padStart(2, '0')}: ${lesson.module.title}` : 'Série Original';
 
   return (
-    <section className="relative h-[400px] md:h-[480px] w-full rounded-2xl md:rounded-3xl overflow-hidden mb-8 md:mb-12 group">
+    <section className="relative h-[280px] sm:h-[350px] md:h-[480px] w-full rounded-2xl md:rounded-3xl overflow-hidden mb-8 md:mb-12 group">
       {/* Background Image */}
       <img
         src={course.cover_url}
@@ -47,7 +47,7 @@ export function HeroSection({ lastWatched, onContinue }: HeroSectionProps) {
           </span>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-4 md:mb-6 leading-[1.1] tracking-tight">
+        <h1 className="text-xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-3 md:mb-6 leading-[1.1] tracking-tight">
           {course.title.length > 25 ? (
             <span>{course.title}</span>
           ) : (
@@ -58,25 +58,25 @@ export function HeroSection({ lastWatched, onContinue }: HeroSectionProps) {
           )}
         </h1>
 
-        <p className="text-[#94a3b8] text-sm md:text-lg mb-6 md:mb-10 leading-relaxed max-w-xl line-clamp-2 md:line-clamp-3">
+        <p className="text-[#94a3b8] text-xs md:text-lg mb-4 md:mb-10 leading-relaxed max-w-xl line-clamp-2 md:line-clamp-3">
           {course.description}
         </p>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 md:gap-4">
+        <div className="flex flex-row items-center gap-2 md:gap-4">
           <button
             onClick={onContinue}
-            className="flex items-center justify-center gap-3 px-6 md:px-8 py-3 md:py-4 bg-[#22ff88] text-black rounded-xl font-bold hover:opacity-90 active:scale-95 transition-all shadow-xl shadow-[#22ff88]/20 group/btn shrink-0"
+            className="flex items-center justify-center gap-2 px-4 md:px-8 py-2 md:py-4 bg-[#22ff88] text-black rounded-lg md:rounded-xl font-bold hover:opacity-90 active:scale-95 transition-all shadow-xl shadow-[#22ff88]/20 group/btn shrink-0"
           >
-            <Play className="w-4 h-4 md:w-5 md:h-5 fill-current group-hover/btn:scale-110 transition-transform" />
-            <span className="text-xs md:text-sm">
+            <Play className="w-3 h-3 md:w-5 md:h-5 fill-current group-hover/btn:scale-110 transition-transform" />
+            <span className="text-[10px] md:text-sm">
               {lastWatched 
-                ? (lastWatched.watched_time > 5 ? `Continuar em ${formatTime(lastWatched.watched_time)}` : 'Continuar Assistindo') 
+                ? (lastWatched.watched_time > 5 ? `Continuar` : 'Assistir') 
                 : 'Começar Agora'}
             </span>
           </button>
-          <button className="flex items-center justify-center gap-3 px-6 md:px-8 py-3 md:py-4 bg-white/5 text-white rounded-xl font-bold hover:bg-white/10 active:scale-95 transition-all backdrop-blur-md border border-white/10 shrink-0">
-            <Info className="w-4 h-4 md:w-5 md:h-5" />
-            <span className="text-xs md:text-sm">Ver Grade Curricular</span>
+          <button className="flex items-center justify-center gap-2 px-4 md:px-8 py-2 md:py-4 bg-white/5 text-white rounded-lg md:rounded-xl font-bold hover:bg-white/10 active:scale-95 transition-all backdrop-blur-md border border-white/10 shrink-0">
+            <Info className="w-3 h-3 md:w-5 md:h-5" />
+            <span className="text-[10px] md:text-sm">Grade</span>
           </button>
         </div>
       </div>

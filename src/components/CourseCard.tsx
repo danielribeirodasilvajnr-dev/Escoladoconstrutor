@@ -34,8 +34,8 @@ export function CourseCard({ image, title, mentor, progress, onClick }: CourseCa
         </div>
       </div>
       
-      <h3 className="text-white font-bold text-sm mb-1 group-hover:text-[#22ff88] transition-colors">{title}</h3>
-      <p className="text-[#64748b] text-[11px] font-medium">Professor: {mentor}</p>
+      <h3 className="text-white font-bold text-xs md:text-sm mb-1 group-hover:text-[#22ff88] transition-colors line-clamp-1">{title}</h3>
+      <p className="text-[#64748b] text-[9px] md:text-[11px] font-medium">Prof: {mentor}</p>
     </div>
   );
 }

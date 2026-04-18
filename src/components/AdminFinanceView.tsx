@@ -137,16 +137,16 @@ export function AdminFinanceView() {
   );
 
   return (
-    <div className="p-10 max-w-[1600px] mx-auto space-y-10 pb-20 text-left">
-      <header className="flex justify-between items-end mb-12">
+    <div className="p-3 md:p-10 max-w-[1600px] mx-auto space-y-5 md:space-y-10 pb-20 mt-2 md:mt-0 text-left">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-6 md:mb-12">
         <div>
-          <h1 className="text-4xl font-bold text-white mb-2">Gestão Financeira Global</h1>
-          <p className="text-[#64748b] text-base">Monitoramento de faturamento por instrutor e métricas da plataforma.</p>
+          <h1 className="text-xl md:text-2xl lg:text-4xl font-bold text-white mb-1 md:mb-2 leading-tight">Financeiro Global</h1>
+          <p className="text-[#64748b] text-[10px] md:text-base tracking-wide uppercase font-bold">Faturamento por Instrutor</p>
         </div>
-        <div className="flex gap-4">
-          <button className="flex items-center gap-2 px-6 py-3 bg-white/5 border border-white/10 text-white font-bold rounded-2xl hover:bg-white/10 transition-all">
-            <Download className="w-4 h-4" />
-            EXPORTAR RELATÓRIO
+        <div className="flex gap-3 w-full md:w-auto">
+          <button className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-white/5 border border-white/10 text-white text-[10px] md:text-sm font-bold rounded-xl md:rounded-2xl hover:bg-white/10 transition-all uppercase tracking-widest">
+            <Download className="w-3.5 h-3.5 md:w-4 md:h-4" />
+            Exportar
           </button>
         </div>
       </header>
@@ -158,54 +158,96 @@ export function AdminFinanceView() {
       ) : (
         <>
           {/* Main Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {[
-              { label: "Faturamento Total", value: `R$ ${globalStats.totalRevenue.toLocaleString('pt-BR')}`, icon: DollarSign, color: "text-[#22ff88]", trend: "+12%" },
-              { label: "Total de Vendas", value: globalStats.totalSales.toString(), icon: TrendingUp, color: "text-blue-400", trend: "+5%" },
-              { label: "Ticket Médio", value: `R$ ${globalStats.avgTicket.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, icon: Award, color: "text-purple-400" },
-              { label: "Top Instructor", value: globalStats.topInstructor, icon: Users, color: "text-orange-400" },
+              { label: "Receita Total", value: `R$ ${globalStats.totalRevenue.toLocaleString('pt-BR')}`, icon: DollarSign, color: "text-[#22ff88]", trend: "+12%" },
+              { label: "Vendas", value: globalStats.totalSales.toString(), icon: TrendingUp, color: "text-blue-400", trend: "+5%" },
+              { label: "Ticket Médio", value: `R$ ${globalStats.avgTicket.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`, icon: Award, color: "text-purple-400" },
+              { label: "Top Professor", value: globalStats.topInstructor, icon: Users, color: "text-orange-400" },
             ].map((stat, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
-                className="bg-[#1a1c22] p-8 rounded-3xl border border-white/5 relative overflow-hidden group hover:border-white/10 transition-colors"
+                className="bg-[#1a1c22] p-5 md:p-8 rounded-2xl md:rounded-3xl border border-white/5 relative overflow-hidden group hover:border-white/10 transition-colors"
               >
-                <div className="flex justify-between items-start mb-6">
-                  <div className="p-3 bg-white/5 rounded-2xl group-hover:scale-110 transition-transform">
-                    <stat.icon className={cn("w-6 h-6", stat.color)} />
+                <div className="flex justify-between items-start mb-3 md:mb-6">
+                  <div className="p-2 bg-white/5 rounded-xl group-hover:scale-110 transition-transform">
+                    <stat.icon className={cn("w-4 h-4 md:w-6 md:h-6", stat.color)} />
                   </div>
                   {stat.trend && (
-                    <div className="flex items-center gap-1 text-[10px] font-bold text-[#22ff88] bg-[#22ff88]/10 px-2 py-1 rounded-lg">
-                      <ArrowUpRight className="w-3 h-3" />
+                    <div className="flex items-center gap-1 text-[8px] font-bold text-[#22ff88] bg-[#22ff88]/10 px-1.5 py-0.5 md:px-2 md:py-1 rounded-lg">
+                      <ArrowUpRight className="w-2.5 h-2.5" />
                       {stat.trend}
                     </div>
                   )}
                 </div>
-                <p className="text-[#64748b] text-sm font-medium mb-1">{stat.label}</p>
-                <p className="text-3xl font-bold text-white tracking-tight truncate">{stat.value}</p>
+                <p className="text-[#64748b] text-[9px] md:text-sm font-bold uppercase tracking-widest mb-1">{stat.label}</p>
+                <p className="text-xl md:text-3xl font-extrabold text-white tracking-tight truncate">{stat.value}</p>
               </motion.div>
             ))}
           </div>
 
-          {/* Instructor Earnings Table */}
-          <div className="bg-[#1a1c22] rounded-[2.5rem] border border-white/5 overflow-hidden">
-            <div className="p-10 border-b border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
-              <h2 className="text-2xl font-bold text-white">Faturamento por Professor</h2>
+          {/* Instructor Earnings List */}
+          <div className="bg-[#1a1c22]/50 md:bg-[#1a1c22] rounded-2xl md:rounded-[2.5rem] border border-white/5 overflow-hidden">
+            <div className="p-6 md:p-10 border-b border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-6">
+              <h2 className="text-xl md:text-2xl font-bold text-white text-center md:text-left">Por Professor</h2>
               <div className="relative group w-full md:max-w-md">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748b] group-focus-within:text-[#22ff88]" />
                 <input
                   type="text"
-                  placeholder="Pesquisar professor..."
+                  placeholder="Pesquisar..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-black/20 border border-white/5 rounded-2xl pl-12 pr-4 py-3.5 text-white focus:outline-none focus:border-[#22ff88]/30 transition-all text-sm"
+                  className="w-full bg-black/20 border border-white/5 rounded-xl md:rounded-2xl pl-11 pr-4 py-3 md:py-3.5 text-white focus:outline-none focus:border-[#22ff88]/30 transition-all text-sm"
                 />
               </div>
             </div>
 
-            <div className="overflow-x-auto">
+            {/* Mobile Cards (sm/md only) */}
+            <div className="md:hidden divide-y divide-white/5">
+              {filteredInstructors.length === 0 ? (
+                 <div className="p-10 text-center text-[#64748b] text-sm">Nenhum instrutor.</div>
+              ) : (
+                filteredInstructors.map(inst => (
+                   <div key={inst.id} className="p-4 space-y-4">
+                      <div className="flex items-center gap-3">
+                         <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center overflow-hidden border border-white/10">
+                            {inst.avatar_url ? (
+                               <img src={inst.avatar_url} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                               <span className="text-sm font-bold text-[#64748b]">{inst.name.charAt(0)}</span>
+                            )}
+                         </div>
+                         <div className="min-w-0">
+                            <p className="font-bold text-white text-sm truncate">{inst.name}</p>
+                            <p className="text-[10px] text-[#64748b] truncate">{inst.email}</p>
+                         </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-2">
+                         <div className="bg-white/[0.02] p-2 rounded-lg border border-white/5">
+                            <p className="text-[8px] uppercase tracking-widest text-[#64748b] font-bold mb-1">Cursos</p>
+                            <p className="text-sm font-bold text-white">{inst.totalCourses}</p>
+                         </div>
+                         <div className="bg-white/[0.02] p-2 rounded-lg border border-white/5">
+                            <p className="text-[8px] uppercase tracking-widest text-[#64748b] font-bold mb-1">Alunos</p>
+                            <p className="text-sm font-bold text-white">{inst.totalStudents}</p>
+                         </div>
+                      </div>
+
+                      <div className="flex justify-between items-end pt-1">
+                         <p className="text-[10px] uppercase font-bold text-[#64748b] tracking-wider">Faturamento</p>
+                         <p className="text-lg font-bold text-[#22ff88]">R$ {inst.totalRevenue.toLocaleString('pt-BR')}</p>
+                      </div>
+                   </div>
+                ))
+              )}
+            </div>
+
+            {/* Desktop Table */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
                   <tr className="text-[10px] uppercase tracking-widest text-[#64748b] border-b border-white/5">

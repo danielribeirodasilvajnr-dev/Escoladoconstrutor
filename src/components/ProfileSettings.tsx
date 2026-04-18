@@ -87,20 +87,20 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
   };
 
   return (
-    <div className="p-10 max-w-[800px] mx-auto pb-20">
-      <header className="mb-12">
-        <h1 className="text-4xl font-bold text-white mb-2">Configurações de Perfil</h1>
-        <p className="text-[#64748b]">Gerencie suas informações pessoais e aparência no console.</p>
+    <div className="p-4 md:p-10 max-w-[800px] mx-auto space-y-6 md:space-y-10 pb-20 mt-2 md:mt-0">
+      <header className="mb-6 md:mb-12">
+        <h1 className="text-xl md:text-2xl lg:text-4xl font-bold text-white mb-1 md:mb-2 leading-tight">Configurações</h1>
+        <p className="text-[#64748b] text-[10px] md:text-base tracking-wide uppercase font-bold">Perfil e Preferências</p>
       </header>
 
       <form onSubmit={handleSave} className="space-y-10">
         {/* Avatar Upload Selection */}
-        <section className="bg-[#1a1c22] p-8 rounded-3xl border border-white/5 flex flex-col items-center gap-6">
+        <section className="bg-[#1a1c22] p-6 md:p-8 rounded-2xl md:rounded-3xl border border-white/5 flex flex-col items-center gap-4 md:gap-6">
           <div className="relative group">
-            <div className="w-32 h-32 rounded-3xl bg-[#0f1115] overflow-hidden border-2 border-white/5 relative flex items-center justify-center">
+            <div className="w-20 h-20 md:w-32 md:h-32 rounded-2xl md:rounded-3xl bg-[#0f1115] overflow-hidden border-2 border-white/5 relative flex items-center justify-center">
               {uploading ? (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/60 z-10">
-                  <Loader2 className="w-8 h-8 text-[#22ff88] animate-spin" />
+                  <Loader2 className="w-5 h-5 md:w-8 md:h-8 text-[#22ff88] animate-spin" />
                 </div>
               ) : null}
               {avatarUrl ? (
@@ -110,7 +110,7 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
                   alt="Profile Preview"
                 />
               ) : (
-                <span className="text-4xl font-bold text-[#64748b]">
+                <span className="text-2xl md:text-4xl font-bold text-[#64748b]">
                   {userData?.name?.charAt(0) || userData?.email?.charAt(0) || '?'}
                 </span>
               )}
@@ -118,9 +118,9 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="absolute -bottom-2 -right-2 w-10 h-10 bg-[#22ff88] rounded-2xl flex items-center justify-center border-4 border-[#1a1c22] hover:scale-110 active:scale-95 transition-all text-black"
+              className="absolute -bottom-1 -right-1 md:-bottom-2 md:-right-2 w-7 h-7 md:w-10 md:h-10 bg-[#22ff88] rounded-lg md:rounded-2xl flex items-center justify-center border-2 md:border-4 border-[#1a1c22] hover:scale-110 active:scale-95 transition-all text-black shadow-lg"
             >
-              <Camera className="w-5 h-5" />
+              <Camera className="w-3.5 h-3.5 md:w-5 md:h-5" />
             </button>
             <input
               type="file"
@@ -131,15 +131,15 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
             />
           </div>
           <div className="text-center">
-            <h3 className="text-sm font-bold text-white mb-1">Foto de Perfil</h3>
-            <p className="text-[10px] text-[#64748b] uppercase tracking-widest font-bold">PNG, JPG ou GIF. Máximo 2MB.</p>
+            <h3 className="text-xs md:text-sm font-bold text-white mb-1">Foto de Perfil</h3>
+            <p className="text-[8px] md:text-[10px] text-[#64748b] uppercase tracking-widest font-bold">Resolução 400x400</p>
           </div>
         </section>
 
         {/* Personal Details */}
         <div className="grid md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest px-1">Nome Completo</label>
+            <label className="text-[9px] font-bold text-[#64748b] uppercase tracking-widest px-1">Nome Completo</label>
             <div className="relative group">
               <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748b] group-focus-within:text-[#22ff88] transition-colors" />
               <input
@@ -147,26 +147,26 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Seu nome"
-                className="w-full bg-[#1a1c22] border border-white/5 rounded-2xl pl-12 pr-4 py-4 text-white focus:outline-none focus:border-[#22ff88]/30 transition-all font-medium"
+                className="w-full bg-[#1a1c22] border border-white/5 rounded-xl md:rounded-2xl pl-11 pr-4 py-3.5 md:py-4 text-sm text-white focus:outline-none focus:border-[#22ff88]/30 transition-all font-medium"
               />
             </div>
           </div>
 
           <div className="space-y-2 opacity-60 cursor-not-allowed">
-            <label className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest px-1">E-mail (Identificador)</label>
+            <label className="text-[9px] font-bold text-[#64748b] uppercase tracking-widest px-1">E-mail</label>
             <div className="relative">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748b]" />
               <input
                 type="email"
                 readOnly
                 value={userData?.email || ''}
-                className="w-full bg-[#0f1115] border border-white/5 rounded-2xl pl-12 pr-4 py-4 text-[#64748b] focus:outline-none font-medium"
+                className="w-full bg-[#0f1115] border border-white/5 rounded-xl md:rounded-2xl pl-11 pr-4 py-3.5 md:py-4 text-sm text-[#64748b] focus:outline-none font-medium"
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest px-1">Telefone (Brasil)</label>
+            <label className="text-[9px] font-bold text-[#64748b] uppercase tracking-widest px-1">Telefone</label>
             <div className="relative group">
               <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748b] group-focus-within:text-[#22ff88] transition-colors" />
               <input
@@ -174,7 +174,7 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
                 value={phone}
                 onChange={handlePhoneChange}
                 placeholder="(00) 00000-0000"
-                className="w-full bg-[#1a1c22] border border-white/5 rounded-2xl pl-12 pr-4 py-4 text-white focus:outline-none focus:border-[#22ff88]/30 transition-all font-medium"
+                className="w-full bg-[#1a1c22] border border-white/5 rounded-xl md:rounded-2xl pl-11 pr-4 py-3.5 md:py-4 text-sm text-white focus:outline-none focus:border-[#22ff88]/30 transition-all font-medium"
               />
             </div>
           </div>
@@ -191,13 +191,13 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
         </div>
 
         {/* Footer Actions */}
-        <div className="pt-10 flex items-center justify-end border-t border-white/5">
+        <div className="pt-6 flex items-center justify-end border-t border-white/5">
           <button
             type="submit"
             disabled={loading || uploading}
-            className="px-10 py-4 bg-[#22ff88] text-black font-bold rounded-2xl hover:opacity-90 active:scale-95 disabled:opacity-50 transition-all flex items-center gap-3 shadow-[0_0_20px_rgba(34,255,136,0.2)]"
+            className="w-full md:w-auto px-10 py-3 bg-[#22ff88] text-black text-[10px] md:text-xs font-black uppercase tracking-widest rounded-xl md:rounded-2xl hover:opacity-90 active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(34,255,136,0.1)]"
           >
-            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'SALVAR ALTERAÇÕES'}
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar Alterações'}
           </button>
         </div>
       </form>

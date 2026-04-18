@@ -15,10 +15,10 @@ export function WeeklyCard({ image, type, title }: WeeklyCardProps) {
           referrerPolicy="no-referrer"
         />
       </div>
-      <span className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider mb-2 block">
+      <span className="text-[8px] md:text-[10px] font-bold text-[#64748b] uppercase tracking-wider mb-1 md:mb-2 block">
         {type}
       </span>
-      <h3 className="text-white font-bold text-sm leading-snug group-hover:text-[#22ff88] transition-colors line-clamp-2">
+      <h3 className="text-white font-bold text-xs md:text-sm leading-snug group-hover:text-[#22ff88] transition-colors line-clamp-2">
         {title}
       </h3>
     </div>

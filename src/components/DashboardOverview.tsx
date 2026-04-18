@@ -131,7 +131,7 @@ export function DashboardOverview({ userData, onCourseSelect }: DashboardOvervie
       initial="hidden"
       animate="visible"
       variants={containerVariants}
-      className="p-4 md:p-8 max-w-[1600px] mx-auto pb-20 space-y-8 md:space-y-12"
+      className="p-3 md:p-8 max-w-[1600px] mx-auto pb-20 space-y-8 md:space-y-12"
     >
       <motion.div variants={itemVariants}>
         <HeroSection 
@@ -142,14 +142,14 @@ export function DashboardOverview({ userData, onCourseSelect }: DashboardOvervie
 
       {/* Meus Cursos */}
       <section className="mb-0">
-        <div className="flex items-center justify-between mb-6 md:mb-8">
-          <div className="flex items-center gap-3">
-            <h2 className="text-xl md:text-2xl font-bold text-white">Meus Cursos</h2>
-            <span className="px-2 py-0.5 bg-[#22ff88]/10 text-[#22ff88] text-[9px] md:text-[10px] font-bold rounded-md uppercase tracking-wider">
+        <div className="flex items-center justify-between mb-4 md:mb-8">
+          <div className="flex items-center gap-2 md:gap-3">
+            <h2 className="text-lg md:text-2xl font-bold text-white">Meus Cursos</h2>
+            <span className="px-2 py-0.5 bg-[#22ff88]/10 text-[#22ff88] text-[8px] md:text-[10px] font-bold rounded-md uppercase tracking-wider">
               {enrolledCourses.length} {enrolledCourses.length === 1 ? 'Ativo' : 'Ativos'}
             </span>
           </div>
-          <button className="text-xs md:text-sm font-medium text-[#64748b] hover:text-white transition-colors">
+          <button className="text-[10px] md:text-sm font-medium text-[#64748b] hover:text-white transition-colors">
             Ver todos
           </button>
         </div>
@@ -185,8 +185,8 @@ export function DashboardOverview({ userData, onCourseSelect }: DashboardOvervie
 
       {/* Recomendados */}
       <section>
-        <h2 className="text-xl md:text-2xl font-bold text-white mb-6 md:mb-8">Recomendados para Você</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        <h2 className="text-lg md:text-2xl font-bold text-white mb-4 md:mb-8">Recomendados para Você</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
           {recommended.map((item, i) => (
             <motion.div key={i} variants={itemVariants}>
               <FeaturedCard {...item} />
@@ -197,8 +197,8 @@ export function DashboardOverview({ userData, onCourseSelect }: DashboardOvervie
 
       {/* Novidades */}
       <section>
-        <h2 className="text-xl md:text-2xl font-bold text-white mb-6 md:mb-8">Novidades da Semana</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <h2 className="text-lg md:text-2xl font-bold text-white mb-4 md:mb-8">Novidades da Semana</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
           {weekly.map((item, i) => (
             <motion.div key={i} variants={itemVariants}>
               <WeeklyCard {...item} />

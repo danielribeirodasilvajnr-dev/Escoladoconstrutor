@@ -51,15 +51,15 @@ export function CourseList({ userData, onEditCourse, onCreateCourse }: CourseLis
   );
 
   return (
-    <div className="p-10 max-w-[1600px] mx-auto space-y-10 pb-20">
-      <header className="flex justify-between items-end mb-12">
+    <div className="p-4 md:p-10 max-w-[1600px] mx-auto space-y-6 md:space-y-10 pb-20">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 md:mb-12">
         <div>
-          <h1 className="text-4xl font-bold text-white mb-2">Meus Cursos</h1>
-          <p className="text-[#64748b] text-base">Gerencie seus conteúdos autorais e acompanhe o engajamento.</p>
+          <h1 className="text-2xl md:text-2xl lg:text-4xl font-bold text-white mb-1 md:mb-2">Meus Cursos</h1>
+          <p className="text-[#64748b] text-sm md:text-base">Gerencie seus conteúdos autorais.</p>
         </div>
         <button
           onClick={onCreateCourse}
-          className="flex items-center gap-2 px-8 py-4 bg-[#22ff88] text-black font-bold rounded-2xl hover:opacity-90 transition-all shadow-[0_0_20px_rgba(34,255,136,0.2)] active:scale-95"
+          className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3.5 bg-[#22ff88] text-black text-sm font-bold rounded-xl md:rounded-2xl hover:opacity-90 transition-all shadow-[0_0_20px_rgba(34,255,136,0.2)] active:scale-95"
         >
           <Plus className="w-5 h-5" />
           CRIAR NOVO CURSO
@@ -67,14 +67,15 @@ export function CourseList({ userData, onEditCourse, onCreateCourse }: CourseLis
       </header>
 
       {/* Search and Filters */}
-      <div className="relative group max-w-md">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#64748b] group-focus-within:text-[#22ff88] transition-colors" />
+      {/* Search and Filters */}
+      <div className="relative group w-full md:max-w-md">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748b] group-focus-within:text-[#22ff88] transition-colors" />
         <input
           type="text"
-          placeholder="Buscar nos meus cursos..."
+          placeholder="Buscar..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full bg-[#1a1c22] border border-white/5 rounded-2xl pl-12 pr-4 py-4 text-white focus:outline-none focus:border-[#22ff88]/30 transition-all font-medium"
+          className="w-full bg-[#1a1c22] border border-white/5 rounded-xl md:rounded-2xl pl-11 pr-4 py-3 md:py-4 text-sm text-white focus:outline-none focus:border-[#22ff88]/30 transition-all font-medium"
         />
       </div>
 
@@ -99,14 +100,14 @@ export function CourseList({ userData, onEditCourse, onCreateCourse }: CourseLis
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {filteredCourses.map((course, i) => (
             <motion.div
               key={course.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
-              className="bg-[#1a1c22] rounded-[2.5rem] border border-white/5 overflow-hidden group hover:border-[#22ff88]/30 transition-all"
+              className="bg-[#1a1c22] rounded-2xl md:rounded-[2.5rem] border border-white/5 overflow-hidden group hover:border-[#22ff88]/30 transition-all"
             >
               <div className="aspect-video relative overflow-hidden">
                 <img
@@ -116,34 +117,34 @@ export function CourseList({ userData, onEditCourse, onCreateCourse }: CourseLis
                 />
                 <div className="absolute top-4 right-4">
                   <span className={cn(
-                    "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest",
+                    "px-2.5 py-1 rounded-full text-[9px] md:text-[10px] font-bold uppercase tracking-widest",
                     course.is_published ? "bg-[#22ff88] text-black" : "bg-black/60 text-white/60 backdrop-blur-md"
                   )}>
                     {course.is_published ? 'Publicado' : 'Rascunho'}
                   </span>
                 </div>
               </div>
-              <div className="p-8">
-                <h3 className="text-xl font-bold text-white mb-4 line-clamp-1 group-hover:text-[#22ff88] transition-colors">{course.title}</h3>
-                <div className="flex items-center justify-between text-[#64748b] mb-8">
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4" />
-                    <span className="text-xs font-bold">{course.students_count || 0} ALUNOS</span>
+              <div className="p-6 md:p-8">
+                <h3 className="text-lg md:text-xl font-bold text-white mb-2 md:mb-4 line-clamp-1 group-hover:text-[#22ff88] transition-colors">{course.title}</h3>
+                <div className="flex items-center justify-between text-[#64748b] mb-6 md:mb-8">
+                  <div className="flex items-center gap-1.5 md:gap-2">
+                    <Users className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                    <span className="text-[10px] md:text-xs font-bold uppercase tracking-tighter">{course.students_count || 0} Alunos</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Star className="w-4 h-4 text-[#22ff88]" />
-                    <span className="text-xs font-bold text-white">{course.rating || '0.0'}</span>
+                  <div className="flex items-center gap-1.5 md:gap-2">
+                    <Star className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#22ff88]" />
+                    <span className="text-xs md:text-sm font-bold text-white">{course.rating || '0.0'}</span>
                   </div>
                 </div>
-                <div className="flex gap-4">
+                <div className="flex gap-3 md:gap-4">
                   <button
                     onClick={() => onEditCourse(course.id)}
-                    className="flex-1 py-4 bg-white/5 text-white text-[10px] font-bold uppercase tracking-widest rounded-2xl border border-white/10 hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+                    className="flex-1 py-3 md:py-4 bg-white/5 text-white text-[9px] md:text-[10px] font-bold uppercase tracking-widest rounded-xl md:rounded-2xl border border-white/10 hover:bg-white/10 transition-all flex items-center justify-center gap-2"
                   >
                     <Edit3 className="w-4 h-4" />
                     Editar
                   </button>
-                  <button className="w-14 h-14 bg-white/5 text-[#64748b] rounded-2xl border border-white/10 hover:bg-red-500/10 hover:text-red-500 transition-all flex items-center justify-center">
+                  <button className="w-12 h-12 md:w-14 md:h-14 bg-white/5 text-[#64748b] rounded-xl md:rounded-2xl border border-white/10 hover:bg-red-500/10 hover:text-red-500 transition-all flex items-center justify-center">
                     <Trash2 className="w-5 h-5" />
                   </button>
                 </div>

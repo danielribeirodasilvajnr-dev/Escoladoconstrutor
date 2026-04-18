@@ -64,20 +64,20 @@ export function Vitrine({ userData, onViewChange }: VitrineProps) {
   );
 
   return (
-    <div className="p-4 md:p-10 max-w-[1600px] mx-auto space-y-8 md:space-y-12 pb-20 mt-4">
-      <header className="flex flex-col lg:flex-row lg:justify-between lg:items-end gap-6 mb-8 md:mb-16">
+    <div className="p-3 md:p-10 max-w-[1600px] mx-auto space-y-6 md:space-y-12 pb-20 mt-2 md:mt-4">
+      <header className="flex flex-col lg:flex-row lg:justify-between lg:items-end gap-6 mb-8 md:mb-16 mt-4 md:mt-0">
         <div className="max-w-xl text-center lg:text-left">
-          <div className="flex items-center justify-center lg:justify-start gap-3 mb-4">
-            <div className="w-10 h-10 bg-[#22ff88]/10 rounded-xl flex items-center justify-center border border-[#22ff88]/20">
-              <Globe className="w-5 h-5 text-[#22ff88]" />
+          <div className="flex items-center justify-center lg:justify-start gap-2 mb-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-[#22ff88]/10 rounded-xl flex items-center justify-center border border-[#22ff88]/20">
+              <Globe className="w-4 h-4 md:w-5 md:h-5 text-[#22ff88]" />
             </div>
-            <span className="text-[10px] font-bold text-[#22ff88] uppercase tracking-[0.2em]">Marketplace Global</span>
+            <span className="text-[8px] md:text-[10px] font-bold text-[#22ff88] uppercase tracking-[0.2em]">Marketplace Global</span>
           </div>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-4 md:mb-6 leading-tight">
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-white mb-3 md:mb-6 leading-tight">
             Vitrine de <span className="text-[#22ff88]">Elite</span>
           </h1>
-          <p className="text-[#64748b] text-base md:text-lg leading-relaxed px-4 lg:px-0">
-            Descubra treinamentos cinematográficos e acelere sua carreira na engenharia com os maiores especialistas do setor.
+          <p className="text-[#64748b] text-sm md:text-lg leading-relaxed px-4 lg:px-0">
+            Descubra treinamentos cinematográficos e acelere sua carreira com os maiores especialistas.
           </p>
         </div>
 
@@ -95,19 +95,19 @@ export function Vitrine({ userData, onViewChange }: VitrineProps) {
       </header>
 
       {/* Search and Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 md:gap-6 mb-12 md:mb-16 px-2 md:px-0">
+      <div className="flex flex-col sm:flex-row gap-3 md:gap-6 mb-8 md:mb-16 px-1 md:px-0">
         <div className="relative flex-1 group">
-          <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-[#64748b] group-focus-within:text-[#22ff88] transition-colors" />
+          <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748b] group-focus-within:text-[#22ff88] transition-colors" />
           <input
             type="text"
             placeholder="O que deseja aprender?"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-[#1a1c22] border border-white/5 rounded-2xl pl-16 pr-6 py-4 md:py-5 text-white focus:outline-none focus:border-[#22ff88]/30 transition-all font-medium text-base md:text-lg placeholder:text-[#334155]"
+            className="w-full bg-[#1a1c22] border border-white/5 rounded-2xl pl-12 pr-5 py-3.5 md:py-5 text-white focus:outline-none focus:border-[#22ff88]/30 transition-all font-medium text-sm md:text-lg placeholder:text-[#334155]"
           />
         </div>
-        <button className="h-14 sm:h-auto px-8 bg-[#1a1c22] text-[#64748b] rounded-2xl border border-white/5 flex items-center justify-center gap-3 hover:text-white hover:border-white/10 transition-all font-bold uppercase tracking-widest text-xs shrink-0">
-          <Filter className="w-5 h-5" />
+        <button className="h-12 sm:h-auto px-6 bg-[#1a1c22] text-[#64748b] rounded-2xl border border-white/5 flex items-center justify-center gap-2 hover:text-white hover:border-white/10 transition-all font-bold uppercase tracking-widest text-[10px] shrink-0">
+          <Filter className="w-4 h-4" />
           Filtros
         </button>
       </div>
@@ -164,32 +164,32 @@ export function Vitrine({ userData, onViewChange }: VitrineProps) {
                 </div>
               </div>
 
-              <div className="p-6 md:p-8 flex-1 flex flex-col">
-                <h3 className="text-xl md:text-2xl font-bold text-white mb-4 line-clamp-2 leading-tight group-hover:text-[#22ff88] transition-colors">
+              <div className="p-5 md:p-8 flex-1 flex flex-col">
+                <h3 className="text-lg md:text-2xl font-bold text-white mb-3 line-clamp-2 leading-tight group-hover:text-[#22ff88] transition-colors">
                   {course.title}
                 </h3>
 
-                <div className="flex items-center gap-4 md:gap-6 mb-6 md:mb-8 text-[#64748b]">
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest">{course.students_count || 0} Alunos</span>
+                <div className="flex items-center gap-3 md:gap-6 mb-5 md:mb-8 text-[#64748b]">
+                  <div className="flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5" />
+                    <span className="text-[9px] font-bold uppercase tracking-widest">{course.students_count || 0}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Star className="w-4 h-4 text-[#22ff88]" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-white">{Number(course.rating).toFixed(1)}</span>
+                  <div className="flex items-center gap-1.5">
+                    <Star className="w-3.5 h-3.5 text-[#22ff88]" />
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-white">{Number(course.rating).toFixed(1)}</span>
                   </div>
                 </div>
 
-                <div className="mt-auto pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="mt-auto pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex flex-col">
-                    <span className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest">Investimento</span>
-                    <span className="text-xl md:text-2xl font-black text-white">R$ {course.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                    <span className="text-[8px] font-bold text-[#64748b] uppercase tracking-widest">Investimento</span>
+                    <span className="text-lg md:text-2xl font-black text-white">R$ {course.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                   </div>
                   <button
                     onClick={() => setSelectedCourse(course)}
-                    className="h-12 md:h-14 px-6 md:px-8 bg-white/5 text-white font-black text-[9px] md:text-[10px] uppercase tracking-widest rounded-2xl border border-white/10 hover:bg-[#22ff88] hover:text-black hover:border-transparent transition-all active:scale-95 flex items-center justify-center gap-2"
+                    className="h-11 md:h-14 px-5 md:px-8 bg-white/5 text-white font-black text-[9px] md:text-[10px] uppercase tracking-widest rounded-xl md:rounded-2xl border border-white/10 hover:bg-[#22ff88] hover:text-black hover:border-transparent transition-all active:scale-95 flex items-center justify-center gap-2"
                   >
-                    Garanta Sua Vaga
+                    Detalhes
                     <Play className="w-3 h-3 fill-current" />
                   </button>
                 </div>

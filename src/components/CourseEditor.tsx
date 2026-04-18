@@ -511,32 +511,32 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
   }
 
   return (
-    <div className="p-10 max-w-[1600px] mx-auto pb-20">
-      <header className="flex justify-between items-start mb-12">
-        <div className="flex items-start gap-6">
+    <div className="p-3 md:p-10 max-w-[1600px] mx-auto space-y-8 md:space-y-10 pb-20">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-start gap-4 md:gap-8 mb-8 md:mb-12">
+        <div className="flex items-start gap-3 md:gap-6 w-full">
           <button
             onClick={onBack}
-            className="mt-2 p-3 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors border border-white/5 text-[#64748b] hover:text-white"
+            className="mt-1 md:mt-2 p-2.5 md:p-3 bg-white/5 rounded-xl md:rounded-2xl hover:bg-white/10 transition-colors border border-white/5 text-[#64748b] hover:text-white shrink-0"
           >
-            <ChevronLeft className="w-6 h-6" />
+            <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
           </button>
-          <div className="max-w-xl">
-            <p className="text-[10px] font-bold text-[#64748b] uppercase tracking-[0.2em] mb-4">Editor de Masterclass / Professor</p>
-            <h1 className="text-5xl font-bold text-white mb-6 leading-tight">
-              {course.title || 'Nome do Curso'}
+          <div className="min-w-0 flex-1">
+            <p className="text-[8px] md:text-[10px] font-bold text-[#64748b] uppercase tracking-[0.2em] mb-2 md:mb-4">Editor Masterclass</p>
+            <h1 className="text-2xl md:text-3xl lg:text-5xl font-bold text-white mb-2 md:mb-6 leading-tight truncate">
+              {course.title || 'Novo Curso'}
             </h1>
           </div>
         </div>
-        <div className="flex gap-4">
-          <button className="px-8 py-3.5 bg-white/5 text-white font-bold rounded-xl hover:bg-white/10 transition-all">
-            Pré-visualizar
+        <div className="flex gap-2 md:gap-4 w-full md:w-auto">
+          <button className="flex-1 md:flex-none px-4 md:px-8 py-2.5 md:py-3.5 bg-white/5 text-white text-xs md:text-sm font-bold rounded-lg md:rounded-xl hover:bg-white/10 transition-all border border-white/10">
+            Preview
           </button>
           <button
             onClick={handleSaveCourse}
             disabled={saving}
-            className="px-8 py-3.5 bg-[#22ff88] text-black font-bold rounded-xl hover:opacity-90 transition-all shadow-[0_0_20px_rgba(34,255,136,0.2)] disabled:opacity-50 flex items-center gap-2"
+            className="flex-1 md:flex-none px-4 md:px-8 py-2.5 md:py-3.5 bg-[#22ff88] text-black text-xs md:text-sm font-bold rounded-lg md:rounded-xl hover:opacity-90 transition-all shadow-[0_0_20px_rgba(34,255,136,0.2)] disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : 'SALVAR ALTERAÇÕES'}
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'SALVAR'}
           </button>
         </div>
       </header>
@@ -571,39 +571,40 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
           </div>
 
           {/* Title and Description */}
-          <div className="space-y-8">
+          <div className="space-y-6 md:space-y-8">
             <div>
-              <label className="text-[9px] font-bold text-[#22ff88] uppercase tracking-[0.2em] mb-4 block">Título do Curso</label>
-              <div className="bg-[#1a1c22] border border-white/5 rounded-2xl p-6">
+              <label className="text-[8px] md:text-[9px] font-bold text-[#22ff88] uppercase tracking-[0.2em] mb-2 md:mb-4 block">Título do Curso</label>
+              <div className="bg-[#1a1c22] border border-white/5 rounded-xl md:rounded-2xl p-4 md:p-6">
                 <input
                   type="text"
                   value={course.title}
+                  placeholder="Ex: Masterclass de Engenharia"
                   onChange={(e) => setCourse(prev => ({ ...prev, title: e.target.value }))}
-                  className="bg-transparent border-none text-3xl font-bold text-white w-full focus:outline-none placeholder:text-white/20"
+                  className="bg-transparent border-none text-xl md:text-3xl font-bold text-white w-full focus:outline-none placeholder:text-white/10"
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-[9px] font-bold text-[#22ff88] uppercase tracking-[0.2em] mb-4 block">Descrição Técnica</label>
+              <label className="text-[8px] md:text-[9px] font-bold text-[#22ff88] uppercase tracking-[0.2em] mb-2 md:mb-4 block">Descrição do Curso</label>
               <textarea
-                placeholder="Descreva o conteúdo..."
+                placeholder="Descreva o que o aluno irá aprender..."
                 value={course.description}
                 onChange={(e) => setCourse(prev => ({ ...prev, description: e.target.value }))}
-                className="w-full bg-[#1a1c22] border border-white/5 rounded-2xl p-8 text-white text-lg min-h-[200px] focus:outline-none focus:border-[#22ff88]/30 transition-all resize-none"
+                className="w-full bg-[#1a1c22] border border-white/5 rounded-xl md:rounded-2xl p-5 md:p-8 text-sm md:text-lg min-h-[150px] md:min-h-[200px] focus:outline-none focus:border-[#22ff88]/30 transition-all resize-none text-white/80"
               />
             </div>
           </div>
 
           {/* Curriculum Architecture */}
-          <section className="space-y-8">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+          <section className="space-y-6 md:space-y-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <h2 className="text-xl md:text-2xl font-bold text-white flex items-center gap-3">
                 ARQUITETURA DO <span className="text-[#22ff88]">CURRÍCULO</span>
               </h2>
               <button
                 onClick={handleAddModule}
-                className="flex items-center gap-2 px-6 py-2.5 bg-white/5 text-[#22ff88] text-[10px] font-bold uppercase tracking-widest rounded-xl hover:bg-white/10 transition-colors border border-[#22ff88]/10"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 bg-white/5 text-[#22ff88] text-[9px] font-bold uppercase tracking-widest rounded-xl hover:bg-white/10 transition-colors border border-[#22ff88]/10"
               >
                 <Plus className="w-4 h-4" />
                 NOVO MÓDULO
@@ -612,11 +613,11 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
 
             <div className="space-y-6">
               {modules.map((module, mIdx) => (
-                <div key={module.id} className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-                  <div className="xl:col-span-3 bg-[#1a1c22] border-l-4 border-[#22ff88] rounded-3xl overflow-hidden border border-white/5">
-                    <div className="p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
-                      <div className="flex items-center gap-4">
-                        <span className="text-2xl font-mono text-white/10">{String(mIdx + 1).padStart(2, "0")}</span>
+                <div key={module.id} className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+                  <div className="xl:col-span-3 bg-[#1a1c22] border-l-4 border-[#22ff88] rounded-2xl md:rounded-3xl overflow-hidden border border-white/5">
+                    <div className="p-4 md:p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+                      <div className="flex items-center gap-3 md:gap-4 flex-1">
+                        <span className="text-xl md:text-2xl font-mono text-white/10">{String(mIdx + 1).padStart(2, "0")}</span>
                         <input
                           type="text"
                           defaultValue={module.title}
@@ -626,21 +627,21 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                               (e.target as HTMLInputElement).blur();
                             }
                           }}
-                          className="bg-transparent border-none text-lg font-bold text-white focus:outline-none focus:text-[#22ff88] transition-colors w-full"
+                          className="bg-transparent border-none text-base md:text-lg font-bold text-white focus:outline-none focus:text-[#22ff88] transition-colors w-full"
                         />
                       </div>
-                      <div className="flex gap-4 text-[#64748b]">
-                        <button onClick={() => handleDeleteModule(module.id)} className="hover:text-red-400 transition-colors">
+                      <div className="flex gap-4 text-[#64748b] ml-4">
+                        <button onClick={() => handleDeleteModule(module.id)} className="hover:text-red-400 transition-colors p-1">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
-                    <div className="p-8 space-y-4">
+                    <div className="p-4 md:p-8 space-y-3 md:space-y-4">
                       {module.lessons.map((lesson, lIdx) => (
                         <div key={lesson.id} className="space-y-2">
-                          <div className="bg-[#0f1115] border border-white/5 rounded-xl p-4 flex items-center justify-between group">
-                            <div className="flex items-center gap-4 flex-1">
-                              <div className="w-12 h-12 rounded-lg overflow-hidden bg-black/40 border border-white/10 flex items-center justify-center shrink-0 group-hover:border-[#22ff88]/30 transition-colors">
+                          <div className="bg-[#0f1115] border border-white/5 rounded-xl p-3 md:p-4 flex items-center justify-between group">
+                            <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
+                              <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg overflow-hidden bg-black/40 border border-white/10 flex items-center justify-center shrink-0 group-hover:border-[#22ff88]/30 transition-colors">
                                 {lesson.content_url ? (
                                   <video
                                     src={lesson.content_url}
@@ -660,10 +661,10 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                                     (e.target as HTMLInputElement).blur();
                                   }
                                 }}
-                                className="bg-transparent border-none text-sm font-bold text-white/60 group-hover:text-white focus:outline-none flex-1 focus:text-[#22ff88]"
+                                className="bg-transparent border-none text-[13px] md:text-sm font-bold text-white/60 group-hover:text-white focus:outline-none flex-1 focus:text-[#22ff88] truncate"
                               />
                             </div>
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2 md:gap-4 shrink-0 h-full">
                               <button
                                 onClick={() => handleDeleteLesson(module.id, lesson.id)}
                                 className="opacity-0 group-hover:opacity-100 p-2 text-[#64748b] hover:text-red-400 transition-all"
@@ -671,11 +672,11 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                                 <X className="w-4 h-4" />
                               </button>
                               {uploadingLessonId === lesson.id ? (
-                                <div className="flex items-center gap-3">
-                                  <div className="w-24 h-1 bg-white/5 rounded-full overflow-hidden">
+                                <div className="flex items-center gap-2 md:gap-3">
+                                  <div className="w-16 md:w-24 h-1 bg-white/5 rounded-full overflow-hidden">
                                     <div className="h-full bg-[#22ff88] transition-all" style={{ width: `${uploadProgress}%` }} />
                                   </div>
-                                  <span className="text-[10px] text-[#22ff88] font-bold">{uploadProgress}%</span>
+                                  <span className="text-[9px] md:text-[10px] text-[#22ff88] font-bold">{uploadProgress}%</span>
                                 </div>
                               ) : (
                                 <button
@@ -683,9 +684,9 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                                     setUploadingLessonId(lesson.id);
                                     lessonInputRef.current?.click();
                                   }}
-                                  className="text-[9px] font-bold text-[#64748b] hover:text-[#22ff88] uppercase tracking-widest transition-colors"
+                                  className="text-[8px] md:text-[9px] font-bold text-[#64748b] hover:text-[#22ff88] uppercase tracking-widest transition-colors"
                                 >
-                                  {lesson.content_url ? "TROCAR VÍDEO" : "UPLOAD VÍDEO"}
+                                  {lesson.content_url ? "TROCAR" : "VÍDEO"}
                                 </button>
                               )}
                             </div>
@@ -779,19 +780,19 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
         </div>
 
         {/* Sidebar Controls */}
-        <div className="space-y-8">
-          <div className="bg-[#1a1c22] p-8 rounded-[2.5rem] border border-white/5">
-            <div className="flex items-center gap-3 mb-10">
+        <div className="space-y-6 md:space-y-8">
+          <div className="bg-[#1a1c22] p-6 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-white/5">
+            <div className="flex items-center gap-3 mb-6 md:mb-10">
               <Settings className="w-4 h-4 text-[#22ff88]" />
-              <h3 className="text-[10px] font-bold text-[#22ff88] uppercase tracking-[0.2em]">LÓGICA DE CONTROLE</h3>
+              <h3 className="text-[9px] md:text-[10px] font-bold text-[#22ff88] uppercase tracking-[0.2em]">CONFIGURAÇÕES</h3>
             </div>
 
-            <div className="space-y-8">
+            <div className="space-y-6 md:space-y-8">
               <div>
-                <p className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest mb-4">PREÇO DE INSCRIÇÃO (BRL)</p>
-                <div className="relative bg-[#0f1115] border border-white/5 rounded-2xl overflow-hidden">
-                  <div className="px-8 py-7 flex items-baseline gap-2">
-                    <span className="text-xl font-bold text-[#22ff88]">R$</span>
+                <p className="text-[9px] md:text-[10px] font-bold text-[#64748b] uppercase tracking-widest mb-3 md:mb-4 px-1">VALOR DA INSCRIÇÃO (BRL)</p>
+                <div className="relative bg-[#0f1115] border border-white/5 rounded-xl md:rounded-2xl overflow-hidden">
+                  <div className="px-6 md:px-8 py-5 md:py-7 flex items-baseline gap-2">
+                    <span className="text-lg md:text-xl font-bold text-[#22ff88]">R$</span>
                     <input
                       type="text"
                       value={priceInput}
