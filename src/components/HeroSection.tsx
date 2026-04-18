@@ -22,7 +22,6 @@ export function HeroSection({ lastWatched, onContinue }: HeroSectionProps) {
   const moduleInfo = lesson?.module ? `Módulo ${String(lesson.module.order_index + 1).padStart(2, '0')}: ${lesson.module.title}` : 'Série Original';
 
   return (
-  return (
     <section className="relative h-[400px] md:h-[480px] w-full rounded-2xl md:rounded-3xl overflow-hidden mb-8 md:mb-12 group">
       {/* Background Image */}
       <img
