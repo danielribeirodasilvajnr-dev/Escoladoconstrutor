@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'motion/react';
 import { User, Mail, Phone, Upload, Loader2, Camera, CheckCircle2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -65,7 +65,6 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setSuccess(false);
 
     try {
       const { error } = await supabase.auth.updateUser({

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
-import { ArrowRight, Sparkles, Layout, Zap, Shield, MousePointer2, ChevronLeft, ChevronRight, Trophy, TrendingUp, Users } from 'lucide-react';
+import { ArrowRight, Sparkles, Layout, Zap, Shield, MousePointer2, ChevronLeft, ChevronRight, Trophy, TrendingUp, Users, Search } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { supabase } from '../lib/supabase';
 
@@ -10,6 +10,8 @@ interface LandingPageProps {
 
 export function LandingPage({ onExplore }: LandingPageProps) {
   const [courses, setCourses] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('Todos');
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
