@@ -393,7 +393,7 @@ export function CoursePlayer({ courseId, onBack, session }: CoursePlayerProps) {
               <video 
                 ref={videoRef}
                 key={currentLesson.id}
-                src={currentLesson.content_url}
+                src={currentLesson.content_url + '#t=0.001'}
                 onTimeUpdate={handleTimeUpdate}
                 onLoadedMetadata={handleLoadedMetadata}
                 className="w-full h-full object-contain"
