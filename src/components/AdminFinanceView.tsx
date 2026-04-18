@@ -158,12 +158,11 @@ export function AdminFinanceView() {
       ) : (
         <>
           {/* Main Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {[
               { label: "Receita Total", value: `R$ ${globalStats.totalRevenue.toLocaleString('pt-BR')}`, icon: DollarSign, color: "text-[#22ff88]", trend: "+12%" },
               { label: "Vendas", value: globalStats.totalSales.toString(), icon: TrendingUp, color: "text-blue-400", trend: "+5%" },
               { label: "Ticket Médio", value: `R$ ${globalStats.avgTicket.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`, icon: Award, color: "text-purple-400" },
-              { label: "Top Professor", value: globalStats.topInstructor, icon: Users, color: "text-orange-400" },
             ].map((stat, i) => (
               <motion.div
                 key={i}
