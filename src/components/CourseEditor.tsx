@@ -27,6 +27,7 @@ interface Lesson {
   title: string;
   content_type: string;
   content_url: string;
+  thumbnail_url: string;
   duration: string;
   order_index: number;
 }
@@ -73,6 +74,7 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
   const [modules, setModules] = useState<Module[]>([]);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadingLessonId, setUploadingLessonId] = useState<string | null>(null);
+  const [uploadingThumbnailLessonId, setUploadingThumbnailLessonId] = useState<string | null>(null);
   const [uploadingAttachmentLessonId, setUploadingAttachmentLessonId] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [lessonAttachments, setLessonAttachments] = useState<Record<string, any[]>>({});
@@ -94,6 +96,7 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
 
   const coverInputRef = useRef<HTMLInputElement>(null);
   const lessonInputRef = useRef<HTMLInputElement>(null);
+  const thumbnailInputRef = useRef<HTMLInputElement>(null);
   const activeModuleForLesson = useRef<string | null>(null);
 
   useEffect(() => {
@@ -437,6 +440,46 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
     }
   };
 
+  const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    const lessonId = uploadingThumbnailLessonId;
+    if (!file || !lessonId) return;
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${lessonId}-thumb-${Math.random()}.${fileExt}`;
+      const filePath = `thumbnails/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('course-content')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('course-content')
+        .getPublicUrl(filePath);
+
+      const { error: updateError } = await supabase.from('lessons')
+        .update({ thumbnail_url: publicUrl })
+        .eq('id', lessonId);
+
+      if (updateError) throw updateError;
+
+      // Update local state
+      const updatedModules = modules.map(m => ({
+        ...m,
+        lessons: m.lessons.map(l => l.id === lessonId ? { ...l, thumbnail_url: publicUrl } : l)
+      }));
+      setModules(updatedModules);
+      toast.success('Capa da aula atualizada!');
+    } catch (error: any) {
+      toast.error('Erro ao subir capa: ' + error.message);
+    } finally {
+      setUploadingThumbnailLessonId(null);
+    }
+  };
+
   const handleAttachmentUpload = async (e: React.ChangeEvent<HTMLInputElement>, lessonId: string) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -642,7 +685,13 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                           <div className="bg-[#0f1115] border border-white/5 rounded-xl p-3 md:p-4 flex items-center justify-between group">
                             <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
                               <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg overflow-hidden bg-black/40 border border-white/10 flex items-center justify-center shrink-0 group-hover:border-[#22ff88]/30 transition-colors relative">
-                                {lesson.content_url ? (
+                                {lesson.thumbnail_url ? (
+                                  <img 
+                                    src={lesson.thumbnail_url} 
+                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform"
+                                    alt="Thumbnail"
+                                  />
+                                ) : lesson.content_url ? (
                                   <>
                                     <video
                                       src={lesson.content_url + '#t=0.001'}
@@ -676,24 +725,43 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                               >
                                 <X className="w-4 h-4" />
                               </button>
-                              {uploadingLessonId === lesson.id ? (
-                                <div className="flex items-center gap-2 md:gap-3">
-                                  <div className="w-16 md:w-24 h-1 bg-white/5 rounded-full overflow-hidden">
-                                    <div className="h-full bg-[#22ff88] transition-all" style={{ width: `${uploadProgress}%` }} />
+                              <div className="flex items-center gap-2 md:gap-3">
+                                {uploadingLessonId === lesson.id ? (
+                                  <div className="flex items-center gap-2 md:gap-3">
+                                    <div className="w-16 md:w-24 h-1 bg-white/5 rounded-full overflow-hidden">
+                                      <div className="h-full bg-[#22ff88] transition-all" style={{ width: `${uploadProgress}%` }} />
+                                    </div>
+                                    <span className="text-[9px] md:text-[10px] text-[#22ff88] font-bold">{uploadProgress}%</span>
                                   </div>
-                                  <span className="text-[9px] md:text-[10px] text-[#22ff88] font-bold">{uploadProgress}%</span>
-                                </div>
-                              ) : (
-                                <button
-                                  onClick={() => {
-                                    setUploadingLessonId(lesson.id);
-                                    lessonInputRef.current?.click();
-                                  }}
-                                  className="text-[8px] md:text-[9px] font-bold text-[#64748b] hover:text-[#22ff88] uppercase tracking-widest transition-colors"
-                                >
-                                  {lesson.content_url ? "TROCAR" : "VÍDEO"}
-                                </button>
-                              )}
+                                ) : (
+                                  <div className="flex items-center gap-2 md:gap-3">
+                                    <button
+                                      onClick={() => {
+                                        setUploadingThumbnailLessonId(lesson.id);
+                                        thumbnailInputRef.current?.click();
+                                      }}
+                                      className="text-[8px] md:text-[9px] font-bold text-[#64748b] hover:text-[#22ff88] uppercase tracking-widest transition-colors flex items-center gap-1"
+                                    >
+                                      {uploadingThumbnailLessonId === lesson.id ? (
+                                        <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                                      ) : (
+                                        <ImageIcon className="w-2.5 h-2.5" />
+                                      )}
+                                      CAPA
+                                    </button>
+                                    <div className="w-[1px] h-3 bg-white/5" />
+                                    <button
+                                      onClick={() => {
+                                        setUploadingLessonId(lesson.id);
+                                        lessonInputRef.current?.click();
+                                      }}
+                                      className="text-[8px] md:text-[9px] font-bold text-[#64748b] hover:text-[#22ff88] uppercase tracking-widest transition-colors"
+                                    >
+                                      {lesson.content_url ? "TROCAR" : "VÍDEO"}
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           </div>
 
@@ -742,6 +810,8 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                       </button>
                     </div>
                   </div>
+
+                  <input type="file" ref={thumbnailInputRef} className="hidden" accept="image/*" onChange={handleThumbnailUpload} />
 
                   {/* Module Exam Square */}
                   <div

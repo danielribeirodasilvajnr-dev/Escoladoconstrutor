@@ -31,6 +31,7 @@ interface Lesson {
   title: string;
   duration: string;
   content_url: string;
+  thumbnail_url: string;
   order_index: number;
 }
 
@@ -114,6 +115,7 @@ export function CoursePlayer({ courseId, onBack, session }: CoursePlayerProps) {
             title,
             duration,
             content_url,
+            thumbnail_url,
             order_index
           )
         `)
@@ -394,6 +396,7 @@ export function CoursePlayer({ courseId, onBack, session }: CoursePlayerProps) {
                 ref={videoRef}
                 key={currentLesson.id}
                 src={currentLesson.content_url + '#t=0.001'}
+                poster={currentLesson.thumbnail_url}
                 onTimeUpdate={handleTimeUpdate}
                 onLoadedMetadata={handleLoadedMetadata}
                 className="w-full h-full object-contain"
