@@ -63,7 +63,8 @@ export function DashboardOverview({ userData, onCourseSelect }: DashboardOvervie
           course:courses (
             *,
             instructor:profiles (
-              full_name
+              full_name,
+              avatar_url
             )
           )
         `)

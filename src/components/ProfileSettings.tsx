@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'motion/react';
 import { User, Mail, Phone, Upload, Loader2, Camera, CheckCircle2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -17,6 +17,16 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
   const [uploading, setUploading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(userData?.avatar_url || '');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Sync state when userData props change (e.g. after background profile fetch)
+  React.useEffect(() => {
+    if (userData) {
+      setName(userData.name || '');
+      setPhone(userData.phone || '');
+      setBio(userData.bio || '');
+      setAvatarUrl(userData.avatar_url || '');
+    }
+  }, [userData]);
 
   // Phone Mask for Brazil (XX) XXXXX-XXXX
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
