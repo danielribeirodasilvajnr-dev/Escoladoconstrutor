@@ -19,10 +19,11 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, Reorder } from 'motion/react';
 import { toast } from 'sonner';
 import { ConfirmModal } from './ConfirmModal';
 import { cn } from '../lib/utils';
+import { GripVertical } from 'lucide-react';
 
 interface Lesson {
   id: string;
@@ -348,87 +349,53 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
     }
   };
 
-  const handleMoveModule = async (moduleId: string, direction: 'up' | 'down') => {
-    const currentIndex = modules.findIndex(m => m.id === moduleId);
-    if (currentIndex === -1) return;
-    if (direction === 'up' && currentIndex === 0) return;
-    if (direction === 'down' && currentIndex === modules.length - 1) return;
-
-    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-    const currentModule = modules[currentIndex];
-    const targetModule = modules[targetIndex];
+  const handleReorderModules = async (newModules: Module[]) => {
+    // Update local state immediately for smooth UI
+    setModules(newModules);
 
     try {
-      // Update in DB
-      const { error } = await supabase.rpc('swap_module_order', {
-        m1_id: currentModule.id,
-        m1_index: targetModule.order_index,
-        m2_id: targetModule.id,
-        m2_index: currentModule.order_index
-      });
+      // Prepare batch updates for order_index
+      const updates = newModules.map((m, index) => ({
+        id: m.id,
+        order_index: index,
+        course_id: courseId // Required by Supabase PK or constraints sometimes, but usually just id is enough
+      }));
 
-      // If RPC fails (not yet implemented in Postgres), fallback to two updates
-      if (error) {
+      // Update in DB (we can do this in the background)
+      for (const update of updates) {
         await supabase
           .from('modules')
-          .update({ order_index: targetModule.order_index })
-          .eq('id', currentModule.id);
-        
-        await supabase
-          .from('modules')
-          .update({ order_index: currentModule.order_index })
-          .eq('id', targetModule.id);
+          .update({ order_index: update.order_index })
+          .eq('id', update.id);
       }
-
-      // Update local state
-      const updatedModules = [...modules];
-      [updatedModules[currentIndex], updatedModules[targetIndex]] = [updatedModules[targetIndex], updatedModules[currentIndex]];
-      setModules(updatedModules);
-      toast.success('Módulo reordenado');
     } catch (error: any) {
-      toast.error('Erro ao reordenar módulo');
+      console.error('Erro ao salvar ordem dos módulos:', error.message);
     }
   };
 
-  const handleMoveLesson = async (moduleId: string, lessonId: string, direction: 'up' | 'down') => {
-    const moduleIndex = modules.findIndex(m => m.id === moduleId);
-    if (moduleIndex === -1) return;
-    
-    const lessons = modules[moduleIndex].lessons;
-    const currentIndex = lessons.findIndex(l => l.id === lessonId);
-    if (currentIndex === -1) return;
-    if (direction === 'up' && currentIndex === 0) return;
-    if (direction === 'down' && currentIndex === lessons.length - 1) return;
-
-    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-    const currentLesson = lessons[currentIndex];
-    const targetLesson = lessons[targetIndex];
+  const handleReorderLessons = async (moduleId: string, newLessons: Lesson[]) => {
+    // Update local state immediately
+    const updatedModules = modules.map(m => 
+      m.id === moduleId ? { ...m, lessons: newLessons } : m
+    );
+    setModules(updatedModules);
 
     try {
+      // Prepare batch updates
+      const updates = newLessons.map((l, index) => ({
+        id: l.id,
+        order_index: index
+      }));
+
       // Update in DB
-      const { error } = await supabase
-        .from('lessons')
-        .update({ order_index: targetLesson.order_index })
-        .eq('id', currentLesson.id);
-
-      if (error) throw error;
-
-      const { error: error2 } = await supabase
-        .from('lessons')
-        .update({ order_index: currentLesson.order_index })
-        .eq('id', targetLesson.id);
-
-      if (error2) throw error2;
-
-      // Update local state
-      const updatedModules = [...modules];
-      const updatedLessons = [...lessons];
-      [updatedLessons[currentIndex], updatedLessons[targetIndex]] = [updatedLessons[targetIndex], updatedLessons[currentIndex]];
-      updatedModules[moduleIndex].lessons = updatedLessons;
-      setModules(updatedModules);
-      toast.success('Aula reordenada');
+      for (const update of updates) {
+        await supabase
+          .from('lessons')
+          .update({ order_index: update.order_index })
+          .eq('id', update.id);
+      }
     } catch (error: any) {
-      toast.error('Erro ao reordenar aula');
+      console.error('Erro ao salvar ordem das aulas:', error.message);
     }
   };
 
@@ -740,12 +707,22 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
               </button>
             </div>
 
-            <div className="space-y-6">
+            <Reorder.Group 
+              axis="y" 
+              values={modules} 
+              onReorder={handleReorderModules} 
+              className="space-y-6"
+            >
               {modules.map((module, mIdx) => (
-                <div key={module.id} className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
+                <Reorder.Item 
+                  key={module.id} 
+                  value={module}
+                  className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6"
+                >
                   <div className="xl:col-span-3 bg-[#1a1c22] border-l-4 border-[#22ff88] rounded-2xl md:rounded-3xl overflow-hidden border border-white/5">
                     <div className="p-4 md:p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
                       <div className="flex items-center gap-3 md:gap-4 flex-1">
+                        <GripVertical className="w-5 h-5 text-white/10 cursor-grab active:cursor-grabbing hover:text-[#22ff88]/40 transition-colors" />
                         <span className="text-xl md:text-2xl font-mono text-white/10">{String(mIdx + 1).padStart(2, "0")}</span>
                         <input
                           type="text"
@@ -760,32 +737,26 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                         />
                       </div>
                       <div className="flex gap-2 md:gap-4 text-[#64748b] ml-4">
-                        <div className="flex bg-black/20 rounded-lg p-1 border border-white/5">
-                          <button 
-                            disabled={mIdx === 0}
-                            onClick={() => handleMoveModule(module.id, 'up')}
-                            className="hover:text-[#22ff88] transition-colors p-1 disabled:opacity-20"
-                          >
-                            <ChevronUp className="w-4 h-4" />
-                          </button>
-                          <button 
-                            disabled={mIdx === modules.length - 1}
-                            onClick={() => handleMoveModule(module.id, 'down')}
-                            className="hover:text-[#22ff88] transition-colors p-1 disabled:opacity-20"
-                          >
-                            <ChevronDown className="w-4 h-4" />
-                          </button>
-                        </div>
                         <button onClick={() => handleDeleteModule(module.id)} className="hover:text-red-400 transition-colors p-1">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
-                    <div className="p-4 md:p-8 space-y-3 md:space-y-4">
+                    <Reorder.Group 
+                      axis="y" 
+                      values={module.lessons} 
+                      onReorder={(newLessons) => handleReorderLessons(module.id, newLessons)}
+                      className="p-4 md:p-8 space-y-3 md:space-y-4"
+                    >
                       {module.lessons.map((lesson, lIdx) => (
-                        <div key={lesson.id} className="space-y-2">
-                          <div className="bg-[#0f1115] border border-white/5 rounded-xl p-3 md:p-4 flex items-center justify-between group">
+                        <Reorder.Item 
+                          key={lesson.id} 
+                          value={lesson}
+                          className="space-y-2"
+                        >
+                          <div className="bg-[#0f1115] border border-white/5 rounded-xl p-3 md:p-4 flex items-center justify-between group cursor-grab active:cursor-grabbing">
                             <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
+                              <GripVertical className="w-4 h-4 text-white/5 group-hover:text-[#22ff88]/30 transition-colors shrink-0" />
                               <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg overflow-hidden bg-black/40 border border-white/10 flex items-center justify-center shrink-0 group-hover:border-[#22ff88]/30 transition-colors relative">
                                 {lesson.thumbnail_url ? (
                                   <img 
@@ -821,25 +792,9 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                               />
                             </div>
                             <div className="flex items-center gap-2 md:gap-4 shrink-0 h-full">
-                              <div className="flex mr-2 bg-black/20 rounded-lg p-0.5 border border-white/5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button
-                                  disabled={lIdx === 0}
-                                  onClick={() => handleMoveLesson(module.id, lesson.id, 'up')}
-                                  className="p-1 text-[#64748b] hover:text-[#22ff88] disabled:opacity-20 transition-colors"
-                                >
-                                  <ChevronUp className="w-3.5 h-3.5" />
-                                </button>
-                                <button
-                                  disabled={lIdx === module.lessons.length - 1}
-                                  onClick={() => handleMoveLesson(module.id, lesson.id, 'down')}
-                                  className="p-1 text-[#64748b] hover:text-[#22ff88] disabled:opacity-20 transition-colors"
-                                >
-                                  <ChevronDown className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
                               <button
                                 onClick={() => handleDeleteLesson(module.id, lesson.id)}
-                                className="opacity-0 group-hover:opacity-100 p-2 text-[#64748b] hover:text-red-400 transition-all border-l border-white/5"
+                                className="opacity-0 group-hover:opacity-100 p-2 text-[#64748b] hover:text-red-400 transition-all"
                               >
                                 <X className="w-4 h-4" />
                               </button>
