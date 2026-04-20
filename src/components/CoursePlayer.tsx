@@ -682,7 +682,18 @@ export function CoursePlayer({ courseId, onBack, session, onTakeExam }: CoursePl
           <div className="space-y-3">
             <div className="flex justify-between items-baseline mb-1">
               <p className="text-[9px] font-bold text-[#64748b] uppercase tracking-widest">
-                {modules.length} Mód • {modules.reduce((acc, m) => acc + m.lessons.length, 0)} Aulas
+                {modules.length} Mód • {modules.reduce((acc, m) => acc + m.lessons.length, 0)} Aulas • {(() => {
+                  let totalSeconds = 0;
+                  modules.forEach(m => {
+                    m.lessons?.forEach((l: any) => {
+                      const [mins, secs] = (l.duration || '0:00').split(':').map(Number);
+                      totalSeconds += (mins || 0) * 60 + (secs || 0);
+                    });
+                  });
+                  const h = Math.floor(totalSeconds / 3600);
+                  const m = Math.floor((totalSeconds % 3600) / 60);
+                  return `${h > 0 ? `${h}h ` : ''}${m}m`;
+                })()}
               </p>
             </div>
             <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">

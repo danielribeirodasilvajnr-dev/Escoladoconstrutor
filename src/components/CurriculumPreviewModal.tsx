@@ -134,7 +134,7 @@ export function CurriculumPreviewModal({ courseId, courseTitle, onClose, onActio
                      });
                      const h = Math.floor(totalSeconds / 3600);
                      const m = Math.floor((totalSeconds % 3600) / 60);
-                     return `${h > 0 ? `${h}h ` : ''}${m}m Total`;
+                     return `${h > 0 ? `${h}h ` : ''}${m}m`;
                    })()}
                  </span>
               </div>
