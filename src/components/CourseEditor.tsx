@@ -81,6 +81,7 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
   const [uploadingAttachmentLessonId, setUploadingAttachmentLessonId] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [lessonAttachments, setLessonAttachments] = useState<Record<string, any[]>>({});
 
   const toggleModule = (moduleId: string) => {
@@ -806,6 +807,17 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                                       ) : (
                                         <Upload className="w-4 h-4 text-white/20" />
                                       )}
+                                      {lesson.content_url && (
+                                        <div 
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setPreviewUrl(lesson.content_url);
+                                          }}
+                                          className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/40 transition-colors cursor-pointer group/play"
+                                        >
+                                          <Play className="w-4 h-4 text-white/40 group-hover/play:text-[#22ff88] group-hover/play:scale-125 transition-all" />
+                                        </div>
+                                      )}
                                     </div>
                                     <input
                                       type="text"
@@ -1033,6 +1045,41 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
         {...confirmConfig}
         onClose={() => setConfirmConfig({ ...confirmConfig, isOpen: false })}
       />
+
+      {/* Video Preview Modal */}
+      <AnimatePresence>
+        {previewUrl && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 md:p-8">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setPreviewUrl(null)}
+              className="absolute inset-0 bg-black/90 backdrop-blur-xl"
+            />
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-5xl aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl border border-white/10"
+            >
+              <button 
+                onClick={() => setPreviewUrl(null)}
+                className="absolute top-4 right-4 z-10 w-10 h-10 bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center text-white/60 hover:text-white hover:bg-black/80 transition-all"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <video 
+                src={previewUrl} 
+                controls 
+                autoPlay 
+                className="w-full h-full"
+              />
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
