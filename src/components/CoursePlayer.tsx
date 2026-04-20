@@ -222,6 +222,17 @@ export function CoursePlayer({ courseId, onBack, session, onTakeExam }: CoursePl
 
       if (error) throw error;
 
+      // Notify Instructor
+      if (course?.instructor_id && course.instructor_id !== user.id) {
+        await supabase.from('notifications').insert({
+          user_id: course.instructor_id,
+          type: 'comment',
+          title: 'Nova dúvida em seu curso',
+          message: `${userData?.name || 'Um aluno'} comentou na aula "${currentLesson.title}"`,
+          link: `/dashboard?course=${courseId}&lesson=${currentLesson.id}`
+        });
+      }
+
       setComments(prev => [data, ...prev]);
       setNewComment('');
       toast.success('Comentário enviado!');

@@ -33,6 +33,15 @@ export function CheckoutModal({ course, userId, onClose, onSuccess }: CheckoutMo
 
         if (error && error.code !== '23505') throw error;
         
+        // Notify Student
+        await supabase.from('notifications').insert({
+          user_id: userId,
+          type: 'purchase',
+          title: 'Inscrição Confirmada!',
+          message: `Você agora tem acesso vitalício ao curso "${course.title}".`,
+          link: `/dashboard?course=${course.id}`
+        });
+        
         await new Promise(resolve => setTimeout(resolve, 1500));
         setStep('success');
       } else {

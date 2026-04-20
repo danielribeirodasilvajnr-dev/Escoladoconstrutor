@@ -197,7 +197,20 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
             updated_at: new Date().toISOString()
           })
           .eq('id', courseId);
+        
         if (error) throw error;
+
+        // Notify Instructor if published now
+        if (course.is_published) {
+          await supabase.from('notifications').insert({
+            user_id: userData.id,
+            type: 'publication',
+            title: 'Curso na Vitrine!',
+            message: `Seu curso "${course.title}" agora está visível para todos os alunos.`,
+            link: `/dashboard?course=${courseId}`
+          });
+        }
+
         toast.success('Curso atualizado com sucesso!');
       } else {
         const { data, error } = await supabase

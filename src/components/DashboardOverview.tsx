@@ -50,10 +50,53 @@ export function DashboardOverview({ userData, onCourseSelect }: DashboardOvervie
       // Parallelize both fetches for faster initial load
       Promise.all([
         fetchEnrollments(),
-        fetchLastWatched()
+        fetchLastWatched(),
+        checkInactivity()
       ]);
     }
   }, [userData?.id]);
+
+  async function checkInactivity() {
+    try {
+      // Avoid spam: Check if we already sent an inactivity notification in the last 24h
+      const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const { data: recent } = await supabase
+        .from('notifications')
+        .select('id')
+        .eq('user_id', userData.id)
+        .eq('type', 'activity')
+        .gt('created_at', yesterday)
+        .limit(1);
+
+      if (recent && recent.length > 0) return;
+
+      // Check last progress update to see how long they've been away
+      const { data: lastProgress } = await supabase
+        .from('lesson_progress')
+        .select('updated_at')
+        .eq('user_id', userData.id)
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (lastProgress) {
+        const lastActive = new Date(lastProgress.updated_at);
+        const daysDiff = (Date.now() - lastActive.getTime()) / (1000 * 60 * 60 * 24);
+
+        if (daysDiff >= 3) {
+          await supabase.from('notifications').insert({
+            user_id: userData.id,
+            type: 'activity',
+            title: 'Sentimos sua falta!',
+            message: `Já faz ${Math.floor(daysDiff)} dias que você não acessa seus cursos. Que tal retomar de onde parou?`,
+            link: '/dashboard'
+          });
+        }
+      }
+    } catch (err) {
+      console.error('Inactivity check error:', err);
+    }
+  }
 
   async function fetchEnrollments() {
     try {

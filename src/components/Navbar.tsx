@@ -1,5 +1,8 @@
+import React, { useState, useEffect } from 'react';
 import { Search, Bell, Settings, Menu } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { NotificationPopover } from './NotificationPopover';
+import { supabase } from '../lib/supabase';
 
 interface NavbarProps {
   userData: any;
@@ -9,8 +12,47 @@ interface NavbarProps {
 }
 
 export function Navbar({ userData, activeView, onViewChange, onToggleSidebar }: NavbarProps) {
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const avatarUrl = userData?.avatar_url;
   const initial = (userData?.name || userData?.email || '?').charAt(0).toUpperCase();
+
+  useEffect(() => {
+    if (userData?.id) {
+      fetchUnreadCount();
+      
+      // Listen for notification changes
+      const channel = supabase
+        .channel('notifications-changes')
+        .on('postgres_changes', { 
+          event: '*', 
+          schema: 'public', 
+          table: 'notifications',
+          filter: `user_id=eq.${userData.id}`
+        }, () => {
+          fetchUnreadCount();
+        })
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [userData?.id]);
+
+  async function fetchUnreadCount() {
+    try {
+      const { count, error } = await supabase
+        .from('notifications')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userData.id)
+        .eq('is_read', false);
+
+      if (!error) setUnreadCount(count || 0);
+    } catch (err) {
+      console.error('Error fetching unread count:', err);
+    }
+  }
 
   return (
     <header className="h-14 md:h-20 flex items-center justify-between px-3 md:px-8 bg-black/20 backdrop-blur-sm sticky top-0 z-40 border-b border-white/5">
@@ -35,11 +77,25 @@ export function Navbar({ userData, activeView, onViewChange, onToggleSidebar }: 
       </div>
       
       <div className="flex items-center gap-2 md:gap-8 ml-2">
-        <div className="hidden sm:flex items-center gap-4">
-          <button className="relative text-[#64748b] hover:text-white transition-colors p-2">
+        <div className="hidden sm:flex items-center gap-4 relative">
+          <button 
+            onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+            className={cn(
+              "relative text-[#64748b] hover:text-white transition-colors p-2",
+              isNotificationsOpen && "text-white"
+            )}
+          >
             <Bell className="w-4.5 h-4.5" />
-            <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-[#22ff88] rounded-full ring-2 ring-[#0f1115]" />
+            {unreadCount > 0 && (
+              <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-[#22ff88] rounded-full ring-2 ring-[#0f1115] animate-pulse" />
+            )}
           </button>
+          
+          <NotificationPopover 
+            userId={userData?.id}
+            isOpen={isNotificationsOpen}
+            onClose={() => setIsNotificationsOpen(false)}
+          />
         </div>
 
         <div className="flex items-center gap-2 md:gap-3 border-l border-white/10 pl-3 md:pl-8 py-1 md:py-2">
