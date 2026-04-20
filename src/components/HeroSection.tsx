@@ -3,6 +3,7 @@ import { Play, Info } from 'lucide-react';
 interface HeroSectionProps {
   lastWatched?: any;
   onContinue?: () => void;
+  onOpenCurriculum?: () => void;
 }
 
 export function HeroSection({ lastWatched, onContinue, onOpenCurriculum }: HeroSectionProps) {
@@ -74,7 +75,10 @@ export function HeroSection({ lastWatched, onContinue, onOpenCurriculum }: HeroS
                 : 'Começar Agora'}
             </span>
           </button>
-          <button className="flex items-center justify-center gap-2 px-4 md:px-8 py-2 md:py-4 bg-white/5 text-white rounded-lg md:rounded-xl font-bold hover:bg-white/10 active:scale-95 transition-all backdrop-blur-md border border-white/10 shrink-0">
+          <button 
+            onClick={onOpenCurriculum}
+            className="flex items-center justify-center gap-2 px-4 md:px-8 py-2 md:py-4 bg-white/5 text-white rounded-lg md:rounded-xl font-bold hover:bg-white/10 active:scale-95 transition-all backdrop-blur-md border border-white/10 shrink-0"
+          >
             <Info className="w-3 h-3 md:w-5 md:h-5" />
             <span className="text-[10px] md:text-sm">Grade</span>
           </button>
