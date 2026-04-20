@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { toast } from 'sonner';
+import { cn } from '../lib/utils';
 
 interface CertificateViewProps {
   certificateId: string;
@@ -32,7 +33,7 @@ export function CertificateView({ certificateId, onBack }: CertificateViewProps)
   async function fetchCertificate() {
     try {
       setLoading(true);
-      // 1. Fetch Basic Certificate Data
+      // 1. Fetch Basic Certificate Data (Bypassing complex joins that may lack foreign keys)
       const { data: cert, error: certError } = await supabase
         .from('certificates')
         .select(`
@@ -40,20 +41,31 @@ export function CertificateView({ certificateId, onBack }: CertificateViewProps)
           issue_date,
           user_id,
           course_id,
-          profiles ( full_name ),
           courses ( 
             title,
-            instructor_id,
-            instructor:profiles!instructor_id ( full_name )
+            instructor_id
           )
         `)
         .eq('id', certificateId)
         .single();
 
       if (certError) throw certError;
-      setCertData(cert);
 
-      // 2. Fetch Curriculum for the Course
+      // 2. Fetch Profiles separately to bypass relationship/join issues in Supabase
+      const [studentRes, instructorRes] = await Promise.all([
+        supabase.from('profiles').select('full_name').eq('id', cert.user_id).single(),
+        supabase.from('profiles').select('full_name').eq('id', cert.courses.instructor_id).single()
+      ]);
+
+      const finalCertData = {
+        ...cert,
+        student: studentRes.data,
+        instructor: instructorRes.data
+      };
+
+      setCertData(finalCertData);
+
+      // 3. Fetch Curriculum for the Course
       const { data: modules, error: modError } = await supabase
         .from('modules')
         .select(`
@@ -105,7 +117,7 @@ export function CertificateView({ certificateId, onBack }: CertificateViewProps)
 
   if (loading) {
     return (
-      <div className="h-[calc(100vh-80px)] flex flex-col items-center justify-center gap-4">
+      <div className="h-[calc(100vh-80px)] flex flex-col items-center justify-center gap-4 bg-[#0a0b0e]">
         <Loader2 className="w-10 h-10 text-[#22ff88] animate-spin" />
         <p className="text-[#64748b] font-bold uppercase tracking-widest text-[10px]">Autenticando Certificação...</p>
       </div>
@@ -125,7 +137,7 @@ export function CertificateView({ certificateId, onBack }: CertificateViewProps)
             className="flex items-center gap-1.5 text-[#64748b] hover:text-white transition-colors mb-4 group"
           >
             <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
-            <span className="text-[9px] font-bold uppercase tracking-widest">Voltar ao Console</span>
+            <span className="text-[9px] font-bold uppercase tracking-widest">Voltar à Central</span>
           </button>
           <h1 className="text-3xl font-black text-white">Minha <span className="text-[#22ff88]">Certificação</span></h1>
         </div>
@@ -136,7 +148,7 @@ export function CertificateView({ certificateId, onBack }: CertificateViewProps)
             className="flex-1 md:flex-none px-6 py-3.5 bg-white/5 text-white font-bold rounded-xl border border-white/10 hover:bg-white/10 transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-[10px]"
           >
             <Printer className="w-4 h-4" />
-            Imprimir / PDF (A4 Paisagem)
+            Imprimir / PDF (A4)
           </button>
           <button className="flex-1 md:flex-none px-6 py-3.5 bg-[#22ff88] text-black font-black rounded-xl hover:opacity-90 transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-[10px] shadow-[0_0_20px_rgba(34,255,136,0.2)]">
             <Share2 className="w-4 h-4" />
@@ -182,14 +194,14 @@ export function CertificateView({ certificateId, onBack }: CertificateViewProps)
              <div className="mb-12">
                 <p className="text-sm md:text-base text-zinc-500 mb-1 font-medium italic">Parabenizamos o aluno</p>
                 <h4 className="text-4xl md:text-6xl font-black tracking-tight border-b-4 border-black inline-block pb-1">
-                   {certData.profiles?.full_name}
+                   {certData.student?.full_name}
                 </h4>
              </div>
 
              <div className="mt-auto pb-16 grid grid-cols-2 md:grid-cols-3 gap-12 items-end">
                 <div>
                    <p className="text-[10px] md:text-xs text-zinc-500 font-bold uppercase tracking-widest mb-1">Instrutor Responsável</p>
-                   <p className="text-sm md:text-base font-bold">{certData.courses?.instructor?.full_name}</p>
+                   <p className="text-sm md:text-base font-bold">{certData.instructor?.full_name}</p>
                 </div>
                 
                 <div className="text-center md:text-left">
@@ -226,27 +238,22 @@ export function CertificateView({ certificateId, onBack }: CertificateViewProps)
           </div>
 
           <div className="flex-1 border-2 border-zinc-200 rounded-3xl overflow-hidden grid grid-cols-1 md:grid-cols-3 divide-x-2 divide-zinc-200 bg-zinc-50/30">
-             {curriculum.map((module, mIdx) => {
-               const chunkedLessons = [];
-               const lessonsPerCol = Math.ceil(module.lessons.length / (module.lessons.length > 10 ? 2 : 1));
-               
-               return (
-                 <div key={module.id} className="p-6 space-y-4 border-b border-zinc-100 last:border-0 md:border-b-0">
-                    <div className="flex items-start gap-2">
-                       <span className="text-[11px] font-black text-[#22ff88] mt-0.5">#{mIdx + 1}</span>
-                       <h4 className="text-[11px] font-black uppercase tracking-tight leading-tight">{module.title}</h4>
-                    </div>
-                    <div className="space-y-1.5 pl-6 border-l border-zinc-200">
-                       {module.lessons.map((lesson: any) => (
-                         <div key={lesson.id} className="flex justify-between items-center text-[9px] text-[#64748b] font-medium leading-none py-0.5 group">
-                            <span className="truncate pr-4 leading-tight italic">{lesson.title}</span>
-                            <span className="font-mono text-[8px] whitespace-nowrap opacity-50">{lesson.duration || '--:--'}</span>
-                         </div>
-                       ))}
-                    </div>
-                 </div>
-               );
-             })}
+             {curriculum.map((module, mIdx) => (
+                <div key={module.id} className="p-6 space-y-4 border-b border-zinc-100 last:border-0 md:border-b-0">
+                   <div className="flex items-start gap-2">
+                      <span className="text-[11px] font-black text-[#22ff88] mt-0.5">#{mIdx + 1}</span>
+                      <h4 className="text-[11px] font-black uppercase tracking-tight leading-tight">{module.title}</h4>
+                   </div>
+                   <div className="space-y-1.5 pl-6 border-l border-zinc-200">
+                      {module.lessons.map((lesson: any) => (
+                        <div key={lesson.id} className="flex justify-between items-center text-[9px] text-[#64748b] font-medium leading-none py-0.5 group">
+                           <span className="truncate pr-4 leading-tight italic">{lesson.title}</span>
+                           <span className="font-mono text-[8px] whitespace-nowrap opacity-50">{lesson.duration || '--:--'}</span>
+                        </div>
+                      ))}
+                   </div>
+                </div>
+             ))}
           </div>
 
           <div className="mt-10 flex justify-between items-center">
