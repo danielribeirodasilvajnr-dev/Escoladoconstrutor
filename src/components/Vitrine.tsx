@@ -150,17 +150,23 @@ export function Vitrine({ userData, onViewChange }: VitrineProps) {
                 </div>
 
                 <div className="absolute bottom-4 md:bottom-6 left-6 md:left-8 right-6 md:right-8">
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={course.instructor?.avatar_url || `https://i.pravatar.cc/100?u=${course.instructor_id}`}
-                      className="w-8 h-8 md:w-10 md:h-10 rounded-xl object-cover border border-white/10"
-                      alt={course.instructor?.full_name}
-                    />
-                    <div className="flex flex-col">
-                      <span className="text-[8px] font-bold text-[#22ff88] uppercase tracking-widest">Professor</span>
-                      <span className="text-[10px] md:text-xs font-bold text-white">{course.instructor?.full_name || 'Especialista'}</span>
+                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-[#2a2d35] to-[#1a1c22] border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
+                      {course.instructor?.avatar_url ? (
+                        <img
+                          src={course.instructor.avatar_url}
+                          className="w-full h-full object-cover"
+                          alt={course.instructor.full_name}
+                        />
+                      ) : (
+                        <span className="text-[10px] md:text-sm font-bold text-[#64748b]">
+                          {course.instructor?.full_name?.charAt(0) || 'E'}
+                        </span>
+                      )}
                     </div>
-                  </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[8px] font-bold text-[#22ff88] uppercase tracking-widest">Professor</span>
+                      <span className="text-[10px] md:text-xs font-bold text-white truncate">{course.instructor?.full_name || 'Especialista'}</span>
+                    </div>
                 </div>
               </div>
 

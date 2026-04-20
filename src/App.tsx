@@ -75,14 +75,35 @@ export default function App() {
 
           if (profile) {
             const finalRole = email === 'danielribeirodasilvajnr@gmail.com' ? 'master' : (profile.role || initialRole);
+            
+            // Auto-sync missing info from metadata to profiles table
+            const needsSync = (!profile.avatar_url && session.user.user_metadata.avatar_url) || 
+                              (!profile.full_name && session.user.user_metadata.full_name);
+            
+            if (needsSync) {
+              await supabase.from('profiles').update({
+                avatar_url: profile.avatar_url || session.user.user_metadata.avatar_url,
+                full_name: profile.full_name || session.user.user_metadata.full_name,
+              }).eq('id', session.user.id);
+            }
+
             setUserData(prev => ({
               ...prev,
               role: finalRole,
               name: profile.full_name || prev.name,
               avatar_url: profile.avatar_url || prev.avatar_url,
-              phone: profile.phone || prev.phone,
               bio: profile.bio || prev.bio,
+              // phone remains in metadata only
             }));
+          } else {
+            // Create profile if it doesn't exist
+            await supabase.from('profiles').insert({
+              id: session.user.id,
+              email: email,
+              full_name: session.user.user_metadata.full_name || email?.split('@')[0],
+              avatar_url: session.user.user_metadata.avatar_url,
+              role: initialRole
+            });
           }
         } catch (err) {
           console.warn('Profile background sync failed:', err);
