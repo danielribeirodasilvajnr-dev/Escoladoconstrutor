@@ -36,7 +36,7 @@ export default function App() {
       setPublicCourseId(courseId);
     }
 
-    const handleSession = (session: Session | null) => {
+    const handleSession = async (session: Session | null) => {
       setSession(session);
       if (session) {
         // Only allow dashboard if email is confirmed
@@ -47,19 +47,27 @@ export default function App() {
         }
 
         const email = session.user.email;
-        const baseRole = session.user.user_metadata.role || 'membro';
         
-        // Elevate danielribeirodasilvajnr@gmail.com to master
+        // Fetch profile data from database to ensure up-to-date roles and info
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+
+        const baseRole = profile?.role || session.user.user_metadata.role || 'membro';
+        
+        // Elevate danielribeirodasilvajnr@gmail.com to master (safety fallback)
         const role = email === 'danielribeirodasilvajnr@gmail.com' ? 'master' : baseRole;
 
         setUserData({
           id: session.user.id,
           email: email,
           role: role,
-          name: session.user.user_metadata.full_name || email?.split('@')[0],
-          avatar_url: session.user.user_metadata.avatar_url,
-          phone: session.user.user_metadata.phone,
-          bio: session.user.user_metadata.bio,
+          name: profile?.full_name || session.user.user_metadata.full_name || email?.split('@')[0],
+          avatar_url: profile?.avatar_url || session.user.user_metadata.avatar_url,
+          phone: profile?.phone || session.user.user_metadata.phone,
+          bio: profile?.bio || session.user.user_metadata.bio,
         });
         setView('dashboard');
       } else {

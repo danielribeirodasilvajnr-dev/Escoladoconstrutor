@@ -67,7 +67,8 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.updateUser({
+      // Update Auth Metadata (for session consistency)
+      const { error: authError } = await supabase.auth.updateUser({
         data: {
           full_name: name,
           phone: phone,
@@ -76,7 +77,21 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
         }
       });
 
-      if (error) throw error;
+      if (authError) throw authError;
+
+      // Update Profiles Table (source of truth for Admin and App)
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          full_name: name,
+          phone: phone,
+          avatar_url: avatarUrl,
+          bio: bio,
+        })
+        .eq('id', userData.id);
+
+      if (profileError) throw profileError;
+
       toast.success('Perfil atualizado com sucesso!');
     } catch (error: any) {
       toast.error('Erro ao salvar perfil: ' + error.message);
