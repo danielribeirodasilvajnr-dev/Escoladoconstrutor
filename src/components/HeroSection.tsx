@@ -5,7 +5,7 @@ interface HeroSectionProps {
   onContinue?: () => void;
 }
 
-export function HeroSection({ lastWatched, onContinue }: HeroSectionProps) {
+export function HeroSection({ lastWatched, onContinue, onOpenCurriculum }: HeroSectionProps) {
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
@@ -48,12 +48,12 @@ export function HeroSection({ lastWatched, onContinue }: HeroSectionProps) {
         </div>
 
         <h1 className="text-xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-3 md:mb-6 leading-[1.1] tracking-tight">
-          {course.title.length > 25 ? (
-            <span>{course.title}</span>
+          {(course?.title || '').length > 25 ? (
+            <span>{course?.title}</span>
           ) : (
             <>
-              {course.title.split(' ').slice(0, 2).join(' ')} <br />
-              <span className="text-[#22ff88]">{course.title.split(' ').slice(2).join(' ')}</span>
+              {(course?.title || '').split(' ').slice(0, 2).join(' ')} <br />
+              <span className="text-[#22ff88]">{(course?.title || '').split(' ').slice(2).join(' ')}</span>
             </>
           )}
         </h1>

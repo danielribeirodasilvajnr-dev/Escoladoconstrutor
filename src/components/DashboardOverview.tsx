@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { HeroSection } from './HeroSection';
 import { CourseCard } from './CourseCard';
 import { FeaturedCard } from './FeaturedCard';
@@ -7,7 +7,6 @@ import { WeeklyCard } from './WeeklyCard';
 import { supabase } from '../lib/supabase';
 import { BookOpen, Loader2 } from 'lucide-react';
 import { CurriculumPreviewModal } from './CurriculumPreviewModal';
-import { AnimatePresence } from 'motion/react';
 
 interface DashboardOverviewProps {
   userData: any;
@@ -107,7 +106,7 @@ export function DashboardOverview({ userData, onCourseSelect }: DashboardOvervie
           course: c
         }));
 
-      const allCourses = [...enrollments, ...teacherEnrollments];
+      const allCourses = [...enrollments, ...teacherEnrollments].filter(e => e.course);
       setEnrolledCourses(allCourses);
       return allCourses;
     } catch (error: any) {
