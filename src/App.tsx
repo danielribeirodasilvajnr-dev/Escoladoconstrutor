@@ -59,6 +59,8 @@ export default function App() {
           name: session.user.user_metadata.full_name || email?.split('@')[0],
           avatar_url: session.user.user_metadata.avatar_url,
           phone: session.user.user_metadata.phone,
+          profession: session.user.user_metadata.profession,
+          crea: session.user.user_metadata.crea,
           bio: session.user.user_metadata.bio,
         });
 
@@ -92,6 +94,8 @@ export default function App() {
               role: finalRole,
               name: profile.full_name || prev.name,
               avatar_url: profile.avatar_url || prev.avatar_url,
+              profession: session.user.user_metadata.profession || prev.profession,
+              crea: session.user.user_metadata.crea || prev.crea,
               // phone and bio remain in metadata only
             }));
           } else {
