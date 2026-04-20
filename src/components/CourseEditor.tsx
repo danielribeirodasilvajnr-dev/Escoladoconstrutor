@@ -873,7 +873,7 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                                </label>
                              </div>
                           </div>
-                        </div>
+                        </Reorder.Item>
                       ))}
                       <button
                         onClick={() => handleAddLesson(module.id)}
@@ -881,7 +881,7 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                       >
                         + ADICIONAR AULA
                       </button>
-                    </div>
+                    </Reorder.Group>
                   </div>
 
                   <input type="file" ref={thumbnailInputRef} className="hidden" accept="image/*" onChange={handleThumbnailUpload} />
@@ -902,8 +902,9 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                       GERENCIAR
                     </button>
                   </div>
-                </div>
+                </Reorder.Item>
               ))}
+            </Reorder.Group>
 
               {/* Final Exam Square */}
               <div
