@@ -14,7 +14,9 @@ import {
   X,
   Upload,
   ClipboardCheck,
-  Award
+  Award,
+  ChevronUp,
+  ChevronDown
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { motion, AnimatePresence } from 'motion/react';
@@ -346,6 +348,90 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
     }
   };
 
+  const handleMoveModule = async (moduleId: string, direction: 'up' | 'down') => {
+    const currentIndex = modules.findIndex(m => m.id === moduleId);
+    if (currentIndex === -1) return;
+    if (direction === 'up' && currentIndex === 0) return;
+    if (direction === 'down' && currentIndex === modules.length - 1) return;
+
+    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    const currentModule = modules[currentIndex];
+    const targetModule = modules[targetIndex];
+
+    try {
+      // Update in DB
+      const { error } = await supabase.rpc('swap_module_order', {
+        m1_id: currentModule.id,
+        m1_index: targetModule.order_index,
+        m2_id: targetModule.id,
+        m2_index: currentModule.order_index
+      });
+
+      // If RPC fails (not yet implemented in Postgres), fallback to two updates
+      if (error) {
+        await supabase
+          .from('modules')
+          .update({ order_index: targetModule.order_index })
+          .eq('id', currentModule.id);
+        
+        await supabase
+          .from('modules')
+          .update({ order_index: currentModule.order_index })
+          .eq('id', targetModule.id);
+      }
+
+      // Update local state
+      const updatedModules = [...modules];
+      [updatedModules[currentIndex], updatedModules[targetIndex]] = [updatedModules[targetIndex], updatedModules[currentIndex]];
+      setModules(updatedModules);
+      toast.success('Módulo reordenado');
+    } catch (error: any) {
+      toast.error('Erro ao reordenar módulo');
+    }
+  };
+
+  const handleMoveLesson = async (moduleId: string, lessonId: string, direction: 'up' | 'down') => {
+    const moduleIndex = modules.findIndex(m => m.id === moduleId);
+    if (moduleIndex === -1) return;
+    
+    const lessons = modules[moduleIndex].lessons;
+    const currentIndex = lessons.findIndex(l => l.id === lessonId);
+    if (currentIndex === -1) return;
+    if (direction === 'up' && currentIndex === 0) return;
+    if (direction === 'down' && currentIndex === lessons.length - 1) return;
+
+    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    const currentLesson = lessons[currentIndex];
+    const targetLesson = lessons[targetIndex];
+
+    try {
+      // Update in DB
+      const { error } = await supabase
+        .from('lessons')
+        .update({ order_index: targetLesson.order_index })
+        .eq('id', currentLesson.id);
+
+      if (error) throw error;
+
+      const { error: error2 } = await supabase
+        .from('lessons')
+        .update({ order_index: currentLesson.order_index })
+        .eq('id', targetLesson.id);
+
+      if (error2) throw error2;
+
+      // Update local state
+      const updatedModules = [...modules];
+      const updatedLessons = [...lessons];
+      [updatedLessons[currentIndex], updatedLessons[targetIndex]] = [updatedLessons[targetIndex], updatedLessons[currentIndex]];
+      updatedModules[moduleIndex].lessons = updatedLessons;
+      setModules(updatedModules);
+      toast.success('Aula reordenada');
+    } catch (error: any) {
+      toast.error('Erro ao reordenar aula');
+    }
+  };
+
   const handleDeleteLesson = async (moduleId: string, lessonId: string) => {
     setConfirmConfig({
       isOpen: true,
@@ -673,7 +759,23 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                           className="bg-transparent border-none text-base md:text-lg font-bold text-white focus:outline-none focus:text-[#22ff88] transition-colors w-full"
                         />
                       </div>
-                      <div className="flex gap-4 text-[#64748b] ml-4">
+                      <div className="flex gap-2 md:gap-4 text-[#64748b] ml-4">
+                        <div className="flex bg-black/20 rounded-lg p-1 border border-white/5">
+                          <button 
+                            disabled={mIdx === 0}
+                            onClick={() => handleMoveModule(module.id, 'up')}
+                            className="hover:text-[#22ff88] transition-colors p-1 disabled:opacity-20"
+                          >
+                            <ChevronUp className="w-4 h-4" />
+                          </button>
+                          <button 
+                            disabled={mIdx === modules.length - 1}
+                            onClick={() => handleMoveModule(module.id, 'down')}
+                            className="hover:text-[#22ff88] transition-colors p-1 disabled:opacity-20"
+                          >
+                            <ChevronDown className="w-4 h-4" />
+                          </button>
+                        </div>
                         <button onClick={() => handleDeleteModule(module.id)} className="hover:text-red-400 transition-colors p-1">
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -719,9 +821,25 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                               />
                             </div>
                             <div className="flex items-center gap-2 md:gap-4 shrink-0 h-full">
+                              <div className="flex mr-2 bg-black/20 rounded-lg p-0.5 border border-white/5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button
+                                  disabled={lIdx === 0}
+                                  onClick={() => handleMoveLesson(module.id, lesson.id, 'up')}
+                                  className="p-1 text-[#64748b] hover:text-[#22ff88] disabled:opacity-20 transition-colors"
+                                >
+                                  <ChevronUp className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  disabled={lIdx === module.lessons.length - 1}
+                                  onClick={() => handleMoveLesson(module.id, lesson.id, 'down')}
+                                  className="p-1 text-[#64748b] hover:text-[#22ff88] disabled:opacity-20 transition-colors"
+                                >
+                                  <ChevronDown className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
                               <button
                                 onClick={() => handleDeleteLesson(module.id, lesson.id)}
-                                className="opacity-0 group-hover:opacity-100 p-2 text-[#64748b] hover:text-red-400 transition-all"
+                                className="opacity-0 group-hover:opacity-100 p-2 text-[#64748b] hover:text-red-400 transition-all border-l border-white/5"
                               >
                                 <X className="w-4 h-4" />
                               </button>
