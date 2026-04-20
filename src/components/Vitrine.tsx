@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Filter, Star, Users, Play, Globe, Loader2, Award, Zap } from 'lucide-react';
+import { Search, Filter, Star, Users, Play, Globe, Loader2, Award, Zap, BookOpen } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { CheckoutModal } from './CheckoutModal';
+import { CurriculumPreviewModal } from './CurriculumPreviewModal';
 
 interface Course {
   id: string;
@@ -29,6 +30,7 @@ export function Vitrine({ userData, onViewChange }: VitrineProps) {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [viewingCurriculum, setViewingCurriculum] = useState<Course | null>(null);
 
   useEffect(() => {
     fetchPublishedCourses();
@@ -191,13 +193,23 @@ export function Vitrine({ userData, onViewChange }: VitrineProps) {
                     <span className="text-[8px] font-bold text-[#64748b] uppercase tracking-widest">Investimento</span>
                     <span className="text-lg md:text-2xl font-black text-white">R$ {course.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                   </div>
-                  <button
-                    onClick={() => setSelectedCourse(course)}
-                    className="h-11 md:h-14 px-5 md:px-8 bg-white/5 text-white font-black text-[9px] md:text-[10px] uppercase tracking-widest rounded-xl md:rounded-2xl border border-white/10 hover:bg-[#22ff88] hover:text-black hover:border-transparent transition-all active:scale-95 flex items-center justify-center gap-2"
-                  >
-                    Detalhes
-                    <Play className="w-3 h-3 fill-current" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setViewingCurriculum(course)}
+                      className="h-11 md:h-14 px-4 md:px-6 bg-white/5 text-[#64748b] font-black text-[9px] md:text-[10px] uppercase tracking-widest rounded-xl md:rounded-2xl border border-white/10 hover:text-[#22ff88] hover:border-[#22ff88]/20 transition-all active:scale-95 flex items-center justify-center gap-2"
+                      title="Ver Grade Curricular"
+                    >
+                      <BookOpen className="w-3.5 h-3.5" />
+                      Grade
+                    </button>
+                    <button
+                      onClick={() => setSelectedCourse(course)}
+                      className="h-11 md:h-14 px-5 md:px-8 bg-[#22ff88]/10 text-[#22ff88] font-black text-[9px] md:text-[10px] uppercase tracking-widest rounded-xl md:rounded-2xl border border-[#22ff88]/10 hover:bg-[#22ff88] hover:text-black hover:border-transparent transition-all active:scale-95 flex items-center justify-center gap-2"
+                    >
+                      Detalhes
+                      <Play className="w-3 h-3 fill-current" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -215,6 +227,13 @@ export function Vitrine({ userData, onViewChange }: VitrineProps) {
               setSelectedCourse(null);
               onViewChange('overview');
             }}
+          />
+        )}
+        {viewingCurriculum && (
+          <CurriculumPreviewModal
+            courseId={viewingCurriculum.id}
+            courseTitle={viewingCurriculum.title}
+            onClose={() => setViewingCurriculum(null)}
           />
         )}
       </AnimatePresence>
