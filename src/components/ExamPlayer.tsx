@@ -168,7 +168,7 @@ export function ExamPlayer({ examId, userData, onBack, onFinish }: ExamPlayerPro
 
         if (certError) {
           console.error('Error generating certificate:', certError);
-          toast.error('Houve um problema ao gerar seu certificado, mas sua aprovação foi registrada. Entre em contato com o suporte.', { id: 'cert-gen' });
+          toast.error(`Erro ao emitir certificado: ${certError.message}`, { id: 'cert-gen', duration: 5000 });
         } else {
           certificateId = certificate.id;
           toast.success('Certificado gerado com sucesso!', { id: 'cert-gen' });
@@ -178,7 +178,10 @@ export function ExamPlayer({ examId, userData, onBack, onFinish }: ExamPlayerPro
       setResult({ score, passed, certificateId });
       setIsFinished(true);
       if (passed) {
-        toast.success('Parabéns! Você foi aprovado.');
+        // Only show success if it wasn't already shown by certificate or if no certificate was expected
+        if (!exam?.is_final) {
+          toast.success('Parabéns! Você foi aprovado.');
+        }
       } else {
         toast.error('Sua pontuação foi insuficiente para a aprovação.');
       }
