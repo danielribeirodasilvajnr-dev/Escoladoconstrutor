@@ -134,7 +134,7 @@ export function CurriculumPreviewModal({ courseId, courseTitle, onClose, onActio
                       <div className="flex items-center gap-4">
                         <div className="flex items-center gap-1.5">
                            <ChevronDown 
-                             className={`w-4 h-4 text-red-500 transition-transform duration-300 ${isOpen ? '' : '-rotate-90'}`} 
+                             className={`w-4 h-4 text-orange-500 transition-transform duration-300 ${isOpen ? '' : '-rotate-90'}`} 
                              strokeWidth={3}
                            />
                            <span className="text-xl font-black text-white/20 tracking-tighter">
