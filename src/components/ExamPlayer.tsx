@@ -154,6 +154,8 @@ export function ExamPlayer({ examId, userData, onBack, onFinish }: ExamPlayerPro
       let certificateId;
       // If passed and is final exam, generate certificate
       if (passed && exam?.is_final) {
+        toast.loading('Gerando certificado oficial...', { id: 'cert-gen' });
+        
         const { data: certificate, error: certError } = await supabase
           .from('certificates')
           .insert({
@@ -166,13 +168,20 @@ export function ExamPlayer({ examId, userData, onBack, onFinish }: ExamPlayerPro
 
         if (certError) {
           console.error('Error generating certificate:', certError);
+          toast.error('Houve um problema ao gerar seu certificado, mas sua aprovação foi registrada. Entre em contato com o suporte.', { id: 'cert-gen' });
         } else {
           certificateId = certificate.id;
+          toast.success('Certificado gerado com sucesso!', { id: 'cert-gen' });
         }
       }
 
       setResult({ score, passed, certificateId });
       setIsFinished(true);
+      if (passed) {
+        toast.success('Parabéns! Você foi aprovado.');
+      } else {
+        toast.error('Sua pontuação foi insuficiente para a aprovação.');
+      }
     } catch (error: any) {
       toast.error('Erro ao enviar prova: ' + error.message);
     } finally {

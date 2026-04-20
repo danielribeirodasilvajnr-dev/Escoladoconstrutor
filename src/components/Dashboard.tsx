@@ -11,6 +11,7 @@ import { AdminUsersView } from './AdminUsersView';
 import { AdminFinanceView } from './AdminFinanceView';
 import { ExamPlayer } from './ExamPlayer';
 import { CertificateView } from './CertificateView';
+import { CertificatesTab } from './CertificatesTab';
 
 type DashboardView =
   | 'vitrine'
@@ -56,6 +57,16 @@ export function Dashboard({ userData, session }: DashboardProps) {
         return <Vitrine userData={userData} onViewChange={(view) => setActiveView(view as DashboardView)} />;
       case 'overview':
         return <DashboardOverview userData={userData} onCourseSelect={handleCourseSelect} />;
+      case 'certificados':
+        return (
+          <CertificatesTab 
+            userData={userData} 
+            onViewCertificate={(id) => {
+              setCurrentCertificateId(id);
+              setActiveView('certificate-view');
+            }} 
+          />
+        );
       case 'player':
         return activeCourseId ? (
           <CoursePlayer
