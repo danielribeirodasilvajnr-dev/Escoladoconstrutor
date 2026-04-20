@@ -45,13 +45,13 @@ export function DashboardOverview({ userData, onCourseSelect }: DashboardOvervie
 
   useEffect(() => {
     if (userData?.id) {
-      const init = async () => {
-        const courses = await fetchEnrollments();
-        fetchLastWatched(courses);
-      };
-      init();
+      // Parallelize both fetches for faster initial load
+      Promise.all([
+        fetchEnrollments(),
+        fetchLastWatched()
+      ]);
     }
-  }, [userData]);
+  }, [userData?.id]);
 
   async function fetchEnrollments() {
     try {
@@ -81,8 +81,7 @@ export function DashboardOverview({ userData, onCourseSelect }: DashboardOvervie
     }
   }
 
-  async function fetchLastWatched(currentEnrolled?: any[]) {
-    const coursesToUse = currentEnrolled || enrolledCourses;
+  async function fetchLastWatched() {
     try {
       const { data, error } = await supabase
         .from('lesson_progress')
@@ -100,27 +99,30 @@ export function DashboardOverview({ userData, onCourseSelect }: DashboardOvervie
         .eq('user_id', userData.id)
         .order('updated_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
-      if (error) {
-        if (error.code !== 'PGRST116') console.error('Erro ao buscar último curso:', error.message);
-        
-        // Fallback: If no progress, use most recent enrollment
-        if (coursesToUse.length > 0) {
-          const latestEnrolled = [...coursesToUse].sort((a, b) => 
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-          )[0];
-          
+      if (error) throw error;
+      
+      if (data) {
+        setLastWatched(data);
+      } else {
+        // Fallback: Use most recent enrollment if no progress yet
+        const { data: latestEnrollment } = await supabase
+          .from('enrollments')
+          .select('*, course:courses(*)')
+          .eq('user_id', userData.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (latestEnrollment) {
           setLastWatched({
-            course: latestEnrolled.course,
+            course: latestEnrollment.course,
             watched_time: 0,
             lesson: null
           });
         }
-        return;
       }
-      
-      setLastWatched(data);
     } catch (error: any) {
       console.error('Erro ao buscar último curso:', error.message);
     }

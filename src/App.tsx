@@ -47,29 +47,46 @@ export default function App() {
         }
 
         const email = session.user.email;
+        const initialRole = session.user.user_metadata.role || 'membro';
         
-        // Fetch profile data from database to ensure up-to-date roles and info
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
-
-        const baseRole = profile?.role || session.user.user_metadata.role || 'membro';
-        
-        // Elevate danielribeirodasilvajnr@gmail.com to master (safety fallback)
-        const role = email === 'danielribeirodasilvajnr@gmail.com' ? 'master' : baseRole;
+        // 1. Immediately set base data from session metadata to unlock UI
+        const roleFallback = email === 'danielribeirodasilvajnr@gmail.com' ? 'master' : initialRole;
 
         setUserData({
           id: session.user.id,
           email: email,
-          role: role,
-          name: profile?.full_name || session.user.user_metadata.full_name || email?.split('@')[0],
-          avatar_url: profile?.avatar_url || session.user.user_metadata.avatar_url,
-          phone: profile?.phone || session.user.user_metadata.phone,
-          bio: profile?.bio || session.user.user_metadata.bio,
+          role: roleFallback,
+          name: session.user.user_metadata.full_name || email?.split('@')[0],
+          avatar_url: session.user.user_metadata.avatar_url,
+          phone: session.user.user_metadata.phone,
+          bio: session.user.user_metadata.bio,
         });
+
+        // 2. Switch to dashboard instantly
         setView('dashboard');
+        
+        // 3. Fetch profile data in background to ensure source-of-truth sync
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+
+          if (profile) {
+            const finalRole = email === 'danielribeirodasilvajnr@gmail.com' ? 'master' : (profile.role || initialRole);
+            setUserData(prev => ({
+              ...prev,
+              role: finalRole,
+              name: profile.full_name || prev.name,
+              avatar_url: profile.avatar_url || prev.avatar_url,
+              phone: profile.phone || prev.phone,
+              bio: profile.bio || prev.bio,
+            }));
+          }
+        } catch (err) {
+          console.warn('Profile background sync failed:', err);
+        }
       } else {
         setUserData(null);
         // Only set to landing if not viewing a public course
