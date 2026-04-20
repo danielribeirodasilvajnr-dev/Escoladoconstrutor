@@ -258,6 +258,11 @@ export function DashboardOverview({ userData, onCourseSelect }: DashboardOvervie
             courseId={viewingCurriculum.id}
             courseTitle={viewingCurriculum.title}
             onClose={() => setViewingCurriculum(null)}
+            onAction={() => {
+              const courseId = viewingCurriculum.id;
+              setViewingCurriculum(null);
+              onCourseSelect(courseId);
+            }}
           />
         )}
       </AnimatePresence>

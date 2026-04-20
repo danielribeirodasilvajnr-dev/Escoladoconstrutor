@@ -232,6 +232,11 @@ export function Vitrine({ userData, onViewChange }: VitrineProps) {
             courseId={viewingCurriculum.id}
             courseTitle={viewingCurriculum.title}
             onClose={() => setViewingCurriculum(null)}
+            onAction={() => {
+              const course = viewingCurriculum;
+              setViewingCurriculum(null);
+              setSelectedCourse(course);
+            }}
           />
         )}
       </AnimatePresence>

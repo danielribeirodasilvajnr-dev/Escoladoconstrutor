@@ -7,9 +7,10 @@ interface CurriculumPreviewModalProps {
   courseId: string;
   courseTitle: string;
   onClose: () => void;
+  onAction?: () => void;
 }
 
-export function CurriculumPreviewModal({ courseId, courseTitle, onClose }: CurriculumPreviewModalProps) {
+export function CurriculumPreviewModal({ courseId, courseTitle, onClose, onAction }: CurriculumPreviewModalProps) {
   const [modules, setModules] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -131,7 +132,7 @@ export function CurriculumPreviewModal({ courseId, courseTitle, onClose }: Curri
         {/* Footer */}
         <div className="p-8 bg-black/40 backdrop-blur-xl border-t border-white/5">
           <button 
-            onClick={onClose}
+            onClick={onAction || onClose}
             className="w-full py-4 bg-[#22ff88] text-black font-black rounded-2xl text-[10px] uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_30px_rgba(34,255,136,0.1)]"
           >
             Começar Agora
