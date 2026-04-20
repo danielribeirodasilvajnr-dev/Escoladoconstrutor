@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Lock, Loader2, BookOpen, ChevronDown } from 'lucide-react';
+import { X, Lock, Loader2, BookOpen, ChevronDown, Play } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface CurriculumPreviewModalProps {
@@ -118,10 +118,11 @@ export function CurriculumPreviewModal({ courseId, courseTitle, onClose, onActio
             <div className="space-y-4">
               {modules.map((module, mIdx) => {
                 const isOpen = expandedModules.has(module.id);
+                const moduleKey = `module-${mIdx}`;
                 
                 return (
                   <div 
-                    key={module.id} 
+                    key={moduleKey} 
                     className={`bg-white/[0.02] border transition-all duration-300 rounded-3xl overflow-hidden ${
                       isOpen ? 'border-white/10 ring-1 ring-white/5' : 'border-white/5 hover:border-white/10'
                     }`}
@@ -154,6 +155,7 @@ export function CurriculumPreviewModal({ courseId, courseTitle, onClose, onActio
                     <AnimatePresence initial={false}>
                       {isOpen && (
                         <motion.div
+                          key={`module-content-${mIdx}`}
                           initial={{ height: 0, opacity: 0 }}
                           animate={{ height: 'auto', opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
@@ -161,9 +163,9 @@ export function CurriculumPreviewModal({ courseId, courseTitle, onClose, onActio
                         >
                           <div className="px-4 pb-4 space-y-1">
                             <div className="bg-black/40 rounded-2xl p-2 border border-white/5">
-                              {module.lessons?.map((lesson: any) => (
+                              {module.lessons?.map((lesson: any, lIdx: number) => (
                                 <div 
-                                  key={lesson.id} 
+                                  key={`lesson-${mIdx}-${lIdx}`} 
                                   className="flex items-center justify-between p-4 hover:bg-white/[0.05] rounded-xl transition-all group/lesson cursor-pointer"
                                 >
                                   <div className="flex items-center gap-4">
@@ -190,7 +192,6 @@ export function CurriculumPreviewModal({ courseId, courseTitle, onClose, onActio
           )}
         </div>
 
-        {/* Footer */}
         <div className="p-8 bg-black/60 backdrop-blur-md border-t border-white/10 flex flex-col items-center">
           <button 
             onClick={onAction || onClose}
