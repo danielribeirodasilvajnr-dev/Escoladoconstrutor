@@ -188,28 +188,26 @@ export function Vitrine({ userData, onViewChange }: VitrineProps) {
                   </div>
                 </div>
 
-                <div className="mt-auto pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <button
+                  onClick={() => setViewingCurriculum(course)}
+                  className="w-full h-11 md:h-12 mb-6 bg-white/5 text-[#64748b] font-black text-[9px] md:text-[10px] uppercase tracking-widest rounded-xl md:rounded-2xl border border-white/10 hover:text-[#22ff88] hover:border-[#22ff88]/20 transition-all active:scale-95 flex items-center justify-center gap-2"
+                >
+                  <BookOpen className="w-3.5 h-3.5" />
+                  Ver Grade Curricular
+                </button>
+
+                <div className="mt-auto pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-white/5">
                   <div className="flex flex-col">
                     <span className="text-[8px] font-bold text-[#64748b] uppercase tracking-widest">Investimento</span>
                     <span className="text-lg md:text-2xl font-black text-white">R$ {course.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setViewingCurriculum(course)}
-                      className="h-11 md:h-14 px-4 md:px-6 bg-white/5 text-[#64748b] font-black text-[9px] md:text-[10px] uppercase tracking-widest rounded-xl md:rounded-2xl border border-white/10 hover:text-[#22ff88] hover:border-[#22ff88]/20 transition-all active:scale-95 flex items-center justify-center gap-2"
-                      title="Ver Grade Curricular"
-                    >
-                      <BookOpen className="w-3.5 h-3.5" />
-                      Grade
-                    </button>
-                    <button
-                      onClick={() => setSelectedCourse(course)}
-                      className="h-11 md:h-14 px-5 md:px-8 bg-[#22ff88]/10 text-[#22ff88] font-black text-[9px] md:text-[10px] uppercase tracking-widest rounded-xl md:rounded-2xl border border-[#22ff88]/10 hover:bg-[#22ff88] hover:text-black hover:border-transparent transition-all active:scale-95 flex items-center justify-center gap-2"
-                    >
-                      Detalhes
-                      <Play className="w-3 h-3 fill-current" />
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => setSelectedCourse(course)}
+                    className="h-11 md:h-14 px-5 md:px-8 bg-[#22ff88]/10 text-[#22ff88] font-black text-[9px] md:text-[10px] uppercase tracking-widest rounded-xl md:rounded-2xl border border-[#22ff88]/10 hover:bg-[#22ff88] hover:text-black hover:border-transparent transition-all active:scale-95 flex items-center justify-center gap-2"
+                  >
+                    Detalhes
+                    <Play className="w-3 h-3 fill-current" />
+                  </button>
                 </div>
               </div>
             </motion.div>
