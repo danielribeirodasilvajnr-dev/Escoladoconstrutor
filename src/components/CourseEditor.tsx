@@ -924,8 +924,7 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                   CONFIGURAR EXAME FINAL
                 </button>
               </div>
-            </div>
-          </section>
+            </section>
         </div>
 
         {/* Sidebar Controls */}
