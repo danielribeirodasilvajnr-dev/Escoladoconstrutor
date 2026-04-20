@@ -205,7 +205,7 @@ export function Vitrine({ userData, onViewChange }: VitrineProps) {
                     onClick={() => setSelectedCourse(course)}
                     className="h-11 md:h-14 px-5 md:px-8 bg-[#22ff88]/10 text-[#22ff88] font-black text-[9px] md:text-[10px] uppercase tracking-widest rounded-xl md:rounded-2xl border border-[#22ff88]/10 hover:bg-[#22ff88] hover:text-black hover:border-transparent transition-all active:scale-95 flex items-center justify-center gap-2"
                   >
-                    Detalhes
+                    Iniciar
                     <Play className="w-3 h-3 fill-current" />
                   </button>
                 </div>
