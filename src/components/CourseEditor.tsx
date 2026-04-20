@@ -308,11 +308,26 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
       variant: 'danger',
       onConfirm: async () => {
         try {
+          // 1. Get all lesson IDs for this module to clean up related data
+          const moduleToDelete = modules.find(m => m.id === moduleId);
+          const lessonIds = moduleToDelete?.lessons.map(l => l.id) || [];
+
+          if (lessonIds.length > 0) {
+            await Promise.all([
+              supabase.from('lesson_progress').delete().in('lesson_id', lessonIds),
+              supabase.from('lesson_attachments').delete().in('lesson_id', lessonIds)
+            ]);
+          }
+
+          // 2. Delete the module (this will cascade to lessons table if set up in DB, 
+          // but we'll manually clean up progress/attachments which are usually not cascaded)
           const { error } = await supabase
             .from('modules')
             .delete()
             .eq('id', moduleId);
+          
           if (error) throw error;
+          
           setModules(modules.filter(m => m.id !== moduleId));
           toast.success('Módulo excluído');
         } catch (error: any) {
@@ -421,10 +436,18 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
       variant: 'danger',
       onConfirm: async () => {
         try {
+          // 1. Clean up related data first to avoid FK constraints
+          await Promise.all([
+            supabase.from('lesson_progress').delete().eq('lesson_id', lessonId),
+            supabase.from('lesson_attachments').delete().eq('lesson_id', lessonId)
+          ]);
+
+          // 2. Delete the lesson
           const { error } = await supabase
             .from('lessons')
             .delete()
             .eq('id', lessonId);
+            
           if (error) throw error;
 
           const updatedModules = modules.map(m => {
