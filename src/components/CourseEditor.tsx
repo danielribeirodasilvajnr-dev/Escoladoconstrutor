@@ -167,7 +167,7 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
           .from('lesson_attachments')
           .select('*')
           .in('lesson_id', lessonIds);
-        
+
         const attMap: Record<string, any[]> = {};
         atts?.forEach(a => {
           if (!attMap[a.lesson_id]) attMap[a.lesson_id] = [];
@@ -389,7 +389,7 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
 
   const handleReorderLessons = async (moduleId: string, newLessons: Lesson[]) => {
     // Update local state immediately
-    const updatedModules = modules.map(m => 
+    const updatedModules = modules.map(m =>
       m.id === moduleId ? { ...m, lessons: newLessons } : m
     );
     setModules(updatedModules);
@@ -599,7 +599,7 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
         .from('lesson_attachments')
         .delete()
         .eq('id', attachmentId);
-      
+
       if (error) throw error;
 
       setLessonAttachments(prev => ({
@@ -721,15 +721,15 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
               </button>
             </div>
 
-            <Reorder.Group 
-              axis="y" 
-              values={modules} 
-              onReorder={handleReorderModules} 
+            <Reorder.Group
+              axis="y"
+              values={modules}
+              onReorder={handleReorderModules}
               className="space-y-6"
             >
               {modules.map((module, mIdx) => (
-                <Reorder.Item 
-                  key={module.id} 
+                <Reorder.Item
+                  key={module.id}
                   value={module}
                   className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6"
                 >
@@ -751,7 +751,7 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                         />
                       </div>
                       <div className="flex gap-2 md:gap-4 text-[#64748b] ml-4">
-                        <button 
+                        <button
                           onClick={() => toggleModule(module.id)}
                           className="hover:text-[#22ff88] transition-colors p-1"
                         >
@@ -771,15 +771,15 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                           transition={{ duration: 0.3, ease: 'easeInOut' }}
                           className="overflow-hidden"
                         >
-                          <Reorder.Group 
-                            axis="y" 
-                            values={module.lessons} 
+                          <Reorder.Group
+                            axis="y"
+                            values={module.lessons}
                             onReorder={(newLessons) => handleReorderLessons(module.id, newLessons)}
                             className="p-4 md:p-8 space-y-3 md:space-y-4"
                           >
                             {module.lessons.map((lesson, lIdx) => (
-                              <Reorder.Item 
-                                key={lesson.id} 
+                              <Reorder.Item
+                                key={lesson.id}
                                 value={lesson}
                                 className="space-y-2"
                               >
@@ -788,8 +788,8 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                                     <GripVertical className="w-4 h-4 text-white/5 group-hover:text-[#22ff88]/30 transition-colors shrink-0" />
                                     <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg overflow-hidden bg-black/40 border border-white/10 flex items-center justify-center shrink-0 group-hover:border-[#22ff88]/30 transition-colors relative">
                                       {lesson.thumbnail_url ? (
-                                        <img 
-                                          src={lesson.thumbnail_url} 
+                                        <img
+                                          src={lesson.thumbnail_url}
                                           className="w-full h-full object-cover group-hover:scale-110 transition-transform"
                                           alt="Thumbnail"
                                         />
@@ -808,7 +808,7 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                                         <Upload className="w-4 h-4 text-white/20" />
                                       )}
                                       {lesson.content_url && (
-                                        <div 
+                                        <div
                                           onClick={(e) => {
                                             e.stopPropagation();
                                             setPreviewUrl(lesson.content_url);
@@ -880,38 +880,38 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
 
                                 {/* Attachments Section */}
                                 <div className="ml-16 mt-2 space-y-2">
-                                   {lessonAttachments[lesson.id]?.map((att) => (
-                                     <div key={att.id} className="flex items-center justify-between py-2 px-4 bg-white/[0.03] rounded-lg border border-white/5">
-                                       <div className="flex items-center gap-2">
-                                         <FileText className="w-3 h-3 text-[#64748b]" />
-                                         <span className="text-[10px] text-white/50">{att.title}</span>
-                                       </div>
-                                       <button 
-                                         onClick={() => handleDeleteAttachment(lesson.id, att.id)}
-                                         className="text-[#64748b] hover:text-red-400 transition-colors"
-                                       >
-                                         <X className="w-3 h-3" />
-                                       </button>
-                                     </div>
-                                   ))}
-                                   <div className="flex items-center gap-4">
-                                     <label className="cursor-pointer group">
-                                       <input 
-                                         type="file" 
-                                         className="hidden" 
-                                         onChange={(e) => handleAttachmentUpload(e, lesson.id)}
-                                         disabled={uploadingAttachmentLessonId === lesson.id}
-                                       />
-                                       <span className="text-[9px] font-bold text-[#22ff88]/60 group-hover:text-[#22ff88] uppercase tracking-widest flex items-center gap-2 transition-all">
-                                         {uploadingAttachmentLessonId === lesson.id ? (
-                                           <Loader2 className="w-3 h-3 animate-spin" />
-                                         ) : (
-                                           <Plus className="w-3 h-3" />
-                                         )}
-                                         Anexar Material (PDF, DWG, EXCEL...)
-                                       </span>
-                                     </label>
-                                   </div>
+                                  {lessonAttachments[lesson.id]?.map((att) => (
+                                    <div key={att.id} className="flex items-center justify-between py-2 px-4 bg-white/[0.03] rounded-lg border border-white/5">
+                                      <div className="flex items-center gap-2">
+                                        <FileText className="w-3 h-3 text-[#64748b]" />
+                                        <span className="text-[10px] text-white/50">{att.title}</span>
+                                      </div>
+                                      <button
+                                        onClick={() => handleDeleteAttachment(lesson.id, att.id)}
+                                        className="text-[#64748b] hover:text-red-400 transition-colors"
+                                      >
+                                        <X className="w-3 h-3" />
+                                      </button>
+                                    </div>
+                                  ))}
+                                  <div className="flex items-center gap-4">
+                                    <label className="cursor-pointer group">
+                                      <input
+                                        type="file"
+                                        className="hidden"
+                                        onChange={(e) => handleAttachmentUpload(e, lesson.id)}
+                                        disabled={uploadingAttachmentLessonId === lesson.id}
+                                      />
+                                      <span className="text-[9px] font-bold text-[#22ff88]/60 group-hover:text-[#22ff88] uppercase tracking-widest flex items-center gap-2 transition-all">
+                                        {uploadingAttachmentLessonId === lesson.id ? (
+                                          <Loader2 className="w-3 h-3 animate-spin" />
+                                        ) : (
+                                          <Plus className="w-3 h-3" />
+                                        )}
+                                        Anexar Material (PDF, DWG, EXCEL...)
+                                      </span>
+                                    </label>
+                                  </div>
                                 </div>
                               </Reorder.Item>
                             ))}
@@ -949,25 +949,25 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
               ))}
             </Reorder.Group>
 
-              {/* Final Exam Square */}
-              <div
-                onClick={() => onOpenExam?.(course.id || '', null)}
-                className="mt-12 bg-[#ffcc00]/5 border border-dashed border-[#ffcc00]/20 rounded-[2.5rem] p-10 flex flex-col lg:flex-row items-center justify-between group hover:border-[#ffcc00]/50 transition-all cursor-pointer"
-              >
-                <div className="flex items-center gap-6">
-                  <div className="w-16 h-16 rounded-2xl bg-[#ffcc00]/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Award className="w-8 h-8 text-[#ffcc00]" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-black text-white uppercase tracking-[0.2em] mb-1">PROVA FINAL DO CURSO</h3>
-                    <p className="text-[10px] text-[#64748b] font-bold uppercase tracking-wider">Habilita a emissão automática do certificado</p>
-                  </div>
+            {/* Final Exam Square */}
+            <div
+              onClick={() => onOpenExam?.(course.id || '', null)}
+              className="mt-12 bg-[#ffcc00]/5 border border-dashed border-[#ffcc00]/20 rounded-[2.5rem] p-10 flex flex-col lg:flex-row items-center justify-between group hover:border-[#ffcc00]/50 transition-all cursor-pointer"
+            >
+              <div className="flex items-center gap-6">
+                <div className="w-16 h-16 rounded-2xl bg-[#ffcc00]/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Award className="w-8 h-8 text-[#ffcc00]" />
                 </div>
-                <button className="mt-6 lg:mt-0 px-8 py-3 bg-[#ffcc00]/10 text-[#ffcc00] text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-[#ffcc00] hover:text-black transition-all border border-[#ffcc00]/10">
-                  CONFIGURAR EXAME FINAL
-                </button>
+                <div>
+                  <h3 className="text-sm font-black text-white uppercase tracking-[0.2em] mb-1">PROVA FINAL DO CURSO</h3>
+                  <p className="text-[10px] text-[#64748b] font-bold uppercase tracking-wider">Habilita a emissão automática do certificado</p>
+                </div>
               </div>
-            </section>
+              <button className="mt-6 lg:mt-0 px-8 py-3 bg-[#ffcc00]/10 text-[#ffcc00] text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-[#ffcc00] hover:text-black transition-all border border-[#ffcc00]/10">
+                CONFIGURAR EXAME FINAL
+              </button>
+            </div>
+          </section>
         </div>
 
         {/* Sidebar Controls */}
@@ -1057,23 +1057,23 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
               onClick={() => setPreviewUrl(null)}
               className="absolute inset-0 bg-black/90 backdrop-blur-xl"
             />
-            
+
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               className="relative w-full max-w-5xl aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl border border-white/10"
             >
-              <button 
+              <button
                 onClick={() => setPreviewUrl(null)}
                 className="absolute top-4 right-4 z-10 w-10 h-10 bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center text-white/60 hover:text-white hover:bg-black/80 transition-all"
               >
                 <X className="w-5 h-5" />
               </button>
-              <video 
-                src={previewUrl} 
-                controls 
-                autoPlay 
+              <video
+                src={previewUrl}
+                controls
+                autoPlay
                 className="w-full h-full"
               />
             </motion.div>
