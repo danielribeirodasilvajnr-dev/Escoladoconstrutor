@@ -116,6 +116,28 @@ export function CurriculumPreviewModal({ courseId, courseTitle, onClose, onActio
             </div>
           ) : (
             <div className="space-y-4">
+              <div className="flex items-center gap-3 px-2 mb-6">
+                 <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">{modules.length} Módulos</span>
+                 <span className="w-1 h-1 bg-white/10 rounded-full" />
+                 <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">
+                   {modules.reduce((acc, m) => acc + (m.lessons?.length || 0), 0)} Aulas
+                 </span>
+                 <span className="w-1 h-1 bg-white/10 rounded-full" />
+                 <span className="text-[10px] font-black text-[#22ff88] uppercase tracking-widest">
+                   {(() => {
+                     let totalSeconds = 0;
+                     modules.forEach(m => {
+                       m.lessons?.forEach((l: any) => {
+                         const [mins, secs] = (l.duration || '0:00').split(':').map(Number);
+                         totalSeconds += (mins || 0) * 60 + (secs || 0);
+                       });
+                     });
+                     const h = Math.floor(totalSeconds / 3600);
+                     const m = Math.floor((totalSeconds % 3600) / 60);
+                     return `${h > 0 ? `${h}h ` : ''}${m}m Total`;
+                   })()}
+                 </span>
+              </div>
               {modules.map((module, mIdx) => {
                 const isOpen = expandedModules.has(module.id);
                 const moduleKey = `module-${mIdx}`;
