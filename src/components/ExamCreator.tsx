@@ -17,6 +17,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { toast } from 'sonner';
 
 interface ExamCreatorProps {
   userData: any;
@@ -176,9 +177,14 @@ export function ExamCreator({ userData, initialCourseId, initialModuleId, onBack
   };
 
   const handleSave = async () => {
-    if (!targetCourse || !title) {
-      alert("Por favor, selecione um curso e defina um título para a prova.");
+    if (!targetCourse) {
+      toast.error("Por favor, selecione um curso para a prova.");
       return;
+    }
+    
+    if (!title) {
+       toast.error("Por favor, defina um título para a prova.");
+       return;
     }
 
     try {
@@ -228,11 +234,11 @@ export function ExamCreator({ userData, initialCourseId, initialModuleId, onBack
         if (aError) throw aError;
       }
 
-      alert("Prova publicada com sucesso!");
+      toast.success("Prova publicada com sucesso!");
       // Reset form or navigate back
     } catch (error: any) {
       console.error("Erro ao salvar prova:", error.message);
-      alert("Erro ao publicar prova. Verifique o console.");
+      toast.error("Erro ao publicar prova. Verifique o console.");
     } finally {
       setLoading(false);
     }

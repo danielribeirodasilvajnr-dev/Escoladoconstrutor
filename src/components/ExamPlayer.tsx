@@ -326,20 +326,23 @@ export function ExamPlayer({ examId, userData, onBack, onFinish }: ExamPlayerPro
       </div>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto custom-scrollbar p-6 lg:p-12 flex items-center justify-center">
-        <div className="max-w-4xl w-full">
+      <main className="flex-1 overflow-y-auto custom-scrollbar p-6 lg:p-12 flex justify-center bg-[#0a0b0e]/50">
+        <div className="max-w-4xl w-full py-8 md:py-12">
           <AnimatePresence mode="wait">
             <motion.div
-              key={currentQuestion?.id}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="space-y-10"
+              key={currentQuestion?.id || 'loading'}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="space-y-8 md:space-y-12"
             >
-              <div>
-                <span className="text-[10px] font-black text-[#22ff88] uppercase tracking-[0.3em] mb-6 block">Questão {currentQuestionIdx + 1}</span>
-                <h2 className="text-2xl md:text-4xl font-black text-white leading-tight">
-                  {currentQuestion?.text}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-[1px] w-8 bg-[#22ff88]/30" />
+                  <span className="text-[10px] md:text-xs font-black text-[#22ff88] uppercase tracking-[0.3em]">Questão {currentQuestionIdx + 1}</span>
+                </div>
+                <h2 className="text-2xl md:text-5xl font-black text-white leading-tight tracking-tight">
+                  {currentQuestion?.text || "Carregando enunciado..."}
                 </h2>
               </div>
 
