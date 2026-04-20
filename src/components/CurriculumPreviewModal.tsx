@@ -38,14 +38,14 @@ export function CurriculumPreviewModal({ courseId, courseTitle, onClose, onActio
         .order('order_index');
 
       if (error) throw error;
-      
+
       const sortedModules = (data || []).map(m => ({
         ...m,
         lessons: (m.lessons || []).sort((a: any, b: any) => a.order_index - b.order_index)
       }));
 
       setModules(sortedModules);
-      
+
       // Expand first module by default
       if (sortedModules.length > 0) {
         setExpandedModules(new Set([sortedModules[0].id]));
@@ -76,7 +76,7 @@ export function CurriculumPreviewModal({ courseId, courseTitle, onClose, onActio
         onClick={onClose}
         className="absolute inset-0 bg-black/90 backdrop-blur-3xl"
       />
-      
+
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -94,7 +94,7 @@ export function CurriculumPreviewModal({ courseId, courseTitle, onClose, onActio
             </div>
             <h3 className="text-3xl font-black text-white leading-tight tracking-tight">{courseTitle}</h3>
           </div>
-          <button 
+          <button
             onClick={onClose}
             className="p-3 text-[#64748b] hover:text-white transition-colors bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10"
           >
@@ -117,51 +117,50 @@ export function CurriculumPreviewModal({ courseId, courseTitle, onClose, onActio
           ) : (
             <div className="space-y-4">
               <div className="flex items-center gap-3 px-2 mb-6">
-                 <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">{modules.length} Módulos</span>
-                 <span className="w-1 h-1 bg-white/10 rounded-full" />
-                 <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">
-                   {modules.reduce((acc, m) => acc + (m.lessons?.length || 0), 0)} Aulas
-                 </span>
-                 <span className="w-1 h-1 bg-white/10 rounded-full" />
-                 <span className="text-[10px] font-black text-[#22ff88] uppercase tracking-widest">
-                   {(() => {
-                     let totalSeconds = 0;
-                     modules.forEach(m => {
-                       m.lessons?.forEach((l: any) => {
-                         const [mins, secs] = (l.duration || '0:00').split(':').map(Number);
-                         totalSeconds += (mins || 0) * 60 + (secs || 0);
-                       });
-                     });
-                     const h = Math.floor(totalSeconds / 3600);
-                     const m = Math.floor((totalSeconds % 3600) / 60);
-                     return `${h > 0 ? `${h}h ` : ''}${m}m`;
-                   })()}
-                 </span>
+                <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">{modules.length} Módulos</span>
+                <span className="w-1 h-1 bg-white/10 rounded-full" />
+                <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">
+                  {modules.reduce((acc, m) => acc + (m.lessons?.length || 0), 0)} Aulas
+                </span>
+                <span className="w-1 h-1 bg-white/10 rounded-full" />
+                <span className="text-[10px] font-black text-[#22ff88] uppercase tracking-widest">
+                  {(() => {
+                    let totalSeconds = 0;
+                    modules.forEach(m => {
+                      m.lessons?.forEach((l: any) => {
+                        const [mins, secs] = (l.duration || '0:00').split(':').map(Number);
+                        totalSeconds += (mins || 0) * 60 + (secs || 0);
+                      });
+                    });
+                    const h = Math.floor(totalSeconds / 3600);
+                    const m = Math.floor((totalSeconds % 3600) / 60);
+                    return `${h > 0 ? `${h}h ` : ''}${m}m`;
+                  })()}
+                </span>
               </div>
               {modules.map((module, mIdx) => {
                 const isOpen = expandedModules.has(module.id);
                 const moduleKey = `module-${mIdx}`;
-                
+
                 return (
-                  <div 
-                    key={moduleKey} 
-                    className={`bg-white/[0.02] border transition-all duration-300 rounded-3xl overflow-hidden ${
-                      isOpen ? 'border-white/10 ring-1 ring-white/5' : 'border-white/5 hover:border-white/10'
-                    }`}
+                  <div
+                    key={moduleKey}
+                    className={`bg-white/[0.02] border transition-all duration-300 rounded-3xl overflow-hidden ${isOpen ? 'border-white/10 ring-1 ring-white/5' : 'border-white/5 hover:border-white/10'
+                      }`}
                   >
-                    <button 
+                    <button
                       onClick={() => toggleModule(module.id)}
                       className="w-full p-6 flex justify-between items-center text-left group"
                     >
                       <div className="flex items-center gap-4">
                         <div className="flex items-center gap-1.5">
-                           <ChevronDown 
-                             className={`w-4 h-4 text-orange-500 transition-transform duration-300 ${isOpen ? '' : '-rotate-90'}`} 
-                             strokeWidth={3}
-                           />
-                           <span className="text-xl font-black text-white/20 tracking-tighter">
-                             {String(mIdx + 1).padStart(2, '0')}
-                           </span>
+                          <ChevronDown
+                            className={`w-4 h-4 text-orange-500 transition-transform duration-300 ${isOpen ? '' : '-rotate-90'}`}
+                            strokeWidth={3}
+                          />
+                          <span className="text-xl font-black text-white/20 tracking-tighter">
+                            {String(mIdx + 1).padStart(2, '0')}
+                          </span>
                         </div>
                         <h4 className="font-black text-white text-lg tracking-tight group-hover:text-[#22ff88] transition-colors">
                           {module.title}
@@ -173,7 +172,7 @@ export function CurriculumPreviewModal({ courseId, courseTitle, onClose, onActio
                         </span>
                       </div>
                     </button>
-                    
+
                     <AnimatePresence initial={false}>
                       {isOpen && (
                         <motion.div
@@ -186,8 +185,8 @@ export function CurriculumPreviewModal({ courseId, courseTitle, onClose, onActio
                           <div className="px-4 pb-4 space-y-1">
                             <div className="bg-black/40 rounded-2xl p-2 border border-white/5">
                               {module.lessons?.map((lesson: any, lIdx: number) => (
-                                <div 
-                                  key={`lesson-${mIdx}-${lIdx}`} 
+                                <div
+                                  key={`lesson-${mIdx}-${lIdx}`}
                                   className="flex items-center justify-between p-4 hover:bg-white/[0.05] rounded-xl transition-all group/lesson cursor-pointer"
                                 >
                                   <div className="flex items-center gap-4">
@@ -215,7 +214,7 @@ export function CurriculumPreviewModal({ courseId, courseTitle, onClose, onActio
         </div>
 
         <div className="p-8 bg-black/60 backdrop-blur-md border-t border-white/10 flex flex-col items-center">
-          <button 
+          <button
             onClick={onAction || onClose}
             className="w-full py-5 bg-[#22ff88] text-black font-black rounded-2xl text-xs uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-95 transition-all shadow-[0_20px_40px_rgba(34,255,136,0.15)] flex items-center justify-center gap-3 group"
           >
