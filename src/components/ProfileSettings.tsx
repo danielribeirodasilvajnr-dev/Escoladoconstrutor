@@ -90,13 +90,12 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
       if (authError) throw authError;
 
       // Update Profiles Table (source of truth for Admin and App)
-      // Note: 'phone' column doesn't exist in 'profiles' table, keeping it only in auth metadata
+      // Note: 'phone' and 'bio' columns don't exist in 'profiles' table, keeping them only in auth metadata
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
           full_name: name,
           avatar_url: avatarUrl,
-          bio: bio,
         })
         .eq('id', userData.id);
 
