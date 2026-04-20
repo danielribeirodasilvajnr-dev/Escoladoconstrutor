@@ -59,6 +59,7 @@ export default function App() {
           name: session.user.user_metadata.full_name || email?.split('@')[0],
           avatar_url: session.user.user_metadata.avatar_url,
           phone: session.user.user_metadata.phone,
+          bio: session.user.user_metadata.bio,
         });
 
         // 2. Switch to dashboard instantly
