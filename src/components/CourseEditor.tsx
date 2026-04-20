@@ -80,7 +80,20 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
   const [uploadingThumbnailLessonId, setUploadingThumbnailLessonId] = useState<string | null>(null);
   const [uploadingAttachmentLessonId, setUploadingAttachmentLessonId] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
   const [lessonAttachments, setLessonAttachments] = useState<Record<string, any[]>>({});
+
+  const toggleModule = (moduleId: string) => {
+    setExpandedModules(prev => {
+      const next = new Set(prev);
+      if (next.has(moduleId)) {
+        next.delete(moduleId);
+      } else {
+        next.add(moduleId);
+      }
+      return next;
+    });
+  };
 
   // Confirm Modal State
   const [confirmConfig, setConfirmConfig] = useState<{
@@ -737,151 +750,169 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                         />
                       </div>
                       <div className="flex gap-2 md:gap-4 text-[#64748b] ml-4">
+                        <button 
+                          onClick={() => toggleModule(module.id)}
+                          className="hover:text-[#22ff88] transition-colors p-1"
+                        >
+                          {expandedModules.has(module.id) ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+                        </button>
                         <button onClick={() => handleDeleteModule(module.id)} className="hover:text-red-400 transition-colors p-1">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
-                    <Reorder.Group 
-                      axis="y" 
-                      values={module.lessons} 
-                      onReorder={(newLessons) => handleReorderLessons(module.id, newLessons)}
-                      className="p-4 md:p-8 space-y-3 md:space-y-4"
-                    >
-                      {module.lessons.map((lesson, lIdx) => (
-                        <Reorder.Item 
-                          key={lesson.id} 
-                          value={lesson}
-                          className="space-y-2"
+                    <AnimatePresence>
+                      {!expandedModules.has(module.id) && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.3, ease: 'easeInOut' }}
+                          className="overflow-hidden"
                         >
-                          <div className="bg-[#0f1115] border border-white/5 rounded-xl p-3 md:p-4 flex items-center justify-between group cursor-grab active:cursor-grabbing">
-                            <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
-                              <GripVertical className="w-4 h-4 text-white/5 group-hover:text-[#22ff88]/30 transition-colors shrink-0" />
-                              <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg overflow-hidden bg-black/40 border border-white/10 flex items-center justify-center shrink-0 group-hover:border-[#22ff88]/30 transition-colors relative">
-                                {lesson.thumbnail_url ? (
-                                  <img 
-                                    src={lesson.thumbnail_url} 
-                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform"
-                                    alt="Thumbnail"
-                                  />
-                                ) : lesson.content_url ? (
-                                  <>
-                                    <video
-                                      src={lesson.content_url + '#t=0.001'}
-                                      className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity"
-                                      preload="metadata"
-                                    />
-                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                      <Play className="w-3 h-3 text-white/40 group-hover:text-white transition-colors" />
-                                    </div>
-                                  </>
-                                ) : (
-                                  <Upload className="w-4 h-4 text-white/20" />
-                                )}
-                              </div>
-                              <input
-                                type="text"
-                                defaultValue={lesson.title}
-                                onBlur={(e) => handleUpdateLessonTitle(lesson.id, e.target.value)}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') {
-                                    (e.target as HTMLInputElement).blur();
-                                  }
-                                }}
-                                className="bg-transparent border-none text-[13px] md:text-sm font-bold text-white/60 group-hover:text-white focus:outline-none flex-1 focus:text-[#22ff88] truncate"
-                              />
-                            </div>
-                            <div className="flex items-center gap-2 md:gap-4 shrink-0 h-full">
-                              <button
-                                onClick={() => handleDeleteLesson(module.id, lesson.id)}
-                                className="opacity-0 group-hover:opacity-100 p-2 text-[#64748b] hover:text-red-400 transition-all"
+                          <Reorder.Group 
+                            axis="y" 
+                            values={module.lessons} 
+                            onReorder={(newLessons) => handleReorderLessons(module.id, newLessons)}
+                            className="p-4 md:p-8 space-y-3 md:space-y-4"
+                          >
+                            {module.lessons.map((lesson, lIdx) => (
+                              <Reorder.Item 
+                                key={lesson.id} 
+                                value={lesson}
+                                className="space-y-2"
                               >
-                                <X className="w-4 h-4" />
-                              </button>
-                              <div className="flex items-center gap-2 md:gap-3">
-                                {uploadingLessonId === lesson.id ? (
-                                  <div className="flex items-center gap-2 md:gap-3">
-                                    <div className="w-16 md:w-24 h-1 bg-white/5 rounded-full overflow-hidden">
-                                      <div className="h-full bg-[#22ff88] transition-all" style={{ width: `${uploadProgress}%` }} />
-                                    </div>
-                                    <span className="text-[9px] md:text-[10px] text-[#22ff88] font-bold">{uploadProgress}%</span>
-                                  </div>
-                                ) : (
-                                  <div className="flex items-center gap-2 md:gap-3">
-                                    <button
-                                      onClick={() => {
-                                        setUploadingThumbnailLessonId(lesson.id);
-                                        thumbnailInputRef.current?.click();
-                                      }}
-                                      className="text-[8px] md:text-[9px] font-bold text-[#64748b] hover:text-[#22ff88] uppercase tracking-widest transition-colors flex items-center gap-1"
-                                    >
-                                      {uploadingThumbnailLessonId === lesson.id ? (
-                                        <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                                <div className="bg-[#0f1115] border border-white/5 rounded-xl p-3 md:p-4 flex items-center justify-between group cursor-grab active:cursor-grabbing">
+                                  <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
+                                    <GripVertical className="w-4 h-4 text-white/5 group-hover:text-[#22ff88]/30 transition-colors shrink-0" />
+                                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg overflow-hidden bg-black/40 border border-white/10 flex items-center justify-center shrink-0 group-hover:border-[#22ff88]/30 transition-colors relative">
+                                      {lesson.thumbnail_url ? (
+                                        <img 
+                                          src={lesson.thumbnail_url} 
+                                          className="w-full h-full object-cover group-hover:scale-110 transition-transform"
+                                          alt="Thumbnail"
+                                        />
+                                      ) : lesson.content_url ? (
+                                        <>
+                                          <video
+                                            src={lesson.content_url + '#t=0.001'}
+                                            className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity"
+                                            preload="metadata"
+                                          />
+                                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                            <Play className="w-3 h-3 text-white/40 group-hover:text-white transition-colors" />
+                                          </div>
+                                        </>
                                       ) : (
-                                        <ImageIcon className="w-2.5 h-2.5" />
+                                        <Upload className="w-4 h-4 text-white/20" />
                                       )}
-                                      CAPA
-                                    </button>
-                                    <div className="w-[1px] h-3 bg-white/5" />
-                                    <button
-                                      onClick={() => {
-                                        setUploadingLessonId(lesson.id);
-                                        lessonInputRef.current?.click();
+                                    </div>
+                                    <input
+                                      type="text"
+                                      defaultValue={lesson.title}
+                                      onBlur={(e) => handleUpdateLessonTitle(lesson.id, e.target.value)}
+                                      onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                          (e.target as HTMLInputElement).blur();
+                                        }
                                       }}
-                                      className="text-[8px] md:text-[9px] font-bold text-[#64748b] hover:text-[#22ff88] uppercase tracking-widest transition-colors"
-                                    >
-                                      {lesson.content_url ? "TROCAR" : "VÍDEO"}
-                                    </button>
+                                      className="bg-transparent border-none text-[13px] md:text-sm font-bold text-white/60 group-hover:text-white focus:outline-none flex-1 focus:text-[#22ff88] truncate"
+                                    />
                                   </div>
-                                )}
-                              </div>
-                            </div>
-                          </div>
+                                  <div className="flex items-center gap-2 md:gap-4 shrink-0 h-full">
+                                    <button
+                                      onClick={() => handleDeleteLesson(module.id, lesson.id)}
+                                      className="opacity-0 group-hover:opacity-100 p-2 text-[#64748b] hover:text-red-400 transition-all"
+                                    >
+                                      <X className="w-4 h-4" />
+                                    </button>
+                                    <div className="flex items-center gap-2 md:gap-3">
+                                      {uploadingLessonId === lesson.id ? (
+                                        <div className="flex items-center gap-2 md:gap-3">
+                                          <div className="w-16 md:w-24 h-1 bg-white/5 rounded-full overflow-hidden">
+                                            <div className="h-full bg-[#22ff88] transition-all" style={{ width: `${uploadProgress}%` }} />
+                                          </div>
+                                          <span className="text-[9px] md:text-[10px] text-[#22ff88] font-bold">{uploadProgress}%</span>
+                                        </div>
+                                      ) : (
+                                        <div className="flex items-center gap-2 md:gap-3">
+                                          <button
+                                            onClick={() => {
+                                              setUploadingThumbnailLessonId(lesson.id);
+                                              thumbnailInputRef.current?.click();
+                                            }}
+                                            className="text-[8px] md:text-[9px] font-bold text-[#64748b] hover:text-[#22ff88] uppercase tracking-widest transition-colors flex items-center gap-1"
+                                          >
+                                            {uploadingThumbnailLessonId === lesson.id ? (
+                                              <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                                            ) : (
+                                              <ImageIcon className="w-2.5 h-2.5" />
+                                            )}
+                                            CAPA
+                                          </button>
+                                          <div className="w-[1px] h-3 bg-white/5" />
+                                          <button
+                                            onClick={() => {
+                                              setUploadingLessonId(lesson.id);
+                                              lessonInputRef.current?.click();
+                                            }}
+                                            className="text-[8px] md:text-[9px] font-bold text-[#64748b] hover:text-[#22ff88] uppercase tracking-widest transition-colors"
+                                          >
+                                            {lesson.content_url ? "TROCAR" : "VÍDEO"}
+                                          </button>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
 
-                          {/* Attachments Section */}
-                          <div className="ml-16 mt-2 space-y-2">
-                             {lessonAttachments[lesson.id]?.map((att) => (
-                               <div key={att.id} className="flex items-center justify-between py-2 px-4 bg-white/[0.03] rounded-lg border border-white/5">
-                                 <div className="flex items-center gap-2">
-                                   <FileText className="w-3 h-3 text-[#64748b]" />
-                                   <span className="text-[10px] text-white/50">{att.title}</span>
-                                 </div>
-                                 <button 
-                                   onClick={() => handleDeleteAttachment(lesson.id, att.id)}
-                                   className="text-[#64748b] hover:text-red-400 transition-colors"
-                                 >
-                                   <X className="w-3 h-3" />
-                                 </button>
-                               </div>
-                             ))}
-                             <div className="flex items-center gap-4">
-                               <label className="cursor-pointer group">
-                                 <input 
-                                   type="file" 
-                                   className="hidden" 
-                                   onChange={(e) => handleAttachmentUpload(e, lesson.id)}
-                                   disabled={uploadingAttachmentLessonId === lesson.id}
-                                 />
-                                 <span className="text-[9px] font-bold text-[#22ff88]/60 group-hover:text-[#22ff88] uppercase tracking-widest flex items-center gap-2 transition-all">
-                                   {uploadingAttachmentLessonId === lesson.id ? (
-                                     <Loader2 className="w-3 h-3 animate-spin" />
-                                   ) : (
-                                     <Plus className="w-3 h-3" />
-                                   )}
-                                   Anexar Material (PDF, DWG, EXCEL...)
-                                 </span>
-                               </label>
-                             </div>
-                          </div>
-                        </Reorder.Item>
-                      ))}
-                      <button
-                        onClick={() => handleAddLesson(module.id)}
-                        className="flex items-center gap-2 text-[10px] font-bold text-[#64748b] uppercase tracking-widest mt-4 hover:text-[#22ff88] transition-colors pl-4"
-                      >
-                        + ADICIONAR AULA
-                      </button>
-                    </Reorder.Group>
+                                {/* Attachments Section */}
+                                <div className="ml-16 mt-2 space-y-2">
+                                   {lessonAttachments[lesson.id]?.map((att) => (
+                                     <div key={att.id} className="flex items-center justify-between py-2 px-4 bg-white/[0.03] rounded-lg border border-white/5">
+                                       <div className="flex items-center gap-2">
+                                         <FileText className="w-3 h-3 text-[#64748b]" />
+                                         <span className="text-[10px] text-white/50">{att.title}</span>
+                                       </div>
+                                       <button 
+                                         onClick={() => handleDeleteAttachment(lesson.id, att.id)}
+                                         className="text-[#64748b] hover:text-red-400 transition-colors"
+                                       >
+                                         <X className="w-3 h-3" />
+                                       </button>
+                                     </div>
+                                   ))}
+                                   <div className="flex items-center gap-4">
+                                     <label className="cursor-pointer group">
+                                       <input 
+                                         type="file" 
+                                         className="hidden" 
+                                         onChange={(e) => handleAttachmentUpload(e, lesson.id)}
+                                         disabled={uploadingAttachmentLessonId === lesson.id}
+                                       />
+                                       <span className="text-[9px] font-bold text-[#22ff88]/60 group-hover:text-[#22ff88] uppercase tracking-widest flex items-center gap-2 transition-all">
+                                         {uploadingAttachmentLessonId === lesson.id ? (
+                                           <Loader2 className="w-3 h-3 animate-spin" />
+                                         ) : (
+                                           <Plus className="w-3 h-3" />
+                                         )}
+                                         Anexar Material (PDF, DWG, EXCEL...)
+                                       </span>
+                                     </label>
+                                   </div>
+                                </div>
+                              </Reorder.Item>
+                            ))}
+                            <button
+                              onClick={() => handleAddLesson(module.id)}
+                              className="flex items-center gap-2 text-[10px] font-bold text-[#64748b] uppercase tracking-widest mt-4 hover:text-[#22ff88] transition-colors pl-4"
+                            >
+                              + ADICIONAR AULA
+                            </button>
+                          </Reorder.Group>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
 
                   <input type="file" ref={thumbnailInputRef} className="hidden" accept="image/*" onChange={handleThumbnailUpload} />
