@@ -6,6 +6,8 @@ import { FeaturedCard } from './FeaturedCard';
 import { WeeklyCard } from './WeeklyCard';
 import { supabase } from '../lib/supabase';
 import { BookOpen, Loader2 } from 'lucide-react';
+import { CurriculumPreviewModal } from './CurriculumPreviewModal';
+import { AnimatePresence } from 'motion/react';
 
 interface DashboardOverviewProps {
   userData: any;
@@ -42,6 +44,7 @@ export function DashboardOverview({ userData, onCourseSelect }: DashboardOvervie
   const [enrolledCourses, setEnrolledCourses] = useState<any[]>([]);
   const [lastWatched, setLastWatched] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [viewingCurriculum, setViewingCurriculum] = useState<any | null>(null);
 
   useEffect(() => {
     if (userData?.id) {
@@ -173,6 +176,13 @@ export function DashboardOverview({ userData, onCourseSelect }: DashboardOvervie
         <HeroSection 
           lastWatched={lastWatched} 
           onContinue={() => lastWatched && onCourseSelect(lastWatched.course.id)}
+          onOpenCurriculum={() => {
+            const courseToPreview = lastWatched?.course || {
+              id: 'd9b9a67a-e45f-4d8e-8b4d-4ed2cef02ee9', // Fallback ID if none
+              title: "Engenharia de Controle Avançado"
+            };
+            setViewingCurriculum(courseToPreview);
+          }}
         />
       </motion.div>
 
@@ -242,6 +252,16 @@ export function DashboardOverview({ userData, onCourseSelect }: DashboardOvervie
           ))}
         </div>
       </section>
+
+      <AnimatePresence>
+        {viewingCurriculum && (
+          <CurriculumPreviewModal
+            courseId={viewingCurriculum.id}
+            courseTitle={viewingCurriculum.title}
+            onClose={() => setViewingCurriculum(null)}
+          />
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
