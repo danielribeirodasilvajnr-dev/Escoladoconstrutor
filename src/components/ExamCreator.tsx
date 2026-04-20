@@ -290,7 +290,11 @@ export function ExamCreator({ userData, initialCourseId, initialModuleId, onBack
           <select
             value={targetCourse}
             onChange={(e) => setTargetCourse(e.target.value)}
-            className="w-full bg-[#0f1115] border border-white/5 rounded-xl px-4 py-3.5 text-white font-bold text-sm focus:outline-none focus:border-[#22ff88]/30 transition-all appearance-none cursor-pointer"
+            disabled={!!initialCourseId}
+            className={cn(
+              "w-full bg-[#0f1115] border border-white/5 rounded-xl px-4 py-3.5 text-white font-bold text-sm focus:outline-none transition-all appearance-none",
+              initialCourseId ? "opacity-60 cursor-not-allowed border-none" : "hover:border-[#22ff88]/30 cursor-pointer"
+            )}
           >
             <option value="">Selecione o Curso</option>
             {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
@@ -306,13 +310,15 @@ export function ExamCreator({ userData, initialCourseId, initialModuleId, onBack
           <div className="flex p-1 bg-[#0f1115] rounded-xl border border-white/5">
             <button
               onClick={() => setIsFinal(false)}
-              className={`flex-1 py-2 text-[10px] font-bold uppercase rounded-lg transition-all ${!isFinal ? 'bg-[#22ff88] text-black shadow-lg' : 'text-[#64748b] hover:text-white'}`}
+              disabled={initialCourseId !== undefined}
+              className={`flex-1 py-2 text-[10px] font-bold uppercase rounded-lg transition-all ${!isFinal ? 'bg-[#22ff88] text-black shadow-lg' : 'text-[#64748b] hover:text-white'} ${initialCourseId !== undefined ? 'pointer-events-none' : ''}`}
             >
               Módulo
             </button>
             <button
               onClick={() => setIsFinal(true)}
-              className={`flex-1 py-2 text-[10px] font-bold uppercase rounded-lg transition-all ${isFinal ? 'bg-[#22ff88] text-black shadow-lg' : 'text-[#64748b] hover:text-white'}`}
+              disabled={initialCourseId !== undefined}
+              className={`flex-1 py-2 text-[10px] font-bold uppercase rounded-lg transition-all ${isFinal ? 'bg-[#22ff88] text-black shadow-lg' : 'text-[#64748b] hover:text-white'} ${initialCourseId !== undefined ? 'pointer-events-none' : ''}`}
             >
               Final
             </button>
@@ -340,7 +346,11 @@ export function ExamCreator({ userData, initialCourseId, initialModuleId, onBack
               <select
                 value={targetModule}
                 onChange={(e) => setTargetModule(e.target.value)}
-                className="w-full bg-[#0f1115] border border-white/5 rounded-xl px-4 py-2.5 text-white font-bold text-xs focus:outline-none focus:border-[#22ff88]/30 transition-all appearance-none cursor-pointer"
+                disabled={initialModuleId !== undefined}
+                className={cn(
+                  "w-full bg-[#0f1115] border border-white/5 rounded-xl px-4 py-2.5 text-white font-bold text-xs focus:outline-none transition-all appearance-none",
+                  initialModuleId !== undefined ? "opacity-60 cursor-not-allowed border-none" : "hover:border-[#22ff88]/30 cursor-pointer"
+                )}
               >
                 <option value="">Todos os Módulos</option>
                 {modules.map(m => <option key={m.id} value={m.id}>{m.title}</option>)}
@@ -360,7 +370,8 @@ export function ExamCreator({ userData, initialCourseId, initialModuleId, onBack
             placeholder="Ex: Avaliação de Solo Nível 1"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full bg-[#0f1115] border border-white/5 rounded-xl px-4 py-3 text-white font-bold text-sm focus:outline-none focus:border-[#22ff88]/30 transition-all"
+            autoFocus={!title}
+            className="w-full bg-[#0f1115] border border-white/5 rounded-xl px-4 py-3 text-white font-bold text-sm focus:outline-none focus:border-[#22ff88]/30 transition-all shadow-inner"
           />
         </div>
       </div>
