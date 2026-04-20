@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion } from 'motion/react';
-import { User, Mail, Phone, Upload, Loader2, Camera, CheckCircle2 } from 'lucide-react';
+import { User, Mail, Phone, Upload, Loader2, Camera, CheckCircle2, Briefcase, FileCheck } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { cn } from '../lib/utils';
 import { toast } from 'sonner';
@@ -12,6 +12,8 @@ interface ProfileSettingsProps {
 export function ProfileSettings({ userData }: ProfileSettingsProps) {
   const [name, setName] = useState(userData?.name || '');
   const [phone, setPhone] = useState(userData?.phone || '');
+  const [profession, setProfession] = useState(userData?.profession || '');
+  const [crea, setCrea] = useState(userData?.crea || '');
   const [bio, setBio] = useState(userData?.bio || '');
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -23,6 +25,8 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
     if (userData) {
       setName(userData.name || '');
       setPhone(userData.phone || '');
+      setProfession(userData.profession || '');
+      setCrea(userData.crea || '');
       setBio(userData.bio || '');
       setAvatarUrl(userData.avatar_url || '');
     }
@@ -82,6 +86,8 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
         data: {
           full_name: name,
           phone: phone,
+          profession: profession,
+          crea: crea,
           avatar_url: avatarUrl,
           bio: bio,
         }
@@ -90,7 +96,6 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
       if (authError) throw authError;
 
       // Update Profiles Table (source of truth for Admin and App)
-      // Note: 'phone' and 'bio' columns don't exist in 'profiles' table, keeping them only in auth metadata
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
@@ -197,6 +202,36 @@ export function ProfileSettings({ userData }: ProfileSettingsProps) {
                 value={phone}
                 onChange={handlePhoneChange}
                 placeholder="(00) 00000-0000"
+                className="w-full bg-[#1a1c22] border border-white/5 rounded-xl md:rounded-2xl pl-11 pr-4 py-3.5 md:py-4 text-sm text-white focus:outline-none focus:border-[#22ff88]/30 transition-all font-medium"
+              />
+            </div>
+          </div>
+
+          {/* New Field 1: Profession */}
+          <div className="space-y-2">
+            <label className="text-[9px] font-bold text-[#64748b] uppercase tracking-widest px-1">Profissão</label>
+            <div className="relative group">
+              <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748b] group-focus-within:text-[#22ff88] transition-colors" />
+              <input
+                type="text"
+                value={profession}
+                onChange={(e) => setProfession(e.target.value)}
+                placeholder="Ex: Engenheiro Civil"
+                className="w-full bg-[#1a1c22] border border-white/5 rounded-xl md:rounded-2xl pl-11 pr-4 py-3.5 md:py-4 text-sm text-white focus:outline-none focus:border-[#22ff88]/30 transition-all font-medium"
+              />
+            </div>
+          </div>
+
+          {/* New Field 2: CREA */}
+          <div className="space-y-2">
+            <label className="text-[9px] font-bold text-[#64748b] uppercase tracking-widest px-1">CREA / Registro Profissional</label>
+            <div className="relative group">
+              <FileCheck className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748b] group-focus-within:text-[#22ff88] transition-colors" />
+              <input
+                type="text"
+                value={crea}
+                onChange={(e) => setCrea(e.target.value)}
+                placeholder="000.000.000-0"
                 className="w-full bg-[#1a1c22] border border-white/5 rounded-xl md:rounded-2xl pl-11 pr-4 py-3.5 md:py-4 text-sm text-white focus:outline-none focus:border-[#22ff88]/30 transition-all font-medium"
               />
             </div>
