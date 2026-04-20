@@ -56,24 +56,57 @@ export function DashboardOverview({ userData, onCourseSelect }: DashboardOvervie
   async function fetchEnrollments() {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('enrollments')
-        .select(`
-          *,
-          course:courses (
+      
+      // Fetch both enrollments and authored courses in parallel
+      const [enrollmentsRes, authoredRes] = await Promise.all([
+        supabase
+          .from('enrollments')
+          .select(`
+            *,
+            course:courses (
+              *,
+              instructor:profiles (
+                full_name,
+                avatar_url
+              )
+            )
+          `)
+          .eq('user_id', userData.id),
+        supabase
+          .from('courses')
+          .select(`
             *,
             instructor:profiles (
               full_name,
               avatar_url
             )
-          )
-        `)
-        .eq('user_id', userData.id);
+          `)
+          .eq('instructor_id', userData.id)
+      ]);
 
-      if (error) throw error;
-      const courses = data || [];
-      setEnrolledCourses(courses);
-      return courses;
+      if (enrollmentsRes.error) throw enrollmentsRes.error;
+      if (authoredRes.error) throw authoredRes.error;
+
+      const enrollments = enrollmentsRes.data || [];
+      const authoredCourses = authoredRes.data || [];
+
+      // Merge and deduplicate
+      const enrollmentCourseIds = new Set(enrollments.map(e => e.course_id));
+      
+      const teacherEnrollments = authoredCourses
+        .filter(c => !enrollmentCourseIds.has(c.id))
+        .map(c => ({
+          id: `instructor-${c.id}`,
+          course_id: c.id,
+          user_id: userData.id,
+          progress: 100, // Instructors see 100% progress
+          is_instructor_view: true,
+          course: c
+        }));
+
+      const allCourses = [...enrollments, ...teacherEnrollments];
+      setEnrolledCourses(allCourses);
+      return allCourses;
     } catch (error: any) {
       console.error('Erro ao buscar inscrições:', error.message);
       return [];
