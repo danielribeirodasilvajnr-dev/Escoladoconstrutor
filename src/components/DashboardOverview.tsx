@@ -144,7 +144,7 @@ export function DashboardOverview({ userData, onCourseSelect }: DashboardOvervie
           id: `instructor-${c.id}`,
           course_id: c.id,
           user_id: userData.id,
-          progress: 100, // Instructors see 100% progress
+          progress: 0, // Instructors see 0% progress unless they enroll as students
           is_instructor_view: true,
           course: c
         }));
