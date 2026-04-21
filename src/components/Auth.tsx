@@ -250,18 +250,6 @@ export function Auth({ onSuccess }: AuthProps) {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 px-4 bg-gradient-to-r from-[#22ff88] to-[#00ffcc] rounded-lg text-black font-bold text-sm tracking-wide hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
-              >
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : mode === 'login' ? 'Entrar' : 'Criar conta'}
-              </button>
-
-              {!verificationSent && (
-                <>
-                  <div className="relative my-6">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-white/5"></div>
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
                       <span className="bg-[#1a1c22] px-2 text-[#64748b]">Ou continuar com</span>
                     </div>
                   </div>
