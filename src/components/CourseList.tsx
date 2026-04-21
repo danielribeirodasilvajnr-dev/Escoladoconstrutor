@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Plus, Search, BookOpen, Users, Star, MoreVertical, Edit3, Trash2, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { toast } from 'sonner';
+import { ConfirmModal } from './ConfirmModal';
 
 interface Course {
   id: string;
@@ -24,6 +25,8 @@ export function CourseList({ userData, onEditCourse, onCreateCourse }: CourseLis
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [courseToDelete, setCourseToDelete] = useState<any>(null);
 
   useEffect(() => {
     fetchCourses();
@@ -47,16 +50,14 @@ export function CourseList({ userData, onEditCourse, onCreateCourse }: CourseLis
     }
   }
 
-  async function handleDelete(courseId: string, courseTitle: string) {
-    if (!confirm(`Tem certeza que deseja excluir o curso "${courseTitle}"? Esta ação não pode ser desfeita.`)) {
-      return;
-    }
+  async function handleDelete() {
+    if (!courseToDelete) return;
 
     try {
       const { error } = await supabase
         .from('courses')
         .delete()
-        .eq('id', courseId);
+        .eq('id', courseToDelete.id);
 
       if (error) throw error;
 
@@ -166,7 +167,10 @@ export function CourseList({ userData, onEditCourse, onCreateCourse }: CourseLis
                     Editar
                   </button>
                   <button 
-                    onClick={() => handleDelete(course.id, course.title)}
+                    onClick={() => {
+                      setCourseToDelete(course);
+                      setIsDeleteModalOpen(true);
+                    }}
                     className="w-12 h-12 md:w-14 md:h-14 bg-white/5 text-[#64748b] rounded-xl md:rounded-2xl border border-white/10 hover:bg-red-500/10 hover:text-red-500 transition-all flex items-center justify-center"
                   >
                     <Trash2 className="w-5 h-5" />
@@ -177,6 +181,20 @@ export function CourseList({ userData, onEditCourse, onCreateCourse }: CourseLis
           ))}
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        title="Excluir Curso"
+        message={`Tem certeza que deseja excluir o curso "${courseToDelete?.title}"? Esta ação removerá permanentemente todo o conteúdo (módulos, aulas e provas) e não poderá ser desfeita.`}
+        confirmLabel="Excluir Agora"
+        cancelLabel="Manter Curso"
+        variant="danger"
+        onConfirm={handleDelete}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setCourseToDelete(null);
+        }}
+      />
     </div>
   );
 }
