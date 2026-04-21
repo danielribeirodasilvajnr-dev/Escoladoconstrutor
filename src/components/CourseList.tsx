@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Plus, Search, BookOpen, Users, Star, MoreVertical, Edit3, Trash2 } from 'lucide-react';
+import { Plus, Search, BookOpen, Users, Star, MoreVertical, Edit3, Trash2, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { toast } from 'sonner';
 
 interface Course {
   id: string;
@@ -43,6 +44,26 @@ export function CourseList({ userData, onEditCourse, onCreateCourse }: CourseLis
       console.error('Erro ao buscar cursos:', error.message);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleDelete(courseId: string, courseTitle: string) {
+    if (!confirm(`Tem certeza que deseja excluir o curso "${courseTitle}"? Esta ação não pode ser desfeita.`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('courses')
+        .delete()
+        .eq('id', courseId);
+
+      if (error) throw error;
+
+      toast.success('Curso removido com sucesso');
+      fetchCourses();
+    } catch (error: any) {
+      toast.error('Erro ao excluir curso: ' + error.message);
     }
   }
 
@@ -144,7 +165,10 @@ export function CourseList({ userData, onEditCourse, onCreateCourse }: CourseLis
                     <Edit3 className="w-4 h-4" />
                     Editar
                   </button>
-                  <button className="w-12 h-12 md:w-14 md:h-14 bg-white/5 text-[#64748b] rounded-xl md:rounded-2xl border border-white/10 hover:bg-red-500/10 hover:text-red-500 transition-all flex items-center justify-center">
+                  <button 
+                    onClick={() => handleDelete(course.id, course.title)}
+                    className="w-12 h-12 md:w-14 md:h-14 bg-white/5 text-[#64748b] rounded-xl md:rounded-2xl border border-white/10 hover:bg-red-500/10 hover:text-red-500 transition-all flex items-center justify-center"
+                  >
                     <Trash2 className="w-5 h-5" />
                   </button>
                 </div>
