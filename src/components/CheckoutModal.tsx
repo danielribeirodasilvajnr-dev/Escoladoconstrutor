@@ -34,13 +34,32 @@ export function CheckoutModal({ course, userId, onClose, onSuccess }: CheckoutMo
         if (error && error.code !== '23505') throw error;
         
         // Notify Student
-        await supabase.from('notifications').insert({
+        const { error: studentNotifError } = await supabase.from('notifications').insert({
           user_id: userId,
           type: 'purchase',
           title: 'Inscrição Confirmada!',
           message: `Você agora tem acesso vitalício ao curso "${course.title}".`,
           link: `/dashboard?course=${course.id}`
         });
+
+        if (studentNotifError) {
+          console.error('Erro ao notificar aluno:', studentNotifError);
+        }
+
+        // Notify Instructor
+        if (course.instructor_id) {
+          const { error: instructorNotifError } = await supabase.from('notifications').insert({
+            user_id: course.instructor_id,
+            type: 'sale',
+            title: 'Novo aluno matriculado!',
+            message: `Um novo aluno acabou de se inscrever no seu curso "${course.title}".`,
+            link: `/dashboard/courses`
+          });
+
+          if (instructorNotifError) {
+            console.error('Erro ao notificar instrutor:', instructorNotifError);
+          }
+        }
         
         await new Promise(resolve => setTimeout(resolve, 1500));
         setStep('success');
