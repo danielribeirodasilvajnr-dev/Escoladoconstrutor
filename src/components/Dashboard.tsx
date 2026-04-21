@@ -12,6 +12,7 @@ import { AdminFinanceView } from './AdminFinanceView';
 import { ExamPlayer } from './ExamPlayer';
 import { CertificateView } from './CertificateView';
 import { CertificatesTab } from './CertificatesTab';
+import { CommunityView } from './CommunityView';
 
 type DashboardView =
   | 'vitrine'
@@ -107,6 +108,8 @@ export function Dashboard({ userData, session }: DashboardProps) {
         return <AdminFinanceView />;
       case 'settings':
         return <ProfileSettings userData={userData} />;
+      case 'comunidade':
+        return <CommunityView />;
       case 'exam-player':
         return currentExamId ? (
           <ExamPlayer
