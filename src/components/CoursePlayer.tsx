@@ -89,6 +89,9 @@ export function CoursePlayer({ courseId, onBack, session, onTakeExam }: CoursePl
   const currentTimeRef = useRef(0);
   const [isInitialSeek, setIsInitialSeek] = useState(true);
 
+  const [moduleExams, setModuleExams] = useState<any[]>([]);
+  const [passedExams, setPassedExams] = useState<Set<string>>(new Set());
+
   useEffect(() => {
     fetchCourseData();
   }, [courseId]);
@@ -97,7 +100,10 @@ export function CoursePlayer({ courseId, onBack, session, onTakeExam }: CoursePl
     try {
       setLoading(true);
       
-      // Fetch course details
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      // 1. Fetch course details
       const { data: courseData, error: courseError } = await supabase
         .from('courses')
         .select('*')
@@ -107,7 +113,7 @@ export function CoursePlayer({ courseId, onBack, session, onTakeExam }: CoursePl
       if (courseError) throw courseError;
       setCourse(courseData);
 
-      // Fetch modules and lessons
+      // 2. Fetch modules and lessons
       const { data: modulesData, error: modulesError } = await supabase
         .from('modules')
         .select(`
@@ -128,7 +134,6 @@ export function CoursePlayer({ courseId, onBack, session, onTakeExam }: CoursePl
 
       if (modulesError) throw modulesError;
 
-      // Sort lessons within modules
       const formattedModules = modulesData.map((m: any) => ({
         ...m,
         lessons: m.lessons.sort((a: any, b: any) => a.order_index - b.order_index)
@@ -136,19 +141,32 @@ export function CoursePlayer({ courseId, onBack, session, onTakeExam }: CoursePl
 
       setModules(formattedModules);
       
-      // Fetch final exam
-      const { data: examData } = await supabase
+      // 3. Fetch all exams for this course (both module and final)
+      const { data: examsData } = await supabase
         .from('exams')
-        .select('id, title, is_final')
-        .eq('course_id', courseId)
-        .eq('is_final', true)
-        .single();
+        .select('id, title, is_final, module_id')
+        .eq('course_id', courseId);
       
-      if (examData) {
-        setFinalExam(examData);
+      if (examsData) {
+        setFinalExam(examsData.find(e => e.is_final));
+        setModuleExams(examsData.filter(e => !e.is_final));
+
+        // 4. Check which exams are already passed
+        const examIds = examsData.map(e => e.id);
+        if (examIds.length > 0) {
+          const { data: subs } = await supabase
+            .from('exam_submissions')
+            .select('exam_id')
+            .eq('user_id', user.id)
+            .eq('passed', true)
+            .in('exam_id', examIds);
+          
+          if (subs) {
+            setPassedExams(new Set(subs.map(s => s.exam_id)));
+          }
+        }
       }
       
-      // Set first lesson as default
       if (formattedModules.length > 0 && formattedModules[0].lessons.length > 0) {
         setCurrentLesson(formattedModules[0].lessons[0]);
       }
@@ -718,83 +736,140 @@ export function CoursePlayer({ courseId, onBack, session, onTakeExam }: CoursePl
         </div>
 
         <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4">
-          {modules.map((module, mIdx) => (
-            <div key={module.id} className="space-y-3">
-              <div className="flex items-center gap-2 px-3 py-2">
-                <span className="text-[10px] font-black text-[#22ff88] uppercase tracking-[0.2em]">Módulo {mIdx + 1 < 10 ? `0${mIdx + 1}` : mIdx + 1}</span>
-              </div>
-              
-              {module.lessons.map((lesson, lIdx) => {
-                const isActive = currentLesson?.id === lesson.id;
-                const isLocked = mIdx > 0 && lIdx > 0; // Simulated lock for visual
+          {modules.map((module, mIdx) => {
+            const moduleExam = moduleExams.find(e => e.module_id === module.id);
+            const isModuleExamPassed = moduleExam && passedExams.has(moduleExam.id);
 
-                return (
-                  <button
-                    key={lesson.id}
-                    onClick={() => !isLocked && setCurrentLesson(lesson)}
-                    className={`w-full group p-4 md:p-5 rounded-xl md:rounded-2xl border text-left transition-all ${
-                      isActive 
-                        ? 'bg-[#22ff88]/5 border-[#22ff88]/20' 
-                        : 'bg-[#1a1c22] border-white/5 hover:border-white/10'
-                    } ${isLocked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          {isActive ? (
-                            <span className="px-1.5 py-0.5 bg-[#22ff88] text-[8px] font-black text-black rounded uppercase tracking-tighter">Live</span>
+            return (
+              <div key={module.id} className="space-y-3">
+                <div className="flex items-center gap-2 px-3 py-2">
+                  <span className="text-[10px] font-black text-[#22ff88] uppercase tracking-[0.2em]">Módulo {mIdx + 1 < 10 ? `0${mIdx + 1}` : mIdx + 1}</span>
+                </div>
+                
+                {module.lessons.map((lesson, lIdx) => {
+                  const isActive = currentLesson?.id === lesson.id;
+                  const isLocked = mIdx > 0 && lIdx > 0 && false; // Keep it unlocked for now as per previous logic
+
+                  return (
+                    <button
+                      key={lesson.id}
+                      onClick={() => !isLocked && setCurrentLesson(lesson)}
+                      className={`w-full group p-4 md:p-5 rounded-xl md:rounded-2xl border text-left transition-all ${
+                        isActive 
+                          ? 'bg-[#22ff88]/5 border-[#22ff88]/20' 
+                          : 'bg-[#1a1c22] border-white/5 hover:border-white/10'
+                      } ${isLocked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            {isActive ? (
+                              <span className="px-1.5 py-0.5 bg-[#22ff88] text-[8px] font-black text-black rounded uppercase tracking-tighter">Live</span>
+                            ) : (
+                              <span className="text-[8px] md:text-[10px] font-bold text-[#64748b] uppercase">{lIdx + 1 < 10 ? `0${lIdx + 1}` : lIdx + 1}</span>
+                            )}
+                          </div>
+                          <h4 className={`text-xs md:text-sm font-bold transition-colors mb-1.5 ${isActive ? 'text-[#22ff88]' : 'text-white/80 group-hover:text-white'}`}>
+                            {lesson.title}
+                          </h4>
+                          <div className="flex items-center gap-1.5 text-[#64748b]">
+                            <Play className={`w-2.5 h-2.5 ${isActive ? 'text-[#22ff88] fill-[#22ff88]' : ''}`} />
+                            <span className="text-[8px] md:text-[10px] font-bold tracking-widest uppercase">{lesson.duration || '--:--'}</span>
+                          </div>
+                        </div>
+                        <div className="mt-1 shrink-0">
+                          {isLocked ? (
+                            <Lock className="w-3.5 h-3.5 text-[#334155]" />
+                          ) : isActive ? (
+                            <div className="w-4 h-4 rounded-full border border-[#22ff88] flex items-center justify-center">
+                              <div className="w-1.5 h-1.5 rounded-full bg-[#22ff88] animate-pulse" />
+                            </div>
                           ) : (
-                            <span className="text-[8px] md:text-[10px] font-bold text-[#64748b] uppercase">{lIdx + 1 < 10 ? `0${lIdx + 1}` : lIdx + 1}</span>
+                            <CheckCircle2 className="w-3.5 h-3.5 text-[#334155]" />
                           )}
                         </div>
-                        <h4 className={`text-xs md:text-sm font-bold transition-colors mb-1.5 ${isActive ? 'text-[#22ff88]' : 'text-white/80 group-hover:text-white'}`}>
-                          {lesson.title}
-                        </h4>
-                        <div className="flex items-center gap-1.5 text-[#64748b]">
-                          <Play className={`w-2.5 h-2.5 ${isActive ? 'text-[#22ff88] fill-[#22ff88]' : ''}`} />
-                          <span className="text-[8px] md:text-[10px] font-bold tracking-widest uppercase">{lesson.duration || '--:--'}</span>
-                        </div>
                       </div>
-                      <div className="mt-1 shrink-0">
-                        {isLocked ? (
-                          <Lock className="w-3.5 h-3.5 text-[#334155]" />
-                        ) : isActive ? (
-                          <div className="w-4 h-4 rounded-full border border-[#22ff88] flex items-center justify-center">
-                            <div className="w-1.5 h-1.5 rounded-full bg-[#22ff88] animate-pulse" />
-                          </div>
-                        ) : (
-                          <CheckCircle2 className="w-3.5 h-3.5 text-[#334155]" />
-                        )}
+                    </button>
+                  );
+                })}
+
+                {/* Module Exam Hook */}
+                {moduleExam && (
+                  <button
+                    onClick={() => onTakeExam?.(moduleExam.id)}
+                    className={cn(
+                      "w-full group p-4 rounded-xl border flex items-center justify-between transition-all",
+                      isModuleExamPassed 
+                        ? "bg-[#22ff88]/10 border-[#22ff88]/30" 
+                        : "bg-white/5 border-dashed border-white/10 hover:border-[#22ff88]/30"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={cn(
+                        "w-8 h-8 rounded-lg flex items-center justify-center transition-colors",
+                        isModuleExamPassed ? "bg-[#22ff88]/20" : "bg-white/5"
+                      )}>
+                        <ShieldCheck className={cn("w-4 h-4", isModuleExamPassed ? "text-[#22ff88]" : "text-[#64748b]")} />
+                      </div>
+                      <div className="text-left">
+                        <p className={cn(
+                          "text-[10px] font-black uppercase tracking-widest mb-0.5",
+                          isModuleExamPassed ? "text-[#22ff88]" : "text-white/60"
+                        )}>
+                          Avaliação do Módulo
+                        </p>
+                        <p className={cn(
+                          "text-[8px] font-bold uppercase tracking-tight",
+                          isModuleExamPassed ? "text-[#22ff88]/60" : "text-[#64748b]"
+                        )}>
+                          {isModuleExamPassed ? 'Concluído com Sucesso' : 'Clique para Iniciar'}
+                        </p>
                       </div>
                     </div>
+                    {isModuleExamPassed && (
+                      <CheckCircle2 className="w-4 h-4 text-[#22ff88]" />
+                    )}
                   </button>
-                );
-              })}
-            </div>
-          ))}
+                )}
+              </div>
+            );
+          })}
 
           {/* Final Exam Card */}
-          {finalExam && (
-            <div className="pt-6">
-              <button
-                onClick={() => onTakeExam?.(finalExam.id)}
-                className="w-full group p-6 rounded-[2rem] bg-[#22ff88]/5 border border-[#22ff88]/20 hover:border-[#22ff88]/50 transition-all text-left relative overflow-hidden"
-              >
-                <div className="absolute -top-12 -right-12 w-24 h-24 bg-[#22ff88]/10 blur-[40px] rounded-full" />
-                <div className="relative z-10">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Award className="w-5 h-5 text-[#22ff88]" />
-                    <span className="text-[10px] font-black text-[#22ff88] uppercase tracking-[0.2em]">Certificação Final</span>
+          {finalExam && (() => {
+            const isFinalPassed = passedExams.has(finalExam.id);
+            return (
+              <div className="pt-6">
+                <button
+                  onClick={() => onTakeExam?.(finalExam.id)}
+                  className={cn(
+                    "w-full group p-6 rounded-[2rem] transition-all text-left relative overflow-hidden",
+                    isFinalPassed 
+                      ? "bg-[#22ff88]/10 border border-[#22ff88]/30" 
+                      : "bg-[#22ff88]/5 border border-[#22ff88]/20 hover:border-[#22ff88]/50"
+                  )}
+                >
+                  <div className="absolute -top-12 -right-12 w-24 h-24 bg-[#22ff88]/10 blur-[40px] rounded-full" />
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Award className="w-5 h-5 text-[#22ff88]" />
+                        <span className="text-[10px] font-black text-[#22ff88] uppercase tracking-[0.2em]">
+                          {isFinalPassed ? 'Certificação Concluída' : 'Certificação Final'}
+                        </span>
+                      </div>
+                      {isFinalPassed && <CheckCircle2 className="w-5 h-5 text-[#22ff88]" />}
+                    </div>
+                    <h4 className="text-white font-black text-base md:text-lg leading-tight mb-2 group-hover:text-[#22ff88] transition-colors">{finalExam.title}</h4>
+                    <p className="text-[#64748b] text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      {isFinalPassed ? 'Você já conquistou seu certificado!' : 'Basta atingir a nota mínima para emitir seu certificado'}
+                    </p>
                   </div>
-                  <h4 className="text-white font-black text-base md:text-lg leading-tight mb-2 group-hover:text-[#22ff88] transition-colors">{finalExam.title}</h4>
-                  <p className="text-[#64748b] text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
-                    <ShieldCheck className="w-3.5 h-3.5" />
-                    Basta atingir a nota mínima para emitir seu certificado
-                  </p>
-                </div>
-              </button>
-            </div>
-          )}
+                </button>
+              </div>
+            );
+          })()}
         </div>
 
         <div className="p-8 mt-auto border-t border-white/5">

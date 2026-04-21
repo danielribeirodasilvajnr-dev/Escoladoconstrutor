@@ -55,12 +55,15 @@ export function ExamPlayer({ examId, userData, onBack, onFinish }: ExamPlayerPro
   const [isFinished, setIsFinished] = useState(false);
   const [result, setResult] = useState<{ score: number; passed: boolean; certificateId?: string } | null>(null);
 
+  const [alreadyPassed, setAlreadyPassed] = useState(false);
+  const [lastSubmission, setLastSubmission] = useState<{ score: number } | null>(null);
+
   useEffect(() => {
     fetchExamData();
   }, [examId]);
 
   useEffect(() => {
-    if (timeLeft > 0 && !isFinished) {
+    if (timeLeft > 0 && !isFinished && !alreadyPassed) {
       const timer = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
@@ -73,11 +76,28 @@ export function ExamPlayer({ examId, userData, onBack, onFinish }: ExamPlayerPro
       }, 1000);
       return () => clearInterval(timer);
     }
-  }, [timeLeft, isFinished]);
+  }, [timeLeft, isFinished, alreadyPassed]);
 
   async function fetchExamData() {
     try {
       setLoading(true);
+
+      // Check if already passed
+      const { data: existingPass } = await supabase
+        .from('exam_submissions')
+        .select('score')
+        .eq('exam_id', examId)
+        .eq('user_id', userData.id)
+        .eq('passed', true)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (existingPass) {
+        setAlreadyPassed(true);
+        setLastSubmission(existingPass);
+      }
+
       const { data: examData, error: examError } = await supabase
         .from('exams')
         .select('*')
@@ -207,6 +227,48 @@ export function ExamPlayer({ examId, userData, onBack, onFinish }: ExamPlayerPro
     );
   }
 
+  if (alreadyPassed && lastSubmission) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-[#0a0b0e] p-6 lg:p-12">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-xl w-full bg-[#1a1c22] border border-white/5 rounded-[2.5rem] p-8 md:p-12 text-center shadow-2xl relative overflow-hidden"
+        >
+          {/* Background Glow */}
+          <div className="absolute -top-24 -left-24 w-48 h-48 blur-[100px] opacity-20 bg-[#22ff88]" />
+
+          <div className="relative z-10 space-y-8">
+            <div className="w-24 h-24 rounded-3xl flex items-center justify-center mx-auto border shadow-2xl bg-[#22ff88]/10 border-[#22ff88]/30 text-[#22ff88]">
+              <CheckCircle2 className="w-12 h-12" />
+            </div>
+
+            <div>
+              <h2 className="text-3xl font-black text-white mb-2 uppercase tracking-tighter">Prova Concluída</h2>
+              <p className="text-[#64748b] font-bold uppercase tracking-widest text-[10px]">
+                Você já foi aprovado nesta avaliação.
+              </p>
+            </div>
+
+            <div className="py-6 border-y border-white/5">
+              <p className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest mb-1">Seu Score Anterior</p>
+              <p className="text-4xl font-black text-[#22ff88]">
+                {lastSubmission.score}%
+              </p>
+            </div>
+
+            <button 
+              onClick={() => onBack()}
+              className="w-full py-5 bg-white/5 text-white font-black rounded-2xl flex items-center justify-center gap-3 hover:bg-white/10 active:scale-95 transition-all text-xs uppercase tracking-widest border border-white/5"
+            >
+              VOLTAR AO CURSO
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
   if (isFinished && result) {
     return (
       <div className="h-screen flex items-center justify-center bg-[#0a0b0e] p-6 lg:p-12">
@@ -232,7 +294,7 @@ export function ExamPlayer({ examId, userData, onBack, onFinish }: ExamPlayerPro
             </div>
 
             <div>
-              <h2 className="text-3xl font-black text-white mb-2">
+              <h2 className="text-3xl font-black text-white mb-2 uppercase tracking-tighter">
                 {result.passed ? "MENSAGEM DE APROVAÇÃO" : "AVALIAÇÃO NÃO CONCLUÍDA"}
               </h2>
               <p className="text-[#64748b] font-bold uppercase tracking-widest text-[10px]">
