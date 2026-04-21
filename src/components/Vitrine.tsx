@@ -167,13 +167,13 @@ export function Vitrine({ userData, onViewChange }: VitrineProps) {
                     </div>
                     <div className="flex flex-col min-w-0">
                       <span className="text-[8px] font-bold text-[#22ff88] uppercase tracking-widest">Professor</span>
-                      <span className="text-[10px] md:text-xs font-bold text-white truncate">{course.instructor?.full_name || 'Especialista'}</span>
+                      <span className="text-[10px] md:text-xs font-bold text-white">{course.instructor?.full_name || 'Especialista'}</span>
                     </div>
                 </div>
               </div>
 
               <div className="p-5 md:p-8 flex-1 flex flex-col">
-                <h3 className="text-lg md:text-2xl font-bold text-white mb-3 line-clamp-2 leading-tight group-hover:text-[#22ff88] transition-colors">
+                <h3 className="text-lg md:text-2xl font-bold text-white mb-3 leading-tight group-hover:text-[#22ff88] transition-colors">
                   {course.title}
                 </h3>
 

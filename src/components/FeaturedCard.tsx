@@ -21,7 +21,7 @@ export function FeaturedCard({ image, category, title }: FeaturedCardProps) {
         <span className="text-[8px] md:text-[10px] font-bold text-[#22ff88] uppercase tracking-[0.2em] mb-2 md:mb-3">
           {category}
         </span>
-        <h3 className="text-lg md:text-2xl font-bold text-white mb-4 md:mb-6 leading-tight group-hover:translate-x-1 transition-transform line-clamp-2">
+        <h3 className="text-lg md:text-2xl font-bold text-white mb-4 md:mb-6 leading-tight group-hover:translate-x-1 transition-transform">
           {title}
         </h3>
         <div className="flex items-center gap-2 text-[9px] md:text-[11px] font-bold text-white group-hover:text-[#22ff88] transition-colors">
