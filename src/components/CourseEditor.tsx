@@ -1087,22 +1087,64 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
               </div>
 
               <div className="bg-[#0f1115] p-5 rounded-xl border border-white/5">
-                <div className="flex items-center gap-2 mb-3">
-                  <Clock className="w-3.5 h-3.5 text-[#64748b]" />
-                  <span className="text-[10px] font-black text-[#64748b] uppercase tracking-widest">Tempo de Acesso</span>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-3.5 h-3.5 text-[#64748b]" />
+                    <span className="text-[10px] font-black text-[#64748b] uppercase tracking-widest">Tempo de Acesso</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-white uppercase tracking-widest">Vitalício</span>
+                    <div
+                      onClick={() => setCourse(prev => ({ ...prev, access_duration: prev.access_duration === 0 ? 12 : 0 }))}
+                      className={cn(
+                        "w-10 h-5 rounded-full relative cursor-pointer transition-colors",
+                        course.access_duration === 0 ? "bg-[#22ff88]" : "bg-white/10"
+                      )}
+                    >
+                      <div className={cn(
+                        "absolute top-1 w-3 h-3 bg-black rounded-full transition-all",
+                        course.access_duration === 0 ? "right-1" : "left-1"
+                      )} />
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <input
-                    type="number"
-                    value={course.access_duration || 12}
-                    onChange={(e) => setCourse(prev => ({ ...prev, access_duration: parseInt(e.target.value) || 0 }))}
-                    className="bg-black/40 border border-white/10 rounded-lg px-4 py-2 text-white font-bold text-lg w-20 focus:outline-none focus:border-[#22ff88]/30"
-                  />
-                  <span className="text-xs font-bold text-[#64748b] uppercase tracking-widest">Meses</span>
-                </div>
-                <p className="text-[9px] text-[#22ff88]/40 mt-3 font-bold uppercase tracking-wider leading-relaxed">
-                  Tempo que o aluno terá acesso às aulas após a compra.
-                </p>
+
+                <AnimatePresence mode="wait">
+                  {course.access_duration !== 0 ? (
+                    <motion.div
+                      key="duration-input"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="space-y-4 overflow-hidden"
+                    >
+                      <div className="flex items-center gap-4">
+                        <input
+                          type="number"
+                          value={course.access_duration || 12}
+                          onChange={(e) => setCourse(prev => ({ ...prev, access_duration: parseInt(e.target.value) || 0 }))}
+                          className="bg-black/40 border border-white/10 rounded-lg px-4 py-2 text-white font-bold text-lg w-24 focus:outline-none focus:border-[#22ff88]/30"
+                        />
+                        <span className="text-xs font-bold text-[#64748b] uppercase tracking-widest">Meses</span>
+                      </div>
+                      <p className="text-[9px] text-[#22ff88]/40 font-bold uppercase tracking-wider leading-relaxed">
+                        Tempo que o aluno terá acesso às aulas após a compra.
+                      </p>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="lifetime-msg"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <p className="text-[10px] text-[#22ff88] font-bold uppercase tracking-wider leading-relaxed bg-[#22ff88]/5 p-3 rounded-lg border border-[#22ff88]/10">
+                        Acesso ilimitado e vitalício configurado.
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
           </div>
