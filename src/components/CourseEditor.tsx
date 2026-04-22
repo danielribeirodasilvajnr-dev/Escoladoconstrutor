@@ -52,6 +52,7 @@ interface Course {
   price: number;
   is_published: boolean;
   is_blocked: boolean;
+  access_duration: number;
   students_count: number;
   rating: number;
 }
@@ -74,6 +75,7 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
     cover_url: '',
     is_published: false,
     is_blocked: false,
+    access_duration: 12,
     students_count: 0,
     rating: 0
   });
@@ -199,6 +201,7 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
             cover_url: course.cover_url,
             is_published: course.is_published,
             is_blocked: course.is_blocked,
+            access_duration: course.access_duration || 12,
             updated_at: new Date().toISOString()
           })
           .eq('id', courseId);
@@ -225,6 +228,7 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
             description: course.description,
             price: course.price,
             cover_url: course.cover_url,
+            access_duration: course.access_duration || 12,
             instructor_id: userData.id
           })
           .select()
@@ -1079,6 +1083,25 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                     course.is_blocked ? "right-1" : "left-1"
                   )} />
                 </div>
+              </div>
+
+              <div className="bg-[#0f1115] p-5 rounded-xl border border-white/5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Clock className="w-3.5 h-3.5 text-[#64748b]" />
+                  <span className="text-[10px] font-black text-[#64748b] uppercase tracking-widest">Tempo de Acesso</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <input
+                    type="number"
+                    value={course.access_duration || 12}
+                    onChange={(e) => setCourse(prev => ({ ...prev, access_duration: parseInt(e.target.value) || 0 }))}
+                    className="bg-black/40 border border-white/10 rounded-lg px-4 py-2 text-white font-bold text-lg w-20 focus:outline-none focus:border-[#22ff88]/30"
+                  />
+                  <span className="text-xs font-bold text-[#64748b] uppercase tracking-widest">Meses</span>
+                </div>
+                <p className="text-[9px] text-[#22ff88]/40 mt-3 font-bold uppercase tracking-wider leading-relaxed">
+                  Tempo que o aluno terá acesso às aulas após a compra.
+                </p>
               </div>
             </div>
           </div>
