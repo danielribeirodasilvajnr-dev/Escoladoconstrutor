@@ -14,6 +14,35 @@ export function LandingPage({ onExplore }: LandingPageProps) {
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [timeLeft, setTimeLeft] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0
+  });
+
+  useEffect(() => {
+    const targetDate = new Date('2026-05-01T00:00:00').getTime();
+
+    const interval = setInterval(() => {
+      const now = new Date().getTime();
+      const distance = targetDate - now;
+
+      if (distance < 0) {
+        clearInterval(interval);
+        return;
+      }
+
+      setTimeLeft({
+        days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+        seconds: Math.floor((distance % (1000 * 60)) / 1000)
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     supabase.from('courses').select('*').order('created_at', { ascending: false }).then(({ data }) => {
@@ -135,22 +164,53 @@ export function LandingPage({ onExplore }: LandingPageProps) {
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 1, delay: 0.4 }}
-            className="relative"
+            className="relative flex items-center justify-center py-10 md:py-0"
           >
-            <div className="relative aspect-square sm:aspect-[4/5] rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl bg-white/5 flex items-center justify-center p-6 md:p-8">
-              <img
-                src="/sticker_transparent.png"
-                alt="Sticker de Sucesso"
-                className="w-full h-full object-contain transition-transform duration-700 hover:scale-105 drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]"
-              />
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 w-full max-w-[600px] relative z-10">
+                {[
+                    { label: 'DIAS', value: timeLeft.days },
+                    { label: 'HORAS', value: timeLeft.hours },
+                    { label: 'MINUTOS', value: timeLeft.minutes },
+                    { label: 'SEGUNDOS', value: timeLeft.seconds }
+                ].map((unit, i) => (
+                    <motion.div 
+                        key={unit.label}
+                        initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        transition={{ delay: 0.6 + (i * 0.1) }}
+                        className="bg-[#1a1c22]/40 backdrop-blur-xl border border-white/10 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 flex flex-col items-center justify-center relative overflow-hidden group hover:border-[#22ff88]/30 transition-all duration-500 shadow-2xl hover:shadow-[#22ff88]/5"
+                    >
+                        {/* Glow effect on hover */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#22ff88]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        <span className="text-4xl md:text-6xl font-black text-white mb-2 md:mb-3 tracking-tighter group-hover:text-[#22ff88] transition-colors leading-none">
+                            {String(unit.value).padStart(2, '0')}
+                        </span>
+                        <span className="text-[8px] md:text-[10px] font-black text-[#64748b] uppercase tracking-widest leading-none">{unit.label}</span>
+                        
+                        {/* Subtle accent border */}
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[1px] bg-[#22ff88]/20 group-hover:w-full transition-all duration-700" />
+                    </motion.div>
+                ))}
             </div>
+            
+            {/* Launching label floating above */}
+            <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.2 }}
+                className="absolute -top-8 md:-top-16 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-black/40 backdrop-blur-md px-6 py-2 rounded-full border border-white/5 whitespace-nowrap"
+            >
+                <div className="w-1.5 h-1.5 rounded-full bg-[#22ff88] animate-pulse" />
+                <span className="text-[10px] md:text-xs font-black text-[#22ff88] uppercase tracking-[0.4em]">Plataforma em Lançamento</span>
+                <div className="w-1.5 h-1.5 rounded-full bg-[#22ff88] animate-pulse" />
+            </motion.div>
 
-            {/* Background elements */}
-            <div className="absolute -top-10 -right-10 md:-top-20 md:-right-20 w-48 md:w-64 h-48 md:h-64 bg-[#22ff88]/10 rounded-full blur-[80px] md:blur-[100px] -z-10" />
-            <div className="absolute -bottom-10 -left-10 md:-bottom-20 md:-left-20 w-64 md:w-80 h-64 md:h-80 bg-blue-500/5 rounded-full blur-[80px] md:blur-[100px] -z-10" />
+            {/* Background decorative glows */}
+            <div className="absolute -top-20 -right-20 w-64 md:w-96 h-64 md:h-96 bg-[#22ff88]/10 rounded-full blur-[100px] md:blur-[150px] -z-10 animate-pulse" />
+            <div className="absolute -bottom-20 -left-20 w-80 md:w-[500px] h-80 md:h-[500px] bg-blue-500/5 rounded-full blur-[100px] md:blur-[150px] -z-10" />
           </motion.div>
         </section>
 
