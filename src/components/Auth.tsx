@@ -7,12 +7,13 @@ import { toast } from 'sonner';
 
 interface AuthProps {
   onSuccess: () => void;
+  onBack?: () => void;
 }
 
 type AuthMode = 'login' | 'register';
 type AccessLevel = 'membro' | 'administrador';
 
-export function Auth({ onSuccess }: AuthProps) {
+export function Auth({ onSuccess, onBack }: AuthProps) {
   const initialMode = window.location.hash === '#register' ? 'register' : 'login';
   const [mode, setMode] = useState<AuthMode>(initialMode);
   const [accessLevel, setAccessLevel] = useState<AccessLevel>('membro');
@@ -130,7 +131,7 @@ export function Auth({ onSuccess }: AuthProps) {
         className="absolute top-8 left-8 md:top-12 md:left-12 z-20 flex items-center gap-4"
       >
         <button 
-          onClick={() => { window.location.hash = ''; }}
+          onClick={onBack || (() => { window.location.hash = ''; })}
           className="w-10 h-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-white/10 transition-all hover:-translate-x-1"
           title="Voltar para a página inicial"
         >

@@ -166,9 +166,10 @@ export default function App() {
           exit={{ opacity: 0, scale: 0.9 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         >
-          <Auth onSuccess={() => {
-            setView('dashboard');
-          }} />
+          <Auth 
+            onSuccess={() => setView('dashboard')} 
+            onBack={() => setView('landing')}
+          />
         </motion.div>
       ) : publicCourseId ? (
         <motion.div
