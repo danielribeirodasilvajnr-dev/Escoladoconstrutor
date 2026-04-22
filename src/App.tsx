@@ -158,7 +158,19 @@ export default function App() {
 
   return (
     <AnimatePresence mode="wait">
-      {publicCourseId ? (
+      {view === 'auth' ? (
+        <motion.div
+          key="auth"
+          initial={{ opacity: 0, scale: 1.1 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <Auth onSuccess={() => {
+            setView('dashboard');
+          }} />
+        </motion.div>
+      ) : publicCourseId ? (
         <motion.div
           key="public-course"
           initial={{ opacity: 0 }}
@@ -187,21 +199,10 @@ export default function App() {
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.5, ease: 'easeInOut' }}
         >
-          <LandingPage onExplore={() => setView(session ? 'dashboard' : 'auth')} />
-        </motion.div>
-      ) : view === 'auth' ? (
-        <motion.div
-          key="auth"
-          initial={{ opacity: 0, scale: 1.1 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.9 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <Auth onSuccess={() => {
-            setView('dashboard');
-            // If was on a public course, the session check will handle it, 
-            // but we might want to keep the public ID to show the checkout
-          }} />
+          <LandingPage 
+            onAuth={() => setView('auth')}
+            onExplore={() => setView(session ? 'dashboard' : 'auth')} 
+          />
         </motion.div>
       ) : (
         <motion.div

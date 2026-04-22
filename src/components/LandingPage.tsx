@@ -6,9 +6,10 @@ import { supabase } from '../lib/supabase';
 
 interface LandingPageProps {
   onExplore: () => void;
+  onAuth: () => void;
 }
 
-export function LandingPage({ onExplore }: LandingPageProps) {
+export function LandingPage({ onExplore, onAuth }: LandingPageProps) {
   const [courses, setCourses] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todos');
@@ -82,13 +83,13 @@ export function LandingPage({ onExplore }: LandingPageProps) {
         <div className="flex items-center gap-3">
           <div className="hidden md:flex gap-4">
             <button
-              onClick={() => { window.location.hash = 'login'; }}
+              onClick={onAuth}
               className="px-6 py-2 bg-[#22ff88] text-black rounded-full text-[11px] uppercase tracking-widest font-bold hover:scale-105 active:scale-95 shadow-xl shadow-[#22ff88]/10 transition-all"
             >
               Fazer Login
             </button>
             <button
-              onClick={() => { window.location.hash = 'register'; }}
+              onClick={onAuth}
               className="px-6 py-2 bg-white/5 text-white rounded-full text-[11px] uppercase tracking-widest font-bold hover:bg-white/10 active:scale-95 transition-all"
             >
               Inscreva-se
@@ -118,13 +119,13 @@ export function LandingPage({ onExplore }: LandingPageProps) {
               <a href="#" className="text-2xl font-bold border-b border-white/5 pb-4">Recursos</a>
               <div className="flex flex-col gap-4 mt-8">
                 <button
-                  onClick={() => { window.location.hash = 'login'; setIsMenuOpen(false); }}
+                  onClick={() => { onAuth(); setIsMenuOpen(false); }}
                   className="w-full py-4 bg-[#22ff88] text-black rounded-2xl text-sm uppercase tracking-widest font-bold"
                 >
                   Fazer Login
                 </button>
                 <button
-                  onClick={() => { window.location.hash = 'register'; setIsMenuOpen(false); }}
+                  onClick={() => { onAuth(); setIsMenuOpen(false); }}
                   className="w-full py-4 bg-white/5 text-white rounded-2xl text-sm uppercase tracking-widest font-bold"
                 >
                   Criar Conta
