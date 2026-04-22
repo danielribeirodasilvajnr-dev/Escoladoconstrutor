@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Filter, Star, Users, Play, Globe, Loader2, Award, Zap, BookOpen } from 'lucide-react';
+import { Search, Filter, Star, Users, Play, Globe, Loader2, Award, Zap, BookOpen, Lock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { toast } from 'sonner';
 import { CheckoutModal } from './CheckoutModal';
 import { CurriculumPreviewModal } from './CurriculumPreviewModal';
+import { cn } from '../lib/utils';
 
 interface Course {
   id: string;
@@ -11,6 +13,7 @@ interface Course {
   description: string;
   cover_url: string;
   price: number;
+  is_blocked: boolean;
   instructor_id: string;
   instructor: {
     full_name: string;
@@ -55,15 +58,18 @@ export function Vitrine({ userData, onViewChange }: VitrineProps) {
       setCourses(data || []);
     } catch (error: any) {
       console.error('Erro ao buscar cursos da vitrine:', error.message);
+      toast.error('Erro ao carregar vitrine: ' + error.message);
     } finally {
       setLoading(false);
     }
   }
 
-  const filteredCourses = courses.filter(course =>
-    course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    course.instructor?.full_name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredCourses = courses.filter(course => {
+    const search = (searchTerm || '').toLowerCase();
+    const titleMatch = (course.title || '').toLowerCase().includes(search);
+    const instructorMatch = (course.instructor?.full_name || '').toLowerCase().includes(search);
+    return titleMatch || instructorMatch;
+  });
 
   return (
     <div className="p-3 md:p-10 max-w-[1600px] mx-auto space-y-6 md:space-y-12 pb-20 mt-2 md:mt-4">
@@ -144,6 +150,14 @@ export function Vitrine({ userData, onViewChange }: VitrineProps) {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
 
+                {course.is_blocked && (
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center">
+                    <div className="w-16 h-16 bg-red-500/20 rounded-2xl border border-red-500/30 flex items-center justify-center shadow-[0_0_30px_rgba(239,68,68,0.2)]">
+                      <Lock className="w-8 h-8 text-red-500" />
+                    </div>
+                  </div>
+                )}
+
                 <div className="absolute top-4 md:top-6 left-4 md:left-6">
                   <div className="bg-black/60 backdrop-blur-md px-3 md:px-4 py-1 md:py-1.5 rounded-full border border-white/10 flex items-center gap-2">
                     <span className="w-1.5 md:w-2 h-1.5 md:h-2 rounded-full bg-[#22ff88] animate-pulse" />
@@ -151,8 +165,8 @@ export function Vitrine({ userData, onViewChange }: VitrineProps) {
                   </div>
                 </div>
 
-                <div className="absolute bottom-4 md:bottom-6 left-6 md:left-8 right-6 md:right-8">
-                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-[#2a2d35] to-[#1a1c22] border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
+                <div className="absolute bottom-4 md:bottom-6 left-6 md:left-8 right-6 md:right-8 flex items-center gap-3">
+                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-[#2a2d35] to-[#1a1c22] border border-white/10 flex items-center justify-center overflow-hidden shrink-0 shadow-lg">
                       {course.instructor?.avatar_url ? (
                         <img
                           src={course.instructor.avatar_url}
@@ -165,9 +179,9 @@ export function Vitrine({ userData, onViewChange }: VitrineProps) {
                         </span>
                       )}
                     </div>
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-[8px] font-bold text-[#22ff88] uppercase tracking-widest">Professor</span>
-                      <span className="text-[10px] md:text-xs font-bold text-white">{course.instructor?.full_name || 'Especialista'}</span>
+                    <div className="flex flex-col min-w-0 bg-black/20 backdrop-blur-sm px-2 py-0.5 rounded-lg">
+                      <span className="text-[8px] font-bold text-[#22ff88] uppercase tracking-widest leading-none mb-0.5">Professor</span>
+                      <span className="text-[10px] md:text-xs font-bold text-white truncate">{course.instructor?.full_name || 'Especialista'}</span>
                     </div>
                 </div>
               </div>
@@ -192,7 +206,7 @@ export function Vitrine({ userData, onViewChange }: VitrineProps) {
                   onClick={() => setViewingCurriculum(course)}
                   className="w-full h-11 md:h-12 mb-6 bg-white/5 text-[#64748b] font-black text-[9px] md:text-[10px] uppercase tracking-widest rounded-xl md:rounded-2xl border border-white/10 hover:text-[#22ff88] hover:border-[#22ff88]/20 transition-all active:scale-95 flex items-center justify-center gap-2"
                 >
-                  <BookOpen className="w-3.5 h-3.5" />
+                   <BookOpen className="w-3.5 h-3.5" />
                   Ver Grade Curricular
                 </button>
 
@@ -202,11 +216,17 @@ export function Vitrine({ userData, onViewChange }: VitrineProps) {
                     <span className="text-lg md:text-2xl font-black text-white">R$ {course.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                   </div>
                   <button
-                    onClick={() => setSelectedCourse(course)}
-                    className="h-11 md:h-14 px-5 md:px-8 bg-[#22ff88]/10 text-[#22ff88] font-black text-[9px] md:text-[10px] uppercase tracking-widest rounded-xl md:rounded-2xl border border-[#22ff88]/10 hover:bg-[#22ff88] hover:text-black hover:border-transparent transition-all active:scale-95 flex items-center justify-center gap-2"
+                    onClick={() => !course.is_blocked && setSelectedCourse(course)}
+                    disabled={course.is_blocked}
+                    className={cn(
+                      "h-11 md:h-14 px-5 md:px-8 font-black text-[9px] md:text-[10px] uppercase tracking-widest rounded-xl md:rounded-2xl border transition-all active:scale-95 flex items-center justify-center gap-2",
+                      course.is_blocked 
+                        ? "bg-white/5 text-[#64748b] border-white/10 cursor-not-allowed opacity-50" 
+                        : "bg-[#22ff88]/10 text-[#22ff88] border-[#22ff88]/10 hover:bg-[#22ff88] hover:text-black hover:border-transparent"
+                    )}
                   >
-                    Iniciar
-                    <Play className="w-3 h-3 fill-current" />
+                    {course.is_blocked ? 'Bloqueado' : 'Iniciar'}
+                    {course.is_blocked ? <Lock className="w-3 h-3" /> : <Play className="w-3 h-3 fill-current" />}
                   </button>
                 </div>
               </div>

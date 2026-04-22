@@ -16,7 +16,9 @@ import {
   ClipboardCheck,
   Award,
   ChevronUp,
-  ChevronDown
+  ChevronDown,
+  Lock,
+  Unlock
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { motion, AnimatePresence, Reorder } from 'motion/react';
@@ -49,6 +51,7 @@ interface Course {
   cover_url: string;
   price: number;
   is_published: boolean;
+  is_blocked: boolean;
   students_count: number;
   rating: number;
 }
@@ -70,6 +73,7 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
     price: 0,
     cover_url: '',
     is_published: false,
+    is_blocked: false,
     students_count: 0,
     rating: 0
   });
@@ -194,6 +198,7 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
             price: course.price,
             cover_url: course.cover_url,
             is_published: course.is_published,
+            is_blocked: course.is_blocked,
             updated_at: new Date().toISOString()
           })
           .eq('id', courseId);
@@ -1050,6 +1055,28 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                   <div className={cn(
                     "absolute top-1 w-4 h-4 bg-black rounded-full transition-all",
                     course.is_published ? "right-1" : "left-1"
+                  )} />
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center bg-[#0f1115] p-5 rounded-xl border border-white/5">
+                <div className="flex flex-col">
+                  <span className={cn(
+                    "text-[10px] font-black uppercase tracking-[0.2em] mb-1",
+                    course.is_blocked ? "text-red-500" : "text-[#64748b]"
+                  )}>CONTEÚDO</span>
+                  <span className="text-sm font-bold text-white uppercase tracking-wider">{course.is_blocked ? 'BLOQUEADO' : 'LIBERADO'}</span>
+                </div>
+                <div
+                  onClick={() => setCourse(prev => ({ ...prev, is_blocked: !prev.is_blocked }))}
+                  className={cn(
+                    "w-12 h-6 rounded-full relative cursor-pointer transition-colors",
+                    course.is_blocked ? "bg-red-500" : "bg-[#22ff88]"
+                  )}
+                >
+                  <div className={cn(
+                    "absolute top-1 w-4 h-4 bg-black rounded-full transition-all",
+                    course.is_blocked ? "right-1" : "left-1"
                   )} />
                 </div>
               </div>

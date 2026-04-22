@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Plus, Search, BookOpen, Users, Star, MoreVertical, Edit3, Trash2, Loader2 } from 'lucide-react';
+import { Plus, Search, BookOpen, Users, Star, MoreVertical, Edit3, Trash2, Loader2, Lock, Unlock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { toast } from 'sonner';
 import { ConfirmModal } from './ConfirmModal';
@@ -11,6 +11,7 @@ interface Course {
   description: string;
   cover_url: string;
   is_published: boolean;
+  is_blocked: boolean;
   students_count: number;
   rating: number;
 }
@@ -65,6 +66,22 @@ export function CourseList({ userData, onEditCourse, onCreateCourse }: CourseLis
       fetchCourses();
     } catch (error: any) {
       toast.error('Erro ao excluir curso: ' + error.message);
+    }
+  }
+
+  async function handleToggleBlock(course: Course) {
+    try {
+      const { error } = await supabase
+        .from('courses')
+        .update({ is_blocked: !course.is_blocked })
+        .eq('id', course.id);
+
+      if (error) throw error;
+
+      toast.success(course.is_blocked ? 'Curso desbloqueado' : 'Curso bloqueado');
+      fetchCourses();
+    } catch (error: any) {
+      toast.error('Erro ao alternar bloqueio: ' + error.message);
     }
   }
 
@@ -165,6 +182,18 @@ export function CourseList({ userData, onEditCourse, onCreateCourse }: CourseLis
                   >
                     <Edit3 className="w-4 h-4" />
                     Editar
+                  </button>
+                  <button
+                    onClick={() => handleToggleBlock(course)}
+                    className={cn(
+                      "w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl border transition-all flex items-center justify-center",
+                      course.is_blocked 
+                        ? "bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20" 
+                        : "bg-white/5 text-[#64748b] border-white/10 hover:text-[#22ff88] hover:border-[#22ff88]/20"
+                    )}
+                    title={course.is_blocked ? "Desbloquear Conteúdo" : "Bloquear Conteúdo"}
+                  >
+                    {course.is_blocked ? <Lock className="w-5 h-5" /> : <Unlock className="w-5 h-5" />}
                   </button>
                   <button 
                     onClick={() => {

@@ -411,6 +411,27 @@ export function CoursePlayer({ courseId, onBack, session, onTakeExam }: CoursePl
       }, { onConflict: 'user_id,lesson_id' });
   }
 
+  if (course?.is_blocked) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-80px)] bg-[#0a0b0e] p-6 text-center">
+        <div className="w-24 h-24 bg-red-500/10 rounded-[2rem] flex items-center justify-center mb-8 border border-red-500/20 shadow-[0_0_50px_rgba(239,68,68,0.1)]">
+          <Lock className="w-10 h-10 text-red-500" />
+        </div>
+        <h2 className="text-3xl md:text-5xl font-black text-white mb-4 uppercase tracking-tighter">Conteúdo <span className="text-red-500">Bloqueado</span></h2>
+        <p className="text-[#64748b] text-lg max-w-md mx-auto mb-10">
+          Esta Masterclass está temporariamente indisponível. Por favor, entre em contato com o suporte ou aguarde a liberação pelo instrutor.
+        </p>
+        <button 
+          onClick={onBack}
+          className="px-8 py-4 bg-white/5 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl border border-white/10 hover:bg-white/10 transition-all flex items-center gap-3"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Voltar ao Painel
+        </button>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-80px)] space-y-4">
