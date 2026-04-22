@@ -158,17 +158,7 @@ export default function App() {
 
   return (
     <AnimatePresence mode="wait">
-      {view === 'landing' ? (
-        <motion.div
-          key="landing"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.5, ease: 'easeInOut' }}
-        >
-          <LandingPage onExplore={() => setView(session ? 'dashboard' : 'auth')} />
-        </motion.div>
-      ) : publicCourseId ? (
+      {publicCourseId ? (
         <motion.div
           key="public-course"
           initial={{ opacity: 0 }}
@@ -188,6 +178,16 @@ export default function App() {
             }}
             onAuth={() => setView('auth')}
           />
+        </motion.div>
+      ) : view === 'landing' ? (
+        <motion.div
+          key="landing"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.5, ease: 'easeInOut' }}
+        >
+          <LandingPage onExplore={() => setView(session ? 'dashboard' : 'auth')} />
         </motion.div>
       ) : view === 'auth' ? (
         <motion.div
