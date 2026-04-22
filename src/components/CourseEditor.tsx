@@ -18,7 +18,8 @@ import {
   ChevronUp,
   ChevronDown,
   Lock,
-  Unlock
+  Unlock,
+  Clock
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { motion, AnimatePresence, Reorder } from 'motion/react';
