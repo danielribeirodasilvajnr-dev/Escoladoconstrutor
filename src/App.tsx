@@ -167,7 +167,14 @@ export default function App() {
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         >
           <Auth 
-            onSuccess={() => setView('dashboard')} 
+            onSuccess={() => {
+              setView('dashboard');
+              setPublicCourseId(null);
+              // Clean up the course parameter from the URL after login
+              const url = new URL(window.location.href);
+              url.searchParams.delete('c');
+              window.history.replaceState({}, '', url);
+            }} 
             onBack={() => setView('landing')}
           />
         </motion.div>
