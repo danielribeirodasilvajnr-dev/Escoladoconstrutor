@@ -191,8 +191,6 @@ export function LandingPage({ onExplore, onAuth }: LandingPageProps) {
                         </span>
                         <span className="text-[8px] md:text-[10px] font-black text-[#64748b] uppercase tracking-widest leading-none">{unit.label}</span>
                         
-                        {/* Subtle accent border */}
-                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[1px] bg-[#22ff88]/20 group-hover:w-full transition-all duration-700" />
                     </motion.div>
                 ))}
             </div>
