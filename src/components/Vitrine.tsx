@@ -142,21 +142,19 @@ export function Vitrine({ userData, onViewChange }: VitrineProps) {
               transition={{ delay: i * 0.1 }}
               className="group bg-[#1a1c22] rounded-[2.5rem] md:rounded-[3rem] border border-white/5 overflow-hidden flex flex-col hover:border-[#22ff88]/20 transition-all duration-500 shadow-2xl hover:shadow-[#22ff88]/5"
             >
-              <div className="aspect-video relative overflow-hidden group-hover:cursor-pointer" onClick={() => setSelectedCourse(course)}>
+              <div 
+                className={cn(
+                  "aspect-video relative overflow-hidden",
+                  !course.is_blocked && "group-hover:cursor-pointer"
+                )} 
+                onClick={() => !course.is_blocked && setSelectedCourse(course)}
+              >
                 <img
                   src={course.cover_url || "https://images.unsplash.com/photo-1541829070764-84a7d30dee73?w=800"}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   alt={course.title}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
-
-                {course.is_blocked && (
-                  <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center">
-                    <div className="w-16 h-16 bg-red-500/20 rounded-2xl border border-red-500/30 flex items-center justify-center shadow-[0_0_30px_rgba(239,68,68,0.2)]">
-                      <Lock className="w-8 h-8 text-red-500" />
-                    </div>
-                  </div>
-                )}
 
                 <div className="absolute top-4 md:top-6 left-4 md:left-6">
                   <div className="bg-black/60 backdrop-blur-md px-3 md:px-4 py-1 md:py-1.5 rounded-full border border-white/10 flex items-center gap-2">
