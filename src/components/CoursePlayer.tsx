@@ -461,7 +461,7 @@ export function CoursePlayer({ courseId, onBack, session, onTakeExam }: CoursePl
               <video 
                 ref={videoRef}
                 key={currentLesson.id}
-                src={currentLesson.content_url + '#t=0.001'}
+                src={currentLesson.thumbnail_url ? currentLesson.content_url : `${currentLesson.content_url}#t=0.001`}
                 poster={currentLesson.thumbnail_url}
                 onTimeUpdate={handleTimeUpdate}
                 onLoadedMetadata={handleLoadedMetadata}
