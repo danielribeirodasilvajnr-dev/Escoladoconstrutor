@@ -92,6 +92,8 @@ export function PublicCourseView({ courseId, onBack, onAuth, session }: PublicCo
   }
 
   const handleCTA = () => {
+    if (course?.is_blocked) return;
+
     if (isEnrolled) {
        onBack(); // Go to dashboard/courses
        return;
@@ -184,10 +186,21 @@ export function PublicCourseView({ courseId, onBack, onAuth, session }: PublicCo
              </div>
           </div>
           <button 
-            onClick={handleCTA}
-            className="w-full md:w-auto px-12 py-5 bg-[#22ff88] text-black font-black rounded-2xl text-sm uppercase tracking-widest hover:opacity-90 transition-all flex items-center justify-center gap-3 shadow-[0_0_50px_rgba(34,255,136,0.2)]"
+            onClick={course.is_blocked ? undefined : handleCTA}
+            disabled={course.is_blocked}
+            className={cn(
+              "w-full md:w-auto px-12 py-5 font-black rounded-2xl text-sm uppercase tracking-widest transition-all flex items-center justify-center gap-3",
+              course.is_blocked 
+                ? "bg-white/5 text-[#64748b] border border-white/10 cursor-not-allowed shadow-none" 
+                : "bg-[#22ff88] text-black hover:opacity-90 shadow-[0_0_50px_rgba(34,255,136,0.2)]"
+            )}
           >
-            {isEnrolled ? 'IR PARA O MEU CONSOLE' : (
+            {course.is_blocked ? (
+              <>
+                <Lock className="w-4 h-4" />
+                MATRÍCULAS SUSPENSAS
+              </>
+            ) : isEnrolled ? 'IR PARA O MEU CONSOLE' : (
                <>
                 GARANTIR MINHA VAGA AGORA
                 <ChevronRight className="w-4 h-4" />
@@ -287,10 +300,23 @@ export function PublicCourseView({ courseId, onBack, onAuth, session }: PublicCo
       {/* Floating CTA for Mobile */}
       <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-4rem)] max-w-md md:hidden">
          <button 
-           onClick={handleCTA}
-           className="w-full py-5 bg-[#22ff88] text-black font-black rounded-2xl text-xs uppercase tracking-widest shadow-2xl"
+           onClick={course.is_blocked ? undefined : handleCTA}
+           disabled={course.is_blocked}
+           className={cn(
+             "w-full py-5 font-black rounded-2xl text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2",
+             course.is_blocked
+               ? "bg-black/60 text-[#64748b] border border-white/10 backdrop-blur-xl"
+               : "bg-[#22ff88] text-black shadow-2xl"
+           )}
          >
-           Garantir Vaga • R$ {course.price?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+           {course.is_blocked ? (
+             <>
+               <Lock className="w-3.5 h-3.5" />
+               MATRÍCULAS SUSPENSAS
+             </>
+           ) : (
+             <>Garantir Vaga • R$ {course.price?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</>
+           )}
          </button>
       </div>
 
