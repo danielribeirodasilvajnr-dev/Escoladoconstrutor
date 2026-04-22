@@ -249,6 +249,7 @@ export function Vitrine({ userData, onViewChange }: VitrineProps) {
           <CurriculumPreviewModal
             courseId={viewingCurriculum.id}
             courseTitle={viewingCurriculum.title}
+            isBlocked={viewingCurriculum.is_blocked}
             onClose={() => setViewingCurriculum(null)}
             onAction={() => {
               const course = viewingCurriculum;

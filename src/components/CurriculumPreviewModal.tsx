@@ -6,11 +6,12 @@ import { supabase } from '../lib/supabase';
 interface CurriculumPreviewModalProps {
   courseId: string;
   courseTitle: string;
+  isBlocked?: boolean;
   onClose: () => void;
   onAction?: () => void;
 }
 
-export function CurriculumPreviewModal({ courseId, courseTitle, onClose, onAction }: CurriculumPreviewModalProps) {
+export function CurriculumPreviewModal({ courseId, courseTitle, isBlocked, onClose, onAction }: CurriculumPreviewModalProps) {
   const [modules, setModules] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
@@ -215,11 +216,25 @@ export function CurriculumPreviewModal({ courseId, courseTitle, onClose, onActio
 
         <div className="p-8 bg-black/60 backdrop-blur-md border-t border-white/10 flex flex-col items-center">
           <button
-            onClick={onAction || onClose}
-            className="w-full py-5 bg-[#22ff88] text-black font-black rounded-2xl text-xs uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-95 transition-all shadow-[0_20px_40px_rgba(34,255,136,0.15)] flex items-center justify-center gap-3 group"
+            onClick={isBlocked ? undefined : (onAction || onClose)}
+            disabled={isBlocked}
+            className={`w-full py-5 font-black rounded-2xl text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 group ${
+              isBlocked 
+                ? 'bg-white/5 text-[#64748b] border border-white/10 cursor-not-allowed' 
+                : 'bg-[#22ff88] text-black hover:scale-[1.02] active:scale-95 shadow-[0_20px_40px_rgba(34,255,136,0.15)]'
+            }`}
           >
-            <Play className="w-4 h-4 fill-current group-hover:scale-110 transition-transform" />
-            Começar Agora
+            {isBlocked ? (
+              <>
+                <Lock className="w-4 h-4" />
+                Matrículas Suspensas
+              </>
+            ) : (
+              <>
+                <Play className="w-4 h-4 fill-current group-hover:scale-110 transition-transform" />
+                Começar Agora
+              </>
+            )}
           </button>
           <p className="text-[9px] text-[#64748b] font-bold uppercase tracking-widest mt-6">
             Acesso vitalício garantido para membros Construtor360
