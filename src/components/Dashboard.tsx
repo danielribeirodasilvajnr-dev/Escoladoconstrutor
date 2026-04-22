@@ -36,7 +36,11 @@ interface DashboardProps {
 }
 
 export function Dashboard({ userData, session }: DashboardProps) {
-  const [activeView, setActiveView] = useState<DashboardView>('overview');
+  const [activeView, setActiveView] = useState<DashboardView>(
+    (userData?.role === 'master' || userData?.role === 'professor') 
+      ? 'admin-overview' 
+      : 'vitrine'
+  );
   const [activeCourseId, setActiveCourseId] = useState<string | null>(null);
   const [examContext, setExamContext] = useState<{ courseId: string; moduleId: string | null } | null>(null);
   const [currentExamId, setCurrentExamId] = useState<string | null>(null);
