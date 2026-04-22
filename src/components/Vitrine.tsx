@@ -223,7 +223,7 @@ export function Vitrine({ userData, onViewChange }: VitrineProps) {
                         : "bg-[#22ff88]/10 text-[#22ff88] border-[#22ff88]/10 hover:bg-[#22ff88] hover:text-black hover:border-transparent"
                     )}
                   >
-                    {course.is_blocked ? 'Bloqueado' : 'Iniciar'}
+                    {course.is_blocked ? 'EM BREVE' : 'Iniciar'}
                     {course.is_blocked ? <Lock className="w-3 h-3" /> : <Play className="w-3 h-3 fill-current" />}
                   </button>
                 </div>

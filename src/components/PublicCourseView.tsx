@@ -198,7 +198,7 @@ export function PublicCourseView({ courseId, onBack, onAuth, session }: PublicCo
             {course.is_blocked ? (
               <>
                 <Lock className="w-4 h-4" />
-                MATRÍCULAS SUSPENSAS
+                EM BREVE
               </>
             ) : isEnrolled ? 'IR PARA O MEU CONSOLE' : (
                <>
@@ -312,7 +312,7 @@ export function PublicCourseView({ courseId, onBack, onAuth, session }: PublicCo
            {course.is_blocked ? (
              <>
                <Lock className="w-3.5 h-3.5" />
-               MATRÍCULAS SUSPENSAS
+               EM BREVE
              </>
            ) : (
              <>Garantir Vaga • R$ {course.price?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</>

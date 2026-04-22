@@ -227,7 +227,7 @@ export function CurriculumPreviewModal({ courseId, courseTitle, isBlocked, onClo
             {isBlocked ? (
               <>
                 <Lock className="w-4 h-4" />
-                Matrículas Suspensas
+                EM BREVE
               </>
             ) : (
               <>
