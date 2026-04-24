@@ -63,10 +63,13 @@ export function Sidebar({ activeView, onViewChange, userData, isOpen, onClose }:
         )}
 
         <div className="mb-6 md:mb-10">
-          <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white flex items-baseline gap-0.5 leading-none">
-            Construtor
-            <span className="text-base md:text-lg text-[#22ff88] font-black font-display tracking-normal">360</span>
-          </h1>
+          <div className="flex items-center gap-3">
+            <img src="/logo.png" alt="Logo" className="w-10 h-10 object-contain" />
+            <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white flex items-baseline gap-0.5 leading-none">
+              Construtor
+              <span className="text-base md:text-lg text-[#22ff88] font-black font-display tracking-normal">360</span>
+            </h1>
+          </div>
         </div>
         
         <div className="space-y-6 md:space-y-8 overflow-y-auto max-h-[calc(100vh-180px)] custom-scrollbar pr-1 md:pr-2">

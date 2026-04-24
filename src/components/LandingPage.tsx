@@ -68,10 +68,8 @@ export function LandingPage({ onExplore, onAuth }: LandingPageProps) {
     <div className="min-h-screen bg-[#050505] text-white overflow-hidden selection:bg-[#22ff88] selection:text-black">
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 px-4 md:px-8 py-4 md:py-6 flex justify-between items-center border-b border-white/5 backdrop-blur-xl bg-[#050505]/60 transition-all">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-[#22ff88] rounded-lg flex items-center justify-center shadow-lg shadow-[#22ff88]/20">
-            <Sparkles className="w-4 h-4 text-black" />
-          </div>
+        <div className="flex items-center gap-3">
+          <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain" />
           <span className="font-display text-lg md:text-xl tracking-tighter font-bold">Construtor360</span>
         </div>
         
@@ -358,8 +356,8 @@ export function LandingPage({ onExplore, onAuth }: LandingPageProps) {
       </main>
 
       <footer className="px-4 md:px-8 py-12 border-t border-white/5 max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-        <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-[#22ff88]" />
+        <div className="flex items-center gap-3">
+          <img src="/logo.png" alt="Logo" className="w-6 h-6 object-contain" />
           <span className="font-display text-lg font-bold">Construtor360</span>
         </div>
         <div className="text-[10px] uppercase tracking-widest text-[#64748b] font-bold text-center">

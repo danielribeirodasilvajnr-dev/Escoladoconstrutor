@@ -137,9 +137,12 @@ export function Auth({ onSuccess, onBack }: AuthProps) {
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-[24px] md:text-[28px] font-bold tracking-tight text-[#22ff88] font-display">
-          Construtor360
-        </h1>
+        <div className="flex items-center gap-3">
+          <img src="/logo.png" alt="Logo" className="w-8 h-8 md:w-10 md:h-10 object-contain" />
+          <h1 className="text-[24px] md:text-[28px] font-bold tracking-tight text-[#22ff88] font-display">
+            Construtor360
+          </h1>
+        </div>
       </motion.div>
 
       {/* Main Auth Card */}
