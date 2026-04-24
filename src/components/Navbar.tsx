@@ -100,7 +100,13 @@ export function Navbar({ userData, activeView, onViewChange, onToggleSidebar }: 
 
         <div className="flex items-center gap-2 md:gap-3 border-l border-white/10 pl-3 md:pl-8 py-1 md:py-2">
           <div className="text-right hidden sm:block">
-            <p className="text-xs md:text-sm font-bold text-white leading-tight truncate max-w-[100px] md:max-w-[120px]">{userData?.name || '...'}</p>
+            <p className="text-xs md:text-sm font-bold text-white leading-tight truncate max-w-[100px] md:max-w-[150px]">
+              {(() => {
+                const name = userData?.name || '';
+                const parts = name.trim().split(/\s+/);
+                return parts.length > 1 ? `${parts[0]} ${parts[parts.length - 1]}` : name || '...';
+              })()}
+            </p>
             <p className={cn(
               "text-[8px] md:text-[10px] items-center font-bold uppercase tracking-wider font-mono",
               userData?.role === 'master' ? "text-red-400" : "text-[#22ff88]"
