@@ -69,7 +69,7 @@ export function LandingPage({ onExplore, onAuth }: LandingPageProps) {
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 px-4 md:px-8 py-4 md:py-6 flex justify-between items-center border-b border-white/5 backdrop-blur-xl bg-[#050505]/60 transition-all">
         <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain" />
+          <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain rounded-lg" />
           <span className="font-display text-lg md:text-xl tracking-tighter font-bold">Construtor360</span>
         </div>
         
@@ -357,7 +357,7 @@ export function LandingPage({ onExplore, onAuth }: LandingPageProps) {
 
       <footer className="px-4 md:px-8 py-12 border-t border-white/5 max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
         <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="Logo" className="w-6 h-6 object-contain" />
+          <img src="/logo.png" alt="Logo" className="w-6 h-6 object-contain rounded-md" />
           <span className="font-display text-lg font-bold">Construtor360</span>
         </div>
         <div className="text-[10px] uppercase tracking-widest text-[#64748b] font-bold text-center">

@@ -64,7 +64,7 @@ export function Sidebar({ activeView, onViewChange, userData, isOpen, onClose }:
 
         <div className="mb-6 md:mb-10">
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="Logo" className="w-10 h-10 object-contain" />
+            <img src="/logo.png" alt="Logo" className="w-10 h-10 object-contain rounded-xl" />
             <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white flex items-baseline gap-0.5 leading-none">
               Construtor
               <span className="text-base md:text-lg text-[#22ff88] font-black font-display tracking-normal">360</span>
