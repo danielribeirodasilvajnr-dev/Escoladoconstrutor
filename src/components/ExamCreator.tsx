@@ -85,7 +85,6 @@ export function ExamCreator({ userData, initialCourseId, initialModuleId, onBack
       fetchModules(targetCourse);
     } else {
       setModules([]);
-      setTargetModule("");
     }
   }, [targetCourse]);
 
@@ -304,85 +303,84 @@ export function ExamCreator({ userData, initialCourseId, initialModuleId, onBack
       {/* Configuration Hub */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-12">
         {/* Course Select */}
-        <div className="bg-[#1a1c22] p-5 md:p-8 rounded-2xl md:rounded-3xl border border-white/5 space-y-3">
-          <div className="flex items-center gap-2 mb-1">
-            <Star className="w-3.5 h-3.5 text-[#22ff88]" />
-            <h3 className="text-[8px] md:text-[10px] font-bold text-[#64748b] uppercase tracking-widest">Curso Vinculado</h3>
+        {!initialCourseId && (
+          <div className="bg-[#1a1c22] p-5 md:p-8 rounded-2xl md:rounded-3xl border border-white/5 space-y-3">
+            <div className="flex items-center gap-2 mb-1">
+              <Star className="w-3.5 h-3.5 text-[#22ff88]" />
+              <h3 className="text-[8px] md:text-[10px] font-bold text-[#64748b] uppercase tracking-widest">Curso Vinculado</h3>
+            </div>
+            <select
+              value={targetCourse}
+              onChange={(e) => setTargetCourse(e.target.value)}
+              className="w-full bg-[#0f1115] border border-white/5 rounded-xl px-4 py-3.5 text-white font-bold text-sm focus:outline-none transition-all appearance-none hover:border-[#22ff88]/30 cursor-pointer"
+            >
+              <option value="">Selecione o Curso</option>
+              {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
+            </select>
           </div>
-          <select
-            value={targetCourse}
-            onChange={(e) => setTargetCourse(e.target.value)}
-            disabled={!!initialCourseId}
-            className={cn(
-              "w-full bg-[#0f1115] border border-white/5 rounded-xl px-4 py-3.5 text-white font-bold text-sm focus:outline-none transition-all appearance-none",
-              initialCourseId ? "opacity-60 cursor-not-allowed border-none" : "hover:border-[#22ff88]/30 cursor-pointer"
-            )}
-          >
-            <option value="">Selecione o Curso</option>
-            {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
-          </select>
-        </div>
+        )}
 
         {/* Scope Toggle */}
-        <div className="bg-[#1a1c22] p-5 md:p-8 rounded-2xl md:rounded-3xl border border-white/5 space-y-3">
-          <div className="flex items-center gap-2 mb-1">
-            <Layers className="w-3.5 h-3.5 text-[#00ffcc]" />
-            <h3 className="text-[8px] md:text-[10px] font-bold text-[#64748b] uppercase tracking-widest">Escopo</h3>
+        {!initialModuleId && initialModuleId !== null && (
+          <div className="bg-[#1a1c22] p-5 md:p-8 rounded-2xl md:rounded-3xl border border-white/5 space-y-3">
+            <div className="flex items-center gap-2 mb-1">
+              <Layers className="w-3.5 h-3.5 text-[#00ffcc]" />
+              <h3 className="text-[8px] md:text-[10px] font-bold text-[#64748b] uppercase tracking-widest">Escopo</h3>
+            </div>
+            <div className="flex p-1 bg-[#0f1115] rounded-xl border border-white/5">
+              <button
+                onClick={() => setIsFinal(false)}
+                className={`flex-1 py-2 text-[10px] font-bold uppercase rounded-lg transition-all ${!isFinal ? 'bg-[#22ff88] text-black shadow-lg' : 'text-[#64748b] hover:text-white'}`}
+              >
+                Módulo
+              </button>
+              <button
+                onClick={() => setIsFinal(true)}
+                className={`flex-1 py-2 text-[10px] font-bold uppercase rounded-lg transition-all ${isFinal ? 'bg-[#22ff88] text-black shadow-lg' : 'text-[#64748b] hover:text-white'}`}
+              >
+                Final
+              </button>
+            </div>
           </div>
-          <div className="flex p-1 bg-[#0f1115] rounded-xl border border-white/5">
-            <button
-              onClick={() => setIsFinal(false)}
-              disabled={initialCourseId !== undefined}
-              className={`flex-1 py-2 text-[10px] font-bold uppercase rounded-lg transition-all ${!isFinal ? 'bg-[#22ff88] text-black shadow-lg' : 'text-[#64748b] hover:text-white'} ${initialCourseId !== undefined ? 'pointer-events-none' : ''}`}
-            >
-              Módulo
-            </button>
-            <button
-              onClick={() => setIsFinal(true)}
-              disabled={initialCourseId !== undefined}
-              className={`flex-1 py-2 text-[10px] font-bold uppercase rounded-lg transition-all ${isFinal ? 'bg-[#22ff88] text-black shadow-lg' : 'text-[#64748b] hover:text-white'} ${initialCourseId !== undefined ? 'pointer-events-none' : ''}`}
-            >
-              Final
-            </button>
-          </div>
-        </div>
+        )}
 
         {/* Target Module / Certificate Info */}
-        <div className="bg-[#1a1c22] p-5 md:p-8 rounded-2xl md:rounded-3xl border border-white/5 space-y-3">
-          {isFinal ? (
-            <>
-              <div className="flex items-center gap-2 mb-1">
-                <Award className="w-3.5 h-3.5 text-[#ffcc00]" />
-                <h3 className="text-[8px] md:text-[10px] font-bold text-[#64748b] uppercase tracking-widest">Certificação</h3>
-              </div>
-              <div className="p-3 bg-[#ffcc00]/10 border border-[#ffcc00]/20 rounded-xl">
-                <p className="text-[10px] text-[#ffcc00] font-bold uppercase text-center">Gera Certificado após Provação</p>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="flex items-center gap-2 mb-1">
-                <ChevronDown className="w-3.5 h-3.5 text-[#00ffcc]" />
-                <h3 className="text-[8px] md:text-[10px] font-bold text-[#64748b] uppercase tracking-widest">Módulo</h3>
-              </div>
-              <select
-                value={targetModule}
-                onChange={(e) => setTargetModule(e.target.value)}
-                disabled={initialModuleId !== undefined}
-                className={cn(
-                  "w-full bg-[#0f1115] border border-white/5 rounded-xl px-4 py-2.5 text-white font-bold text-xs focus:outline-none transition-all appearance-none",
-                  initialModuleId !== undefined ? "opacity-60 cursor-not-allowed border-none" : "hover:border-[#22ff88]/30 cursor-pointer"
-                )}
-              >
-                <option value="">Todos os Módulos</option>
-                {modules.map(m => <option key={m.id} value={m.id}>{m.title}</option>)}
-              </select>
-            </>
-          )}
-        </div>
+        {!initialModuleId && initialModuleId !== null && (
+          <div className="bg-[#1a1c22] p-5 md:p-8 rounded-2xl md:rounded-3xl border border-white/5 space-y-3">
+            {isFinal ? (
+              <>
+                <div className="flex items-center gap-2 mb-1">
+                  <Award className="w-3.5 h-3.5 text-[#ffcc00]" />
+                  <h3 className="text-[8px] md:text-[10px] font-bold text-[#64748b] uppercase tracking-widest">Certificação</h3>
+                </div>
+                <div className="p-3 bg-[#ffcc00]/10 border border-[#ffcc00]/20 rounded-xl">
+                  <p className="text-[10px] text-[#ffcc00] font-bold uppercase text-center">Gera Certificado após Provação</p>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-2 mb-1">
+                  <ChevronDown className="w-3.5 h-3.5 text-[#00ffcc]" />
+                  <h3 className="text-[8px] md:text-[10px] font-bold text-[#64748b] uppercase tracking-widest">Módulo</h3>
+                </div>
+                <select
+                  value={targetModule}
+                  onChange={(e) => setTargetModule(e.target.value)}
+                  className="w-full bg-[#0f1115] border border-white/5 rounded-xl px-4 py-2.5 text-white font-bold text-xs focus:outline-none transition-all appearance-none hover:border-[#22ff88]/30 cursor-pointer"
+                >
+                  <option value="">Todos os Módulos</option>
+                  {modules.map(m => <option key={m.id} value={m.id}>{m.title}</option>)}
+                </select>
+              </>
+            )}
+          </div>
+        )}
 
         {/* Basic Info */}
-        <div className="bg-[#1a1c22] p-8 rounded-3xl border border-white/5 space-y-4">
+        <div className={cn(
+          "bg-[#1a1c22] p-8 rounded-3xl border border-white/5 space-y-4",
+          (initialModuleId || initialModuleId === null) ? "lg:col-span-3" : ""
+        )}>
           <div className="flex items-center gap-3 mb-2">
             <Info className="w-4 h-4 text-blue-400" />
             <h3 className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest">Título da Prova</h3>
