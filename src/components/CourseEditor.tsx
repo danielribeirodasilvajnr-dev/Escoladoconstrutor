@@ -156,6 +156,11 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
       if (modulesError) throw modulesError;
 
       // Sort lessons by order_index
+      const formattedModules = (modulesData || []).map(m => ({
+        ...m,
+        lessons: (m.lessons || []).sort((a: any, b: any) => a.order_index - b.order_index)
+      }));
+
       setModules(formattedModules);
 
       // Fetch exams for this course
