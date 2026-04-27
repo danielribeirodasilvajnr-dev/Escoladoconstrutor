@@ -99,10 +99,10 @@ export function ExamCreator({ userData, initialCourseId, initialModuleId, onBack
         query = query.is('module_id', null).eq('is_final', true);
       }
 
-      const { data: examData, error: examError } = await query.maybeSingle();
-
-      if (examError) throw examError;
-
+      const { data: exams, error: examError } = await query.order('created_at', { ascending: false });
+      
+      const examData = exams && exams.length > 0 ? exams[0] : null;
+      
       if (examData) {
         setExistingExamId(examData.id);
         setTitle(examData.title);
