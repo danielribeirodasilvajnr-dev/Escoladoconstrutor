@@ -66,6 +66,81 @@ interface CourseEditorProps {
   onOpenExam?: (courseId: string, moduleId: string | null) => void;
 }
 
+// Helper Components for Exam Blocks to keep the main render clean
+function ModuleExamBlock({ module, exams, onOpenExam, courseId }: any) {
+  const moduleExam = exams.find((e: any) => e.module_id === module.id);
+  
+  return (
+    <div
+      onClick={() => onOpenExam?.(courseId || '', module.id)}
+      className={cn(
+        "bg-white/[0.02] border border-dashed rounded-3xl p-8 flex flex-col items-center justify-center text-center group transition-all cursor-pointer h-full min-h-[200px]",
+        moduleExam ? "border-[#22ff88]/30 bg-[#22ff88]/5" : "border-white/10 hover:border-[#22ff88]/50"
+      )}
+    >
+      <div className={cn(
+        "w-16 h-16 rounded-2xl flex items-center justify-center mb-4 transition-all group-hover:scale-110",
+        moduleExam ? "bg-[#22ff88]/20" : "bg-[#22ff88]/5 group-hover:bg-[#22ff88]/10"
+      )}>
+        <ClipboardCheck className="w-8 h-8 text-[#22ff88]" />
+      </div>
+      <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em] mb-2">
+        {moduleExam ? "PROVA SALVA" : "PROVA DO MÓDULO"}
+      </h3>
+      <p className="text-[9px] text-[#64748b] font-bold uppercase tracking-wider mb-6 leading-relaxed max-w-[150px] line-clamp-2">
+        {moduleExam ? moduleExam.title : "Avaliação obrigatória para conclusão do módulo"}
+      </p>
+      <button className={cn(
+        "px-6 py-2.5 text-[9px] font-black uppercase tracking-widest rounded-xl transition-all",
+        moduleExam 
+          ? "bg-[#22ff88] text-black shadow-[0_0_20px_rgba(34,255,136,0.3)]" 
+          : "bg-[#22ff88]/10 text-[#22ff88] hover:bg-[#22ff88] hover:text-black"
+      )}>
+        {moduleExam ? "EDITAR PROVA" : "GERENCIAR"}
+      </button>
+    </div>
+  );
+}
+
+function FinalExamBlock({ exams, onOpenExam, courseId }: any) {
+  const finalExam = exams.find((e: any) => e.is_final);
+  
+  return (
+    <div
+      onClick={() => onOpenExam?.(courseId || '', null)}
+      className={cn(
+        "mt-12 border border-dashed rounded-[2.5rem] p-10 flex flex-col lg:flex-row items-center justify-between group transition-all cursor-pointer",
+        finalExam ? "bg-[#ffcc00]/10 border-[#ffcc00]/40" : "bg-[#ffcc00]/5 border-[#ffcc00]/20 hover:border-[#ffcc00]/50"
+      )}
+    >
+      <div className="flex items-center gap-6">
+        <div className={cn(
+          "w-16 h-16 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110",
+          finalExam ? "bg-[#ffcc00]/20" : "bg-[#ffcc00]/10"
+        )}>
+          <Award className="w-8 h-8 text-[#ffcc00]" />
+        </div>
+        <div>
+          <h3 className="text-sm font-black text-white uppercase tracking-[0.2em] mb-1">
+            {finalExam ? "EXAME FINAL SALVO" : "PROVA FINAL DO CURSO"}
+          </h3>
+          <p className="text-[10px] text-[#64748b] font-bold uppercase tracking-wider">
+            {finalExam ? finalExam.title : "Habilita a emissão automática do certificado"}
+          </p>
+        </div>
+      </div>
+      <button className={cn(
+        "mt-6 lg:mt-0 px-8 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all border",
+        finalExam 
+          ? "bg-[#ffcc00] text-black border-[#ffcc00] shadow-[0_0_30px_rgba(255,204,0,0.2)]"
+          : "bg-[#ffcc00]/10 text-[#ffcc00] border-[#ffcc00]/10 hover:bg-[#ffcc00] hover:text-black"
+      )}>
+        {finalExam ? "EDITAR EXAME FINAL" : "CONFIGURAR EXAME FINAL"}
+      </button>
+    </div>
+  );
+}
+
 export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenExam }: CourseEditorProps) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -133,6 +208,7 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
   }, [courseId]);
 
   async function fetchCourseData() {
+    console.log("Buscando dados do curso:", courseId);
     try {
       setLoading(true);
       const { data: courseData, error: courseError } = await supabase
@@ -161,6 +237,7 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
         lessons: (m.lessons || []).sort((a: any, b: any) => a.order_index - b.order_index)
       }));
 
+      console.log("Módulos formatados:", formattedModules.length);
       setModules(formattedModules);
 
       // Fetch exams for this course
@@ -776,16 +853,24 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
               </button>
             </div>
 
-            <Reorder.Group
-              axis="y"
-              values={modules}
-              onReorder={handleReorderModules}
-              className="space-y-6"
-            >
+            <div className="space-y-6">
+              {modules.length === 0 && (
+                <div className="text-center py-20 bg-white/[0.02] rounded-[2.5rem] border border-dashed border-white/10 flex flex-col items-center gap-4">
+                  <div className="w-16 h-16 rounded-2xl bg-white/[0.05] flex items-center justify-center">
+                    <Plus className="w-8 h-8 text-white/20" />
+                  </div>
+                  <p className="text-sm font-bold text-[#64748b] uppercase tracking-[0.2em]">Nenhum módulo criado ainda</p>
+                  <button 
+                    onClick={handleAddModule}
+                    className="px-6 py-2.5 bg-[#22ff88]/10 text-[#22ff88] text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-[#22ff88] hover:text-black transition-all"
+                  >
+                    + Adicionar Primeiro Módulo
+                  </button>
+                </div>
+              )}
               {modules.map((module, mIdx) => (
-                <Reorder.Item
+                <div
                   key={module.id}
-                  value={module}
                   className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6"
                 >
                   <div className="xl:col-span-3 bg-[#1a1c22] border-l-4 border-[#22ff88] rounded-2xl md:rounded-3xl overflow-hidden border border-white/5">
@@ -826,16 +911,10 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                           transition={{ duration: 0.3, ease: 'easeInOut' }}
                           className="overflow-hidden"
                         >
-                          <Reorder.Group
-                            axis="y"
-                            values={module.lessons}
-                            onReorder={(newLessons) => handleReorderLessons(module.id, newLessons)}
-                            className="p-4 md:p-8 space-y-3 md:space-y-4"
-                          >
+                          <div className="p-4 md:p-8 space-y-3 md:space-y-4">
                             {module.lessons.map((lesson, lIdx) => (
-                              <Reorder.Item
+                              <div
                                 key={lesson.id}
-                                value={lesson}
                                 className="space-y-2"
                               >
                                 <div className="bg-[#0f1115] border border-white/5 rounded-xl p-3 md:p-4 flex items-center justify-between group cursor-grab active:cursor-grabbing">
@@ -968,7 +1047,7 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                                     </label>
                                   </div>
                                 </div>
-                              </Reorder.Item>
+                              </div>
                             ))}
                             <button
                               onClick={() => handleAddLesson(module.id)}
@@ -976,7 +1055,7 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                             >
                               + ADICIONAR AULA
                             </button>
-                          </Reorder.Group>
+                          </div>
                         </motion.div>
                       )}
                     </AnimatePresence>
@@ -985,81 +1064,21 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                   <input type="file" ref={thumbnailInputRef} className="hidden" accept="image/*" onChange={handleThumbnailUpload} />
 
                   {/* Module Exam Square */}
-                  {(() => {
-                    const moduleExam = exams.find(e => e.module_id === module.id);
-                    return (
-                      <div
-                        onClick={() => onOpenExam?.(course.id || '', module.id)}
-                        className={cn(
-                          "bg-white/[0.02] border border-dashed rounded-3xl p-8 flex flex-col items-center justify-center text-center group transition-all cursor-pointer h-full min-h-[200px]",
-                          moduleExam ? "border-[#22ff88]/30 bg-[#22ff88]/5" : "border-white/10 hover:border-[#22ff88]/50"
-                        )}
-                      >
-                        <div className={cn(
-                          "w-16 h-16 rounded-2xl flex items-center justify-center mb-4 transition-all group-hover:scale-110",
-                          moduleExam ? "bg-[#22ff88]/20" : "bg-[#22ff88]/5 group-hover:bg-[#22ff88]/10"
-                        )}>
-                          <ClipboardCheck className="w-8 h-8 text-[#22ff88]" />
-                        </div>
-                        <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em] mb-2">
-                          {moduleExam ? "PROVA SALVA" : "PROVA DO MÓDULO"}
-                        </h3>
-                        <p className="text-[9px] text-[#64748b] font-bold uppercase tracking-wider mb-6 leading-relaxed max-w-[150px] line-clamp-2">
-                          {moduleExam ? moduleExam.title : "Avaliação obrigatória para conclusão do módulo"}
-                        </p>
-                        <button className={cn(
-                          "px-6 py-2.5 text-[9px] font-black uppercase tracking-widest rounded-xl transition-all",
-                          moduleExam 
-                            ? "bg-[#22ff88] text-black shadow-[0_0_20px_rgba(34,255,136,0.3)]" 
-                            : "bg-[#22ff88]/10 text-[#22ff88] hover:bg-[#22ff88] hover:text-black"
-                        )}>
-                          {moduleExam ? "EDITAR PROVA" : "GERENCIAR"}
-                        </button>
-                      </div>
-                    );
-                  })()}
-                </Reorder.Item>
-              ))}
-            </Reorder.Group>
-
-            {/* Final Exam Square */}
-            {(() => {
-              const finalExam = exams.find(e => e.is_final);
-              return (
-                <div
-                  onClick={() => onOpenExam?.(course.id || '', null)}
-                  className={cn(
-                    "mt-12 border border-dashed rounded-[2.5rem] p-10 flex flex-col lg:flex-row items-center justify-between group transition-all cursor-pointer",
-                    finalExam ? "bg-[#ffcc00]/10 border-[#ffcc00]/40" : "bg-[#ffcc00]/5 border-[#ffcc00]/20 hover:border-[#ffcc00]/50"
-                  )}
-                >
-                  <div className="flex items-center gap-6">
-                    <div className={cn(
-                      "w-16 h-16 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110",
-                      finalExam ? "bg-[#ffcc00]/20" : "bg-[#ffcc00]/10"
-                    )}>
-                      <Award className="w-8 h-8 text-[#ffcc00]" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-black text-white uppercase tracking-[0.2em] mb-1">
-                        {finalExam ? "EXAME FINAL SALVO" : "PROVA FINAL DO CURSO"}
-                      </h3>
-                      <p className="text-[10px] text-[#64748b] font-bold uppercase tracking-wider">
-                        {finalExam ? finalExam.title : "Habilita a emissão automática do certificado"}
-                      </p>
-                    </div>
-                  </div>
-                  <button className={cn(
-                    "mt-6 lg:mt-0 px-8 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all border",
-                    finalExam 
-                      ? "bg-[#ffcc00] text-black border-[#ffcc00] shadow-[0_0_30px_rgba(255,204,0,0.2)]"
-                      : "bg-[#ffcc00]/10 text-[#ffcc00] border-[#ffcc00]/10 hover:bg-[#ffcc00] hover:text-black"
-                  )}>
-                    {finalExam ? "EDITAR EXAME FINAL" : "CONFIGURAR EXAME FINAL"}
-                  </button>
+                  <ModuleExamBlock 
+                    module={module} 
+                    exams={exams} 
+                    onOpenExam={onOpenExam} 
+                    courseId={courseId} 
+                  />
                 </div>
-              );
-            })()}
+              ))}
+            </div>
+
+            <FinalExamBlock 
+              exams={exams} 
+              onOpenExam={onOpenExam} 
+              courseId={courseId} 
+            />
           </section>
         </div>
 

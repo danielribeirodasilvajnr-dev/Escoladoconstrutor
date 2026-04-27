@@ -45,6 +45,8 @@ export function Dashboard({ userData, session }: DashboardProps) {
   const [examContext, setExamContext] = useState<{ courseId: string; moduleId: string | null } | null>(null);
   const [currentExamId, setCurrentExamId] = useState<string | null>(null);
   const [currentCertificateId, setCurrentCertificateId] = useState<string | null>(null);
+  const [courseManagerView, setCourseManagerView] = useState<'list' | 'editor'>('list');
+  const [courseManagerSelectedId, setCourseManagerSelectedId] = useState<string | null>(null);
 
   const handleOpenExam = (courseId: string, moduleId: string | null) => {
     setExamContext({ courseId, moduleId });
@@ -104,6 +106,10 @@ export function Dashboard({ userData, session }: DashboardProps) {
             userData={userData}
             onViewChange={(view) => setActiveView(view as DashboardView)}
             onOpenExam={handleOpenExam}
+            activeSubView={courseManagerView}
+            setActiveSubView={setCourseManagerView}
+            selectedCourseId={courseManagerSelectedId}
+            setSelectedCourseId={setCourseManagerSelectedId}
           />
         );
       case "admin-usuarios":
