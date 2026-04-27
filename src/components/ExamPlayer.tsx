@@ -82,20 +82,18 @@ export function ExamPlayer({ examId, userData, onBack, onFinish }: ExamPlayerPro
     try {
       setLoading(true);
 
-      // Check if already passed
-      const { data: existingPass } = await supabase
+      // Check for previous attempts
+      const { data: previousAttempts } = await supabase
         .from('exam_submissions')
-        .select('score')
+        .select('passed, score')
         .eq('exam_id', examId)
         .eq('user_id', userData.id)
-        .eq('passed', true)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+        .order('created_at', { ascending: false });
 
-      if (existingPass) {
+      const hasPassed = previousAttempts?.some(attempt => attempt.passed);
+      if (hasPassed) {
         setAlreadyPassed(true);
-        setLastSubmission(existingPass);
+        setLastSubmission(previousAttempts!.find(a => a.passed)!);
       }
 
       const { data: examData, error: examError } = await supabase
@@ -123,7 +121,22 @@ export function ExamPlayer({ examId, userData, onBack, onFinish }: ExamPlayerPro
         .order('order_index', { ascending: true });
 
       if (qError) throw qError;
-      setQuestions(questionsData || []);
+      
+      let finalQuestions = questionsData || [];
+
+      // If it's a second attempt (at least one previous failed attempt), shuffle
+      if (previousAttempts && previousAttempts.length > 0 && !hasPassed) {
+        // Shuffle questions
+        finalQuestions = shuffleArray([...finalQuestions]);
+        
+        // Shuffle alternatives for each question
+        finalQuestions = finalQuestions.map(q => ({
+          ...q,
+          alternatives: shuffleArray([...q.alternatives])
+        }));
+      }
+
+      setQuestions(finalQuestions);
 
     } catch (error: any) {
       toast.error('Erro ao carregar prova: ' + error.message);
@@ -131,6 +144,15 @@ export function ExamPlayer({ examId, userData, onBack, onFinish }: ExamPlayerPro
     } finally {
       setLoading(false);
     }
+  }
+
+  function shuffleArray<T>(array: T[]): T[] {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
   }
 
   const handleSelectAlternative = (questionId: string, alternativeId: string) => {
