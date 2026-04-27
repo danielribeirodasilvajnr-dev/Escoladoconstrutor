@@ -74,11 +74,74 @@ export function ExamCreator({ userData, initialCourseId, initialModuleId, onBack
     if (initialModuleId) {
       setTargetModule(initialModuleId);
       setIsFinal(false);
+      fetchExistingExam(initialCourseId!, initialModuleId);
     } else if (initialModuleId === null && initialCourseId) {
       // If moduleId is explicitly null but courseId exists, it's a final exam
       setIsFinal(true);
+      fetchExistingExam(initialCourseId, null);
     }
   }, [initialCourseId, initialModuleId]);
+
+  const [existingExamId, setExistingExamId] = useState<string | null>(null);
+
+  async function fetchExistingExam(courseId: string, moduleId: string | null) {
+    try {
+      setLoading(true);
+      // 1. Fetch exam
+      let query = supabase
+        .from('exams')
+        .select('*')
+        .eq('course_id', courseId);
+      
+      if (moduleId) {
+        query = query.eq('module_id', moduleId);
+      } else {
+        query = query.is('module_id', null).eq('is_final', true);
+      }
+
+      const { data: examData, error: examError } = await query.maybeSingle();
+
+      if (examError) throw examError;
+
+      if (examData) {
+        setExistingExamId(examData.id);
+        setTitle(examData.title);
+        setTimeLimit(examData.time_limit.toString());
+        setPassingScore(examData.passing_score.toString());
+        setIsFinal(examData.is_final);
+        
+        // Map attempts
+        if (examData.attempts_allowed === 1) setAttempts('Única tentativa');
+        else if (examData.attempts_allowed === 2) setAttempts('2 Tentativas');
+        else setAttempts('Ilimitado');
+
+        // 2. Fetch questions and alternatives
+        const { data: questionsData, error: qError } = await supabase
+          .from('questions')
+          .select('*, alternatives(*)')
+          .eq('exam_id', examData.id)
+          .order('order_index');
+
+        if (qError) throw qError;
+
+        if (questionsData && questionsData.length > 0) {
+          setQuestions(questionsData.map(q => ({
+            id: q.id,
+            text: q.text,
+            alternatives: q.alternatives.map((a: any) => ({
+              id: a.id,
+              text: a.text,
+              is_correct: a.is_correct
+            }))
+          })));
+        }
+      }
+    } catch (error: any) {
+      console.error('Erro ao carregar prova existente:', error.message);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
     if (targetCourse) {
@@ -194,57 +257,103 @@ export function ExamCreator({ userData, initialCourseId, initialModuleId, onBack
     try {
       setLoading(true);
 
-      // 1. Create the Exam
-      const { data: exam, error: examError } = await supabase
-        .from('exams')
-        .insert({
-          course_id: targetCourse,
-          module_id: isFinal ? null : targetModule,
-          title,
-          time_limit: parseInt(timeLimit),
-          passing_score: parseInt(passingScore),
-          attempts_allowed: attempts === 'Única tentativa' ? 1 : attempts === '2 Tentativas' ? 2 : 99,
-          is_final: isFinal
-        })
-        .select()
-        .single();
+      if (existingExamId) {
+        // UPDATE MODE
+        const { error: examError } = await supabase
+          .from('exams')
+          .update({
+            title,
+            time_limit: parseInt(timeLimit),
+            passing_score: parseInt(passingScore),
+            attempts_allowed: attempts === 'Única tentativa' ? 1 : attempts === '2 Tentativas' ? 2 : 99,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existingExamId);
 
-      if (examError) throw examError;
+        if (examError) throw examError;
 
-      // 2. Create Questions and Alternatives
-      for (const q of questions) {
-        if (!q.text.trim()) continue; // Skip empty questions
+        // Clean up old questions and alternatives (simplest way to update)
+        // In a real production app with submissions, we should be more careful
+        await supabase.from('questions').delete().eq('exam_id', existingExamId);
 
-        const { data: question, error: qError } = await supabase
-          .from('questions')
+        // Re-insert questions and alternatives
+        for (const q of questions) {
+          if (!q.text.trim()) continue;
+          const { data: question, error: qError } = await supabase
+            .from('questions')
+            .insert({
+              exam_id: existingExamId,
+              text: q.text,
+              order_index: questions.indexOf(q)
+            })
+            .select()
+            .single();
+
+          if (qError) throw qError;
+
+          const alternativesToInsert = q.alternatives
+            .filter(a => a.text.trim())
+            .map(a => ({
+              question_id: question.id,
+              text: a.text,
+              is_correct: a.is_correct
+            }));
+
+          if (alternativesToInsert.length > 0) {
+            const { error: aError } = await supabase.from('alternatives').insert(alternativesToInsert);
+            if (aError) throw aError;
+          }
+        }
+        
+        toast.success("Prova atualizada com sucesso!");
+      } else {
+        // CREATE MODE
+        const { data: exam, error: examError } = await supabase
+          .from('exams')
           .insert({
-            exam_id: exam.id,
-            text: q.text,
-            order_index: questions.indexOf(q)
+            course_id: targetCourse,
+            module_id: isFinal ? null : targetModule,
+            title,
+            time_limit: parseInt(timeLimit),
+            passing_score: parseInt(passingScore),
+            attempts_allowed: attempts === 'Única tentativa' ? 1 : attempts === '2 Tentativas' ? 2 : 99,
+            is_final: isFinal
           })
           .select()
           .single();
 
-        if (qError) throw qError;
+        if (examError) throw examError;
 
-        const alternativesToInsert = q.alternatives
-          .filter(a => a.text.trim()) // Skip empty alternatives
-          .map(a => ({
-            question_id: question.id,
-            text: a.text,
-            is_correct: a.is_correct
-          }));
+        for (const q of questions) {
+          if (!q.text.trim()) continue;
+          const { data: question, error: qError } = await supabase
+            .from('questions')
+            .insert({
+              exam_id: exam.id,
+              text: q.text,
+              order_index: questions.indexOf(q)
+            })
+            .select()
+            .single();
 
-        if (alternativesToInsert.length > 0) {
-          const { error: aError } = await supabase
-            .from('alternatives')
-            .insert(alternativesToInsert);
+          if (qError) throw qError;
 
-          if (aError) throw aError;
+          const alternativesToInsert = q.alternatives
+            .filter(a => a.text.trim())
+            .map(a => ({
+              question_id: question.id,
+              text: a.text,
+              is_correct: a.is_correct
+            }));
+
+          if (alternativesToInsert.length > 0) {
+            const { error: aError } = await supabase.from('alternatives').insert(alternativesToInsert);
+            if (aError) throw aError;
+          }
         }
+        
+        toast.success("Prova publicada com sucesso!");
       }
-
-      toast.success("Prova publicada com sucesso!");
       
       // Auto-navigate back after a short delay
       setTimeout(() => {
@@ -279,7 +388,7 @@ export function ExamCreator({ userData, initialCourseId, initialModuleId, onBack
             <h2 className="text-[10px] font-black text-[#22ff88] uppercase tracking-[0.2em]">Exam Factory</h2>
           </div>
           <h1 className="text-2xl md:text-5xl font-black text-white mb-3 md:mb-4 leading-tight">
-            Criar Nova <span className="text-[#22ff88]">Avaliação</span>
+            {existingExamId ? 'Editar' : 'Criar Nova'} <span className="text-[#22ff88]">Avaliação</span>
           </h1>
           <p className="text-[#64748b] text-sm md:text-base leading-relaxed">
             Configure o escopo da avaliação, defina os parâmetros de aprovação e construa as questões técnicas.

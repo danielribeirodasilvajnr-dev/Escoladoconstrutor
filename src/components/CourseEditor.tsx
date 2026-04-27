@@ -90,6 +90,7 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [lessonAttachments, setLessonAttachments] = useState<Record<string, any[]>>({});
+  const [exams, setExams] = useState<any[]>([]);
 
   const toggleModule = (moduleId: string) => {
     setExpandedModules(prev => {
@@ -155,12 +156,15 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
       if (modulesError) throw modulesError;
 
       // Sort lessons by order_index
-      const formattedModules = (modulesData || []).map(m => ({
-        ...m,
-        lessons: (m.lessons || []).sort((a: any, b: any) => a.order_index - b.order_index)
-      }));
-
       setModules(formattedModules);
+
+      // Fetch exams for this course
+      const { data: examsData } = await supabase
+        .from('exams')
+        .select('*')
+        .eq('course_id', courseId);
+      
+      setExams(examsData || []);
 
       // Update price input string
       if (courseData.price !== undefined) {
@@ -976,43 +980,81 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
                   <input type="file" ref={thumbnailInputRef} className="hidden" accept="image/*" onChange={handleThumbnailUpload} />
 
                   {/* Module Exam Square */}
-                  <div
-                    onClick={() => onOpenExam?.(course.id, module.id)}
-                    className="bg-white/[0.02] border border-dashed border-white/10 rounded-3xl p-8 flex flex-col items-center justify-center text-center group hover:border-[#22ff88]/50 transition-all cursor-pointer h-full min-h-[200px]"
-                  >
-                    <div className="w-16 h-16 rounded-2xl bg-[#22ff88]/5 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-[#22ff88]/10 transition-all">
-                      <ClipboardCheck className="w-8 h-8 text-[#22ff88]" />
-                    </div>
-                    <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em] mb-2">PROVA DO MÓDULO</h3>
-                    <p className="text-[9px] text-[#64748b] font-bold uppercase tracking-wider mb-6 leading-relaxed">
-                      Avaliação obrigatória para conclusão do módulo
-                    </p>
-                    <button className="px-6 py-2.5 bg-[#22ff88]/10 text-[#22ff88] text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-[#22ff88] hover:text-black transition-all">
-                      GERENCIAR
-                    </button>
-                  </div>
+                  {(() => {
+                    const moduleExam = exams.find(e => e.module_id === module.id);
+                    return (
+                      <div
+                        onClick={() => onOpenExam?.(course.id || '', module.id)}
+                        className={cn(
+                          "bg-white/[0.02] border border-dashed rounded-3xl p-8 flex flex-col items-center justify-center text-center group transition-all cursor-pointer h-full min-h-[200px]",
+                          moduleExam ? "border-[#22ff88]/30 bg-[#22ff88]/5" : "border-white/10 hover:border-[#22ff88]/50"
+                        )}
+                      >
+                        <div className={cn(
+                          "w-16 h-16 rounded-2xl flex items-center justify-center mb-4 transition-all group-hover:scale-110",
+                          moduleExam ? "bg-[#22ff88]/20" : "bg-[#22ff88]/5 group-hover:bg-[#22ff88]/10"
+                        )}>
+                          <ClipboardCheck className="w-8 h-8 text-[#22ff88]" />
+                        </div>
+                        <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em] mb-2">
+                          {moduleExam ? "PROVA SALVA" : "PROVA DO MÓDULO"}
+                        </h3>
+                        <p className="text-[9px] text-[#64748b] font-bold uppercase tracking-wider mb-6 leading-relaxed max-w-[150px] line-clamp-2">
+                          {moduleExam ? moduleExam.title : "Avaliação obrigatória para conclusão do módulo"}
+                        </p>
+                        <button className={cn(
+                          "px-6 py-2.5 text-[9px] font-black uppercase tracking-widest rounded-xl transition-all",
+                          moduleExam 
+                            ? "bg-[#22ff88] text-black shadow-[0_0_20px_rgba(34,255,136,0.3)]" 
+                            : "bg-[#22ff88]/10 text-[#22ff88] hover:bg-[#22ff88] hover:text-black"
+                        )}>
+                          {moduleExam ? "EDITAR PROVA" : "GERENCIAR"}
+                        </button>
+                      </div>
+                    );
+                  })()}
                 </Reorder.Item>
               ))}
             </Reorder.Group>
 
             {/* Final Exam Square */}
-            <div
-              onClick={() => onOpenExam?.(course.id || '', null)}
-              className="mt-12 bg-[#ffcc00]/5 border border-dashed border-[#ffcc00]/20 rounded-[2.5rem] p-10 flex flex-col lg:flex-row items-center justify-between group hover:border-[#ffcc00]/50 transition-all cursor-pointer"
-            >
-              <div className="flex items-center gap-6">
-                <div className="w-16 h-16 rounded-2xl bg-[#ffcc00]/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Award className="w-8 h-8 text-[#ffcc00]" />
+            {(() => {
+              const finalExam = exams.find(e => e.is_final);
+              return (
+                <div
+                  onClick={() => onOpenExam?.(course.id || '', null)}
+                  className={cn(
+                    "mt-12 border border-dashed rounded-[2.5rem] p-10 flex flex-col lg:flex-row items-center justify-between group transition-all cursor-pointer",
+                    finalExam ? "bg-[#ffcc00]/10 border-[#ffcc00]/40" : "bg-[#ffcc00]/5 border-[#ffcc00]/20 hover:border-[#ffcc00]/50"
+                  )}
+                >
+                  <div className="flex items-center gap-6">
+                    <div className={cn(
+                      "w-16 h-16 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110",
+                      finalExam ? "bg-[#ffcc00]/20" : "bg-[#ffcc00]/10"
+                    )}>
+                      <Award className="w-8 h-8 text-[#ffcc00]" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-black text-white uppercase tracking-[0.2em] mb-1">
+                        {finalExam ? "EXAME FINAL SALVO" : "PROVA FINAL DO CURSO"}
+                      </h3>
+                      <p className="text-[10px] text-[#64748b] font-bold uppercase tracking-wider">
+                        {finalExam ? finalExam.title : "Habilita a emissão automática do certificado"}
+                      </p>
+                    </div>
+                  </div>
+                  <button className={cn(
+                    "mt-6 lg:mt-0 px-8 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all border",
+                    finalExam 
+                      ? "bg-[#ffcc00] text-black border-[#ffcc00] shadow-[0_0_30px_rgba(255,204,0,0.2)]"
+                      : "bg-[#ffcc00]/10 text-[#ffcc00] border-[#ffcc00]/10 hover:bg-[#ffcc00] hover:text-black"
+                  )}>
+                    {finalExam ? "EDITAR EXAME FINAL" : "CONFIGURAR EXAME FINAL"}
+                  </button>
                 </div>
-                <div>
-                  <h3 className="text-sm font-black text-white uppercase tracking-[0.2em] mb-1">PROVA FINAL DO CURSO</h3>
-                  <p className="text-[10px] text-[#64748b] font-bold uppercase tracking-wider">Habilita a emissão automática do certificado</p>
-                </div>
-              </div>
-              <button className="mt-6 lg:mt-0 px-8 py-3 bg-[#ffcc00]/10 text-[#ffcc00] text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-[#ffcc00] hover:text-black transition-all border border-[#ffcc00]/10">
-                CONFIGURAR EXAME FINAL
-              </button>
-            </div>
+              );
+            })()}
           </section>
         </div>
 
