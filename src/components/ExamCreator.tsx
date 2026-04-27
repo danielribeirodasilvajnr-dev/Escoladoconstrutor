@@ -187,6 +187,11 @@ export function ExamCreator({ userData, initialCourseId, initialModuleId, onBack
        return;
     }
 
+    if (!isFinal && !targetModule) {
+      toast.error("Por favor, selecione um módulo para a prova.");
+      return;
+    }
+
     try {
       setLoading(true);
 
@@ -195,7 +200,7 @@ export function ExamCreator({ userData, initialCourseId, initialModuleId, onBack
         .from('exams')
         .insert({
           course_id: targetCourse,
-          module_id: isFinal ? null : (targetModule || null),
+          module_id: isFinal ? null : targetModule,
           title,
           time_limit: parseInt(timeLimit),
           passing_score: parseInt(passingScore),
@@ -209,6 +214,8 @@ export function ExamCreator({ userData, initialCourseId, initialModuleId, onBack
 
       // 2. Create Questions and Alternatives
       for (const q of questions) {
+        if (!q.text.trim()) continue; // Skip empty questions
+
         const { data: question, error: qError } = await supabase
           .from('questions')
           .insert({
@@ -221,21 +228,30 @@ export function ExamCreator({ userData, initialCourseId, initialModuleId, onBack
 
         if (qError) throw qError;
 
-        const alternativesToInsert = q.alternatives.map(a => ({
-          question_id: question.id,
-          text: a.text,
-          is_correct: a.is_correct
-        }));
+        const alternativesToInsert = q.alternatives
+          .filter(a => a.text.trim()) // Skip empty alternatives
+          .map(a => ({
+            question_id: question.id,
+            text: a.text,
+            is_correct: a.is_correct
+          }));
 
-        const { error: aError } = await supabase
-          .from('alternatives')
-          .insert(alternativesToInsert);
+        if (alternativesToInsert.length > 0) {
+          const { error: aError } = await supabase
+            .from('alternatives')
+            .insert(alternativesToInsert);
 
-        if (aError) throw aError;
+          if (aError) throw aError;
+        }
       }
 
       toast.success("Prova publicada com sucesso!");
-      // Reset form or navigate back
+      
+      // Auto-navigate back after a short delay
+      setTimeout(() => {
+        if (onBack) onBack();
+      }, 1500);
+
     } catch (error: any) {
       console.error("Erro ao salvar prova:", error.message);
       toast.error("Erro ao publicar prova. Verifique o console.");
