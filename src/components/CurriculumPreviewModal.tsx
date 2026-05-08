@@ -237,7 +237,7 @@ export function CurriculumPreviewModal({ courseId, courseTitle, isBlocked, onClo
             )}
           </button>
           <p className="text-[9px] text-[#64748b] font-bold uppercase tracking-widest mt-6">
-            Acesso vitalício garantido para membros Construtor360
+            Acesso vitalício garantido para membros 360Pro
           </p>
         </div>
       </motion.div>

@@ -47,7 +47,7 @@ export function AdminUsersView() {
       setLoading(true);
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id, email, full_name, role, avatar_url, created_at')
         .order('created_at', { ascending: false });
 
       if (error) throw error;

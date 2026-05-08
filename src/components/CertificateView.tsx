@@ -263,7 +263,7 @@ export function CertificateView({ certificateId, onBack }: CertificateViewProps)
                 </div>
                 <div>
                    <p className="text-[9px] font-black text-black uppercase tracking-widest leading-none">Autenticidade Garantida</p>
-                   <p className="text-[8px] text-zinc-400 mt-1">Este documento é original e validado por Construtor360 Academy</p>
+                   <p className="text-[8px] text-zinc-400 mt-1">Este documento é original e validado por 360Pro Academy</p>
                 </div>
              </div>
              <div className="text-right">

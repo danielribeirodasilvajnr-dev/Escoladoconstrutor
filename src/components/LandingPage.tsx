@@ -46,7 +46,7 @@ export function LandingPage({ onExplore, onAuth }: LandingPageProps) {
   }, []);
 
   useEffect(() => {
-    supabase.from('courses').select('*').order('created_at', { ascending: false }).then(({ data }) => {
+    supabase.from('courses').select('id, title, description, price, instructor_id, thumbnail_url, category, created_at').order('created_at', { ascending: false }).then(({ data }) => {
       if (data) setCourses(data);
     });
   }, []);
@@ -72,7 +72,7 @@ export function LandingPage({ onExplore, onAuth }: LandingPageProps) {
           <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain rounded-lg" />
           <span className="font-display text-lg md:text-xl tracking-tighter font-bold">Construtor360</span>
         </div>
-        
+
         <div className="hidden md:flex gap-8 text-[11px] uppercase tracking-widest font-bold text-muted">
           <a href="#" className="hover:text-ink transition-colors">Plataforma</a>
           <a href="#" className="hover:text-ink transition-colors">Recursos</a>
@@ -93,8 +93,8 @@ export function LandingPage({ onExplore, onAuth }: LandingPageProps) {
               Inscreva-se
             </button>
           </div>
-          
-          <button 
+
+          <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="md:hidden p-2 text-white hover:bg-white/5 rounded-lg transition-colors"
           >
@@ -152,7 +152,7 @@ export function LandingPage({ onExplore, onAuth }: LandingPageProps) {
               Da teoria à prática, transforme aprendizado em resultados reais.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <button 
+              <button
                 onClick={onExplore}
                 className="px-8 py-4 bg-[#22ff88] text-black rounded-2xl font-bold flex items-center justify-center gap-2 group hover:scale-105 active:scale-95 transition-all shadow-xl shadow-[#22ff88]/10"
               >
@@ -169,40 +169,40 @@ export function LandingPage({ onExplore, onAuth }: LandingPageProps) {
             className="relative flex items-center justify-center py-10 md:py-0"
           >
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 w-full max-w-[600px] relative z-10">
-                {[
-                    { label: 'DIAS', value: timeLeft.days },
-                    { label: 'HORAS', value: timeLeft.hours },
-                    { label: 'MINUTOS', value: timeLeft.minutes },
-                    { label: 'SEGUNDOS', value: timeLeft.seconds }
-                ].map((unit, i) => (
-                    <motion.div 
-                        key={unit.label}
-                        initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        transition={{ delay: 0.6 + (i * 0.1) }}
-                        className="bg-[#1a1c22]/40 backdrop-blur-xl border border-white/10 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 flex flex-col items-center justify-center relative overflow-hidden group hover:border-[#22ff88]/30 transition-all duration-500 shadow-2xl hover:shadow-[#22ff88]/5"
-                    >
-                        {/* Glow effect on hover */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-[#22ff88]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                        <span className="text-4xl md:text-6xl font-black text-white mb-2 md:mb-3 tracking-tighter group-hover:text-[#22ff88] transition-colors leading-none">
-                            {String(unit.value).padStart(2, '0')}
-                        </span>
-                        <span className="text-[8px] md:text-[10px] font-black text-[#64748b] uppercase tracking-widest leading-none">{unit.label}</span>
-                        
-                    </motion.div>
-                ))}
+              {[
+                { label: 'DIAS', value: timeLeft.days },
+                { label: 'HORAS', value: timeLeft.hours },
+                { label: 'MINUTOS', value: timeLeft.minutes },
+                { label: 'SEGUNDOS', value: timeLeft.seconds }
+              ].map((unit, i) => (
+                <motion.div
+                  key={unit.label}
+                  initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ delay: 0.6 + (i * 0.1) }}
+                  className="bg-[#1a1c22]/40 backdrop-blur-xl border border-white/10 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 flex flex-col items-center justify-center relative overflow-hidden group hover:border-[#22ff88]/30 transition-all duration-500 shadow-2xl hover:shadow-[#22ff88]/5"
+                >
+                  {/* Glow effect on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#22ff88]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <span className="text-4xl md:text-6xl font-black text-white mb-2 md:mb-3 tracking-tighter group-hover:text-[#22ff88] transition-colors leading-none">
+                    {String(unit.value).padStart(2, '0')}
+                  </span>
+                  <span className="text-[8px] md:text-[10px] font-black text-[#64748b] uppercase tracking-widest leading-none">{unit.label}</span>
+
+                </motion.div>
+              ))}
             </div>
-            
+
             {/* Launching label floating above */}
-            <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.2 }}
-                className="absolute -top-8 md:-top-16 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-black/40 backdrop-blur-md px-6 py-2 rounded-full border border-white/5 whitespace-nowrap"
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.2 }}
+              className="absolute -top-8 md:-top-16 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-black/40 backdrop-blur-md px-6 py-2 rounded-full border border-white/5 whitespace-nowrap"
             >
-                <div className="w-1.5 h-1.5 rounded-full bg-[#22ff88] animate-pulse" />
-                <span className="text-[10px] md:text-xs font-black text-[#22ff88] uppercase tracking-[0.4em]">Plataforma em Lançamento</span>
-                <div className="w-1.5 h-1.5 rounded-full bg-[#22ff88] animate-pulse" />
+              <div className="w-1.5 h-1.5 rounded-full bg-[#22ff88] animate-pulse" />
+              <span className="text-[10px] md:text-xs font-black text-[#22ff88] uppercase tracking-[0.4em]">Plataforma em Lançamento</span>
+              <div className="w-1.5 h-1.5 rounded-full bg-[#22ff88] animate-pulse" />
             </motion.div>
 
             {/* Background decorative glows */}

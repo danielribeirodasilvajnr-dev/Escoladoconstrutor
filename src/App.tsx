@@ -71,7 +71,7 @@ export default function App() {
         try {
           const { data: profile } = await supabase
             .from('profiles')
-            .select('*')
+            .select('id, email, full_name, role, avatar_url')
             .eq('id', session.user.id)
             .single();
 

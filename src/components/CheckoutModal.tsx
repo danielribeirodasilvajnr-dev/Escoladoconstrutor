@@ -205,7 +205,7 @@ export function CheckoutModal({ course, userId, onClose, onSuccess }: CheckoutMo
             >
               <Loader2 className="w-20 h-20 text-[#22ff88] animate-spin mx-auto mb-8" />
               <h3 className="text-2xl font-bold text-white mb-4">Processando Inscrição...</h3>
-              <p className="text-[#64748b]">Sincronizando dados com o Construtor360.</p>
+              <p className="text-[#64748b]">Sincronizando dados com o 360Pro.</p>
             </motion.div>
           )}
 

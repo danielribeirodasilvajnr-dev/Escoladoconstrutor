@@ -95,7 +95,7 @@ export function Auth({ onSuccess, onBack }: AuthProps) {
     } catch (err: any) {
       console.error('Auth error:', err);
       let message = err.message || 'Ocorreu um erro na autenticação.';
-      
+
       // Tradução de erros comuns do Supabase
       if (message.includes('email rate limit exceeded')) {
         message = 'Muitas tentativas em pouco tempo. Por favor, aguarde alguns minutos antes de tentar novamente.';
@@ -125,12 +125,12 @@ export function Auth({ onSuccess, onBack }: AuthProps) {
       </div>
 
       {/* Header Logo */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="absolute top-8 left-8 md:top-12 md:left-12 z-20 flex items-center gap-4"
       >
-        <button 
+        <button
           onClick={onBack || (() => { window.location.hash = ''; })}
           className="w-10 h-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-white/10 transition-all hover:-translate-x-1"
           title="Voltar para a página inicial"
@@ -203,7 +203,7 @@ export function Auth({ onSuccess, onBack }: AuthProps) {
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Verifique seu e-mail</h3>
               <p className="text-[#94a3b8] text-sm mb-6 leading-relaxed">
-                Enviamos um link de confirmação para <span className="text-white font-medium">{email}</span>. 
+                Enviamos um link de confirmação para <span className="text-white font-medium">{email}</span>.
                 Por favor, clique no link para ativar sua conta.
               </p>
               <button
@@ -239,7 +239,7 @@ export function Auth({ onSuccess, onBack }: AuthProps) {
 
               <AnimatePresence mode="wait">
                 {error && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
@@ -314,7 +314,7 @@ export function Auth({ onSuccess, onBack }: AuthProps) {
           {accessLevel === 'membro' ? (
             <p className="text-sm text-[#94a3b8]">
               {mode === 'login' ? 'Novo na plataforma?' : 'Já tem uma conta?'}
-              <button 
+              <button
                 onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
                 className="ml-2 text-white font-bold hover:text-[#22ff88] transition-colors"
               >
@@ -327,7 +327,7 @@ export function Auth({ onSuccess, onBack }: AuthProps) {
             </p>
           )}
           <p className="mt-6 text-[10px] text-[#64748b] leading-relaxed">
-            Esta página é protegida por Google reCAPTCHA para garantir que você não é um robô. 
+            Esta página é protegida por Google reCAPTCHA para garantir que você não é um robô.
             <button className="text-[#22ff88] ml-1">Saiba mais.</button>
           </p>
         </div>

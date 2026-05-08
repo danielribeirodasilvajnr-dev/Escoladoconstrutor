@@ -55,7 +55,7 @@ export function AdminFinanceView() {
       // 1. Fetch all instructors
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id, email, full_name, role, avatar_url')
         .in('role', ['administrador', 'master']);
 
       if (profilesError) throw profilesError;

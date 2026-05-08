@@ -130,7 +130,7 @@ export function CourseList({ userData, onEditCourse, onCreateCourse }: CourseLis
             <BookOpen className="w-10 h-10 text-[#22ff88]" />
           </div>
           <h2 className="text-2xl font-bold text-white mb-4">Nenhum curso encontrado</h2>
-          <p className="text-[#64748b] mb-8 max-w-md mx-auto">Comece agora a criar sua primeira Masterclass cinematográfica para o Construtor360.</p>
+          <p className="text-[#64748b] mb-8 max-w-md mx-auto">Comece agora a criar sua primeira Masterclass cinematográfica para o 360Pro.</p>
           <button
             onClick={onCreateCourse}
             className="px-8 py-3.5 bg-white/5 text-white font-bold rounded-xl hover:bg-white/10 transition-all"
