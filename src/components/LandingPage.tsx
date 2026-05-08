@@ -46,7 +46,7 @@ export function LandingPage({ onExplore, onAuth }: LandingPageProps) {
   }, []);
 
   useEffect(() => {
-    supabase.from('courses').select('id, title, description, price, instructor_id, thumbnail_url, category, created_at').order('created_at', { ascending: false }).then(({ data }) => {
+    supabase.from('courses').select('*').order('created_at', { ascending: false }).then(({ data }) => {
       if (data) setCourses(data);
     });
   }, []);
@@ -329,7 +329,7 @@ export function LandingPage({ onExplore, onAuth }: LandingPageProps) {
               {
                 icon: Trophy,
                 title: "Expertise de Mercado",
-                desc: "Diga adeus à teoria vazia. Aprenda o que funciona na vida real com metodologias de gestão testadas e aprovadas em canteiros de alto padrão."
+                desc: "Diga adeus à teoria vazia. Aprenda o que funciona na vida real com metodologias de gestão testadas and aprovadas em canteiros de alto padrão."
               },
               {
                 icon: TrendingUp,
