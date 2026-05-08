@@ -6,7 +6,7 @@ import { supabase } from '../lib/supabase';
 
 interface LandingPageProps {
   onExplore: () => void;
-  onAuth: () => void;
+  onAuth: (mode?: 'login' | 'register') => void;
 }
 
 export function LandingPage({ onExplore, onAuth }: LandingPageProps) {
@@ -23,7 +23,7 @@ export function LandingPage({ onExplore, onAuth }: LandingPageProps) {
   });
 
   useEffect(() => {
-    const targetDate = new Date('2026-05-01T00:00:00').getTime();
+    const targetDate = new Date('2026-06-17T00:00:00').getTime();
 
     const interval = setInterval(() => {
       const now = new Date().getTime();
@@ -46,7 +46,7 @@ export function LandingPage({ onExplore, onAuth }: LandingPageProps) {
   }, []);
 
   useEffect(() => {
-    supabase.from('courses').select('*').order('created_at', { ascending: false }).then(({ data }) => {
+    supabase.from('courses').select('*').order('students_count', { ascending: false }).then(({ data }) => {
       if (data) setCourses(data);
     });
   }, []);
@@ -70,27 +70,22 @@ export function LandingPage({ onExplore, onAuth }: LandingPageProps) {
       <nav className="fixed top-0 w-full z-50 px-4 md:px-8 py-4 md:py-6 flex justify-between items-center border-b border-white/5 backdrop-blur-xl bg-[#050505]/60 transition-all">
         <div className="flex items-center gap-3">
           <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain rounded-lg" />
-          <span className="font-display text-lg md:text-xl tracking-tighter font-bold">Construtor360</span>
-        </div>
-
-        <div className="hidden md:flex gap-8 text-[11px] uppercase tracking-widest font-bold text-muted">
-          <a href="#" className="hover:text-ink transition-colors">Plataforma</a>
-          <a href="#" className="hover:text-ink transition-colors">Recursos</a>
+          <span className="font-display text-xl md:text-2xl tracking-tighter font-black bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">Construtor360</span>
         </div>
 
         <div className="flex items-center gap-3">
           <div className="hidden md:flex gap-4">
             <button
-              onClick={onAuth}
-              className="px-6 py-2 bg-[#22ff88] text-black rounded-full text-[11px] uppercase tracking-widest font-bold hover:scale-105 active:scale-95 shadow-xl shadow-[#22ff88]/10 transition-all"
+              onClick={() => onAuth('login')}
+              className="px-6 py-2.5 text-white/70 hover:text-white rounded-full text-[11px] uppercase tracking-widest font-black transition-all hover:bg-white/5"
             >
               Fazer Login
             </button>
             <button
-              onClick={onAuth}
-              className="px-6 py-2 bg-white/5 text-white rounded-full text-[11px] uppercase tracking-widest font-bold hover:bg-white/10 active:scale-95 transition-all"
+              onClick={() => onAuth('register')}
+              className="px-8 py-2.5 bg-[#22ff88] text-black rounded-full text-[11px] uppercase tracking-widest font-black hover:scale-105 active:scale-95 shadow-xl shadow-[#22ff88]/10 transition-all border border-[#22ff88]/20"
             >
-              Inscreva-se
+              Inscrever-se
             </button>
           </div>
 
@@ -113,20 +108,18 @@ export function LandingPage({ onExplore, onAuth }: LandingPageProps) {
             className="fixed inset-0 z-40 bg-[#050505] pt-24 px-8 md:hidden"
           >
             <div className="flex flex-col gap-6">
-              <a href="#" className="text-2xl font-bold border-b border-white/5 pb-4">Plataforma</a>
-              <a href="#" className="text-2xl font-bold border-b border-white/5 pb-4">Recursos</a>
               <div className="flex flex-col gap-4 mt-8">
                 <button
-                  onClick={() => { onAuth(); setIsMenuOpen(false); }}
-                  className="w-full py-4 bg-[#22ff88] text-black rounded-2xl text-sm uppercase tracking-widest font-bold"
+                  onClick={() => { onAuth('login'); setIsMenuOpen(false); }}
+                  className="w-full py-5 bg-white/5 text-white rounded-2xl text-[10px] uppercase tracking-[0.2em] font-black border border-white/10"
                 >
                   Fazer Login
                 </button>
                 <button
-                  onClick={() => { onAuth(); setIsMenuOpen(false); }}
-                  className="w-full py-4 bg-white/5 text-white rounded-2xl text-sm uppercase tracking-widest font-bold"
+                  onClick={() => { onAuth('register'); setIsMenuOpen(false); }}
+                  className="w-full py-5 bg-[#22ff88] text-black rounded-2xl text-[10px] uppercase tracking-[0.2em] font-black shadow-xl shadow-[#22ff88]/10"
                 >
-                  Criar Conta
+                  Inscrever-se
                 </button>
               </div>
             </div>
@@ -138,26 +131,35 @@ export function LandingPage({ onExplore, onAuth }: LandingPageProps) {
         {/* Hero Section */}
         <section className="px-4 md:px-8 max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 md:gap-16 items-center min-h-[70vh] md:min-h-[80vh]">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="text-center lg:text-left"
           >
-            <h1 className="text-4xl sm:text-6xl md:text-[80px] leading-[1.1] font-display font-bold tracking-tighter mb-6 md:mb-8 bg-gradient-to-br from-white to-white/60 bg-clip-text text-transparent">
-              Eleve seu conhecimento. <br />
-              <span className="text-[#22ff88]">Construa seu futuro.</span>
+            <div className="inline-flex items-center gap-2 bg-[#22ff88]/10 border border-[#22ff88]/20 px-4 py-1.5 rounded-full mb-8">
+              <Sparkles className="w-4 h-4 text-[#22ff88]" />
+              <span className="text-[10px] font-black text-[#22ff88] uppercase tracking-widest">A Revolução na Construção</span>
+            </div>
+            <h1 className="text-5xl sm:text-7xl md:text-[86px] leading-[0.95] font-display font-black tracking-tighter mb-8 bg-gradient-to-br from-white via-white to-white/40 bg-clip-text text-transparent">
+              Domine a Engenharia <br />
+              <span className="text-[#22ff88]">na Prática.</span>
             </h1>
-            <p className="text-base md:text-lg text-[#64748b] max-w-2xl mx-auto lg:mx-0 leading-relaxed mb-8">
-              Aprenda com especialistas e domine as técnicas que impulsionam o setor da construção.
-              Da teoria à prática, transforme aprendizado em resultados reais.
+            <p className="text-lg md:text-xl text-[#64748b] max-w-2xl mx-auto lg:mx-0 leading-relaxed mb-12 font-medium">
+              A plataforma definitiva para profissionais da construção civil que buscam excelência técnica e resultados de alto nível.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+            <div className="flex flex-col sm:flex-row gap-5 justify-center lg:justify-start">
               <button
-                onClick={onExplore}
-                className="px-8 py-4 bg-[#22ff88] text-black rounded-2xl font-bold flex items-center justify-center gap-2 group hover:scale-105 active:scale-95 transition-all shadow-xl shadow-[#22ff88]/10"
+                onClick={() => onAuth('register')}
+                className="px-10 py-5 bg-[#22ff88] text-black rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 group hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(34,255,136,0.15)]"
               >
-                Explorar Cursos
+                Inscrever-se Agora
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </button>
+              <button
+                onClick={() => onAuth('login')}
+                className="px-10 py-5 bg-white/5 text-white border border-white/10 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white/10 transition-all active:scale-95"
+              >
+                Fazer Login
               </button>
             </div>
           </motion.div>
@@ -312,6 +314,68 @@ export function LandingPage({ onExplore, onAuth }: LandingPageProps) {
             <span>·</span>
           </motion.div>
         </div>
+
+        {/* Todos os Cursos - Grid */}
+        {courses.length > 0 && (
+          <section className="px-4 md:px-8 py-24 md:py-32 max-w-7xl mx-auto">
+            <div className="flex flex-col items-center mb-16 md:mb-20 space-y-4 text-center">
+              <h2 className="text-3xl md:text-6xl font-bold font-display tracking-tight text-white mb-2">
+                Todos os <span className="text-[#22ff88]">Treinamentos</span>
+              </h2>
+              <p className="text-[#64748b] text-base md:text-lg max-w-2xl">
+                Explore nossa biblioteca completa de especializações, ordenadas pelos cursos mais buscados por profissionais da elite da construção.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
+              {courses.map(course => (
+                <div key={course.id} className="bg-[#0f1115] rounded-[2.5rem] overflow-hidden border border-white/5 group hover:border-[#22ff88]/20 transition-all duration-500 flex flex-col hover:-translate-y-3 hover:shadow-[0_20px_50px_rgba(34,255,136,0.05)]">
+                  <div className="relative aspect-video overflow-hidden bg-black/50">
+                    <img
+                      src={course.cover_url || "https://picsum.photos/seed/placeholder/800/450"}
+                      alt={course.title}
+                      className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-80 group-hover:opacity-100"
+                      referrerPolicy="no-referrer"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0f1115] via-transparent to-transparent opacity-60" />
+                    <div className="absolute top-6 left-6 bg-black/60 backdrop-blur-md border border-white/10 px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase text-white flex items-center gap-2">
+                      <Users className="w-3.5 h-3.5 text-[#22ff88]" />
+                      {course.students_count || 0} Alunos
+                    </div>
+                  </div>
+                  <div className="p-8 md:p-10 flex flex-col flex-1">
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-[#22ff88] bg-[#22ff88]/5 border border-[#22ff88]/10 px-3 py-1 rounded-lg">
+                        {course.category || 'Especialização'}
+                      </span>
+                    </div>
+                    <h3 className="text-xl md:text-2xl font-bold font-display text-white mb-4 line-clamp-2 group-hover:text-[#22ff88] transition-colors leading-tight">
+                      {course.title}
+                    </h3>
+                    <p className="text-sm text-[#64748b] leading-relaxed line-clamp-3 mb-10 flex-1">
+                      {course.description || "Domine as melhores práticas do mercado nesta masterclass completa focada em resultados práticos no canteiro."}
+                    </p>
+
+                    <div className="mt-auto pt-6 border-t border-white/5 flex items-center justify-between">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest mb-1">Investimento</span>
+                        <span className="text-white font-black font-display text-xl md:text-2xl">
+                          {Number(course.price) === 0 ? 'Grátis' : `R$ ${Number(course.price).toFixed(2).replace('.', ',')}`}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => window.location.search = `?c=${course.id}`}
+                        className="h-12 md:h-14 px-6 md:px-8 bg-[#22ff88] text-black font-black text-[10px] uppercase tracking-widest rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-[0_10px_20px_rgba(34,255,136,0.1)]"
+                      >
+                        Começar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Grid Features */}
         <section className="px-4 md:px-8 py-20 md:py-32 max-w-7xl mx-auto">

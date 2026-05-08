@@ -20,7 +20,7 @@ export default function App() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    
+
     // Check for payment success parameter
     if (params.get('payment_success') === 'true') {
       setShowPaymentSuccess(true);
@@ -48,7 +48,7 @@ export default function App() {
 
         const email = session.user.email;
         const initialRole = session.user.user_metadata.role || 'membro';
-        
+
         // 1. Immediately set base data from session metadata to unlock UI
         const roleFallback = email === 'danielribeirodasilvajnr@gmail.com' ? 'master' : initialRole;
 
@@ -66,7 +66,7 @@ export default function App() {
 
         // 2. Switch to dashboard instantly
         setView('dashboard');
-        
+
         // 3. Fetch profile data in background to ensure source-of-truth sync
         try {
           const { data: profile } = await supabase
@@ -77,11 +77,11 @@ export default function App() {
 
           if (profile) {
             const finalRole = email === 'danielribeirodasilvajnr@gmail.com' ? 'master' : (profile.role || initialRole);
-            
+
             // Auto-sync missing info from metadata to profiles table
-            const needsSync = (!profile.avatar_url && session.user.user_metadata.avatar_url) || 
-                              (!profile.full_name && session.user.user_metadata.full_name);
-            
+            const needsSync = (!profile.avatar_url && session.user.user_metadata.avatar_url) ||
+              (!profile.full_name && session.user.user_metadata.full_name);
+
             if (needsSync) {
               await supabase.from('profiles').update({
                 avatar_url: profile.avatar_url || session.user.user_metadata.avatar_url,
@@ -135,12 +135,12 @@ export default function App() {
       if (hash === '#login' || hash === '#register') {
         // We only switch to auth if we are not authenticated
         supabase.auth.getSession().then(({ data: { session } }) => {
-           if (!session) setView('auth');
+          if (!session) setView('auth');
         });
       } else if (!hash && !new URLSearchParams(window.location.search).get('c')) {
         // If hash is cleared (user clicked back button), go back to landing
         supabase.auth.getSession().then(({ data: { session } }) => {
-           if (!session) setView('landing');
+          if (!session) setView('landing');
         });
       }
     };
@@ -166,7 +166,7 @@ export default function App() {
           exit={{ opacity: 0, scale: 0.9 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         >
-          <Auth 
+          <Auth
             onSuccess={() => {
               setView('dashboard');
               setPublicCourseId(null);
@@ -174,7 +174,7 @@ export default function App() {
               const url = new URL(window.location.href);
               url.searchParams.delete('c');
               window.history.replaceState({}, '', url);
-            }} 
+            }}
             onBack={() => setView('landing')}
           />
         </motion.div>
@@ -185,8 +185,8 @@ export default function App() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          <PublicCourseView 
-            courseId={publicCourseId} 
+          <PublicCourseView
+            courseId={publicCourseId}
             session={session}
             onBack={() => {
               setPublicCourseId(null);
@@ -208,7 +208,10 @@ export default function App() {
           transition={{ duration: 0.5, ease: 'easeInOut' }}
         >
           <LandingPage 
-            onAuth={() => setView('auth')}
+            onAuth={(mode) => {
+              if (mode) window.location.hash = mode;
+              setView('auth');
+            }}
             onExplore={() => setView(session ? 'dashboard' : 'auth')} 
           />
         </motion.div>
@@ -224,7 +227,7 @@ export default function App() {
           <Dashboard userData={userData} session={session} />
         </motion.div>
       )}
-      
+
       {/* Payment Success Modal */}
       <AnimatePresence>
         {showPaymentSuccess && (
@@ -234,12 +237,12 @@ export default function App() {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md px-4"
           >
-            <Confetti 
-              width={window.innerWidth} 
-              height={window.innerHeight} 
-              recycle={false} 
-              numberOfPieces={600} 
-              gravity={0.12} 
+            <Confetti
+              width={window.innerWidth}
+              height={window.innerHeight}
+              recycle={false}
+              numberOfPieces={600}
+              gravity={0.12}
               colors={['#22ff88', '#00ffcc', '#ffffff', '#10b981']}
             />
             <motion.div
@@ -250,28 +253,28 @@ export default function App() {
             >
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#22ff88]/50 via-[#22ff88] to-[#22ff88]/50"></div>
               <div className="w-24 h-24 bg-[#22ff88]/10 rounded-full flex items-center justify-center mx-auto mb-8 relative">
-                  <div className="absolute inset-0 rounded-full animate-ping bg-[#22ff88]/20 opacity-75"></div>
-                  <svg className="w-12 h-12 text-[#22ff88] relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"></path></svg>
+                <div className="absolute inset-0 rounded-full animate-ping bg-[#22ff88]/20 opacity-75"></div>
+                <svg className="w-12 h-12 text-[#22ff88] relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"></path></svg>
               </div>
               <h2 className="text-3xl font-extrabold text-white mb-4 tracking-tight">Pagamento Aprovado!</h2>
               <p className="text-zinc-400 mb-8 max-w-sm mx-auto text-[1.05rem] leading-relaxed">
                 Sua matrícula foi concluída com sucesso. O seu <strong>The Creator Masterclass</strong> acaba de ser destrancado.
               </p>
               <button
-                  onClick={() => setShowPaymentSuccess(false)}
-                  className="w-full bg-[#22ff88] hover:bg-[#1ee077] text-black font-bold py-4 rounded-2xl transition-all shadow-lg shadow-[#22ff88]/20 hover:shadow-[#22ff88]/40 active:scale-[0.98] text-lg uppercase tracking-wider"
+                onClick={() => setShowPaymentSuccess(false)}
+                className="w-full bg-[#22ff88] hover:bg-[#1ee077] text-black font-bold py-4 rounded-2xl transition-all shadow-lg shadow-[#22ff88]/20 hover:shadow-[#22ff88]/40 active:scale-[0.98] text-lg uppercase tracking-wider"
               >
-                  Acessar meu Treinamento
+                Acessar meu Treinamento
               </button>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <Toaster 
-        theme="dark" 
-        position="top-right" 
-        closeButton 
+      <Toaster
+        theme="dark"
+        position="top-right"
+        closeButton
         toastOptions={{
           style: {
             background: 'rgba(5, 5, 5, 0.9)',
