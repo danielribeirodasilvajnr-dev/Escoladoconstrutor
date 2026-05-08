@@ -14,6 +14,8 @@ export function LandingPage({ onExplore, onAuth }: LandingPageProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [wordIndex, setWordIndex] = useState(0);
+  const words = ['a Engenharia', 'a Regularização', 'a Gestão', 'a Sua Obra'];
   const scrollRef = useRef<HTMLDivElement>(null);
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
@@ -49,6 +51,13 @@ export function LandingPage({ onExplore, onAuth }: LandingPageProps) {
     supabase.from('courses').select('*').order('students_count', { ascending: false }).then(({ data }) => {
       if (data) setCourses(data);
     });
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setWordIndex((prev) => (prev + 1) % words.length);
+    }, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   const scroll = (direction: 'left' | 'right') => {
@@ -140,12 +149,29 @@ export function LandingPage({ onExplore, onAuth }: LandingPageProps) {
               <Sparkles className="w-4 h-4 text-[#22ff88]" />
               <span className="text-[10px] font-black text-[#22ff88] uppercase tracking-widest">A Revolução na Construção</span>
             </div>
-            <h1 className="text-5xl sm:text-7xl md:text-[86px] leading-[0.95] font-display font-black tracking-tighter mb-8 bg-gradient-to-br from-white via-white to-white/40 bg-clip-text text-transparent">
-              Domine a Engenharia <br />
-              <span className="text-[#22ff88]">na Prática.</span>
+            <h1 className="text-4xl sm:text-6xl md:text-[80px] leading-[0.95] font-display font-black tracking-tighter mb-8 bg-gradient-to-br from-white via-white to-white/40 bg-clip-text text-transparent flex flex-col lg:items-start items-center">
+              <span>Domine</span>
+              <div className="relative h-[1.2em] w-full flex lg:justify-start justify-center overflow-visible py-1">
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={wordIndex}
+                    initial={{ y: 60, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -60, opacity: 0 }}
+                    transition={{ 
+                      duration: 0.6, 
+                      ease: [0.16, 1, 0.3, 1]
+                    }}
+                    className="text-[#22ff88] absolute whitespace-nowrap px-2"
+                  >
+                    {words[wordIndex]}
+                  </motion.span>
+                </AnimatePresence>
+              </div>
+              <span className="text-white/40">na Prática.</span>
             </h1>
             <p className="text-lg md:text-xl text-[#64748b] max-w-2xl mx-auto lg:mx-0 leading-relaxed mb-12 font-medium">
-              A plataforma definitiva para profissionais da construção civil que buscam excelência técnica e resultados de alto nível.
+              A plataforma definitiva para engenheiros, contadores, advogados e proprietários que buscam excelência técnica, regularização de INSS e resultados de alto nível.
             </p>
             <div className="flex flex-col sm:flex-row gap-5 justify-center lg:justify-start">
               <button
