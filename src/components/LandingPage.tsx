@@ -171,7 +171,7 @@ export function LandingPage({ onExplore, onAuth }: LandingPageProps) {
               <span className="text-white/40">na Prática.</span>
             </h1>
             <p className="text-lg md:text-xl text-[#64748b] max-w-2xl mx-auto lg:mx-0 leading-relaxed mb-12 font-medium">
-              A plataforma definitiva para engenheiros, contadores, advogados e proprietários que buscam excelência técnica, regularização de INSS e resultados de alto nível.
+              Aprenda com especialistas e domine as técnicas que impulsionam o setor da construção. Da teoria à prática, transforme aprendizado em resultados reais.
             </p>
             <div className="flex flex-col sm:flex-row gap-5 justify-center lg:justify-start">
               <button
