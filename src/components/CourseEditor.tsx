@@ -49,6 +49,7 @@ interface Course {
   id: string;
   title: string;
   description: string;
+  category: string;
   cover_url: string;
   price: number;
   is_published: boolean;
@@ -147,6 +148,7 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
   const [course, setCourse] = useState<Partial<Course>>({
     title: '',
     description: '',
+    category: '',
     price: 0,
     cover_url: '',
     is_published: false,
@@ -166,6 +168,9 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [lessonAttachments, setLessonAttachments] = useState<Record<string, any[]>>({});
   const [exams, setExams] = useState<any[]>([]);
+  const [existingCategories, setExistingCategories] = useState<string[]>([]);
+  const [isCreatingCategory, setIsCreatingCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
 
   const toggleModule = (moduleId: string) => {
     setExpandedModules(prev => {
@@ -200,12 +205,40 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
   const activeModuleForLesson = useRef<string | null>(null);
 
   useEffect(() => {
+    fetchExistingCategories();
     if (courseId) {
       fetchCourseData();
     } else {
       setLoading(false);
     }
   }, [courseId]);
+
+  async function fetchExistingCategories() {
+    try {
+      const { data } = await supabase
+        .from('courses')
+        .select('category')
+        .not('category', 'is', null);
+      
+      const unique = Array.from(new Set(data?.map(c => c.category).filter(Boolean))) as string[];
+      // Base categories
+      const base = [
+        'Engenharia Civil',
+        'Licitações',
+        'BIM',
+        'Gestão de Obras',
+        'eSocial',
+        'Regularização',
+        'Financeiro',
+        'Segurança do Trabalho',
+        'Planejamento',
+        'Outros'
+      ];
+      setExistingCategories(Array.from(new Set([...base, ...unique])).sort());
+    } catch (error) {
+      console.error('Erro ao buscar categorias:', error);
+    }
+  }
 
   async function fetchCourseData() {
     console.log("Buscando dados do curso:", courseId);
@@ -277,6 +310,10 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
 
   async function handleSaveCourse() {
     try {
+      if (!course.category) {
+        toast.error('A categoria do curso é obrigatória!');
+        return;
+      }
       setSaving(true);
       if (courseId) {
         const { error } = await supabase
@@ -284,6 +321,7 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
           .update({
             title: course.title,
             description: course.description,
+            category: course.category,
             price: course.price,
             cover_url: course.cover_url,
             is_published: course.is_published,
@@ -314,6 +352,7 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
             title: course.title || 'Novo Curso',
             description: course.description,
             price: course.price,
+            category: course.category,
             cover_url: course.cover_url,
             access_duration: course.access_duration || 12,
             instructor_id: userData.id
@@ -1091,6 +1130,62 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
             </div>
 
             <div className="space-y-6 md:space-y-8">
+              <div>
+                <p className="text-[9px] md:text-[10px] font-bold text-[#64748b] uppercase tracking-widest mb-3 md:mb-4 px-1">Categoria do Curso *</p>
+                {isCreatingCategory ? (
+                  <div className="space-y-3">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        autoFocus
+                        placeholder="Nome da categoria..."
+                        value={newCategoryName}
+                        onChange={(e) => setNewCategoryName(e.target.value)}
+                        className="flex-1 bg-[#0f1115] border border-[#22ff88]/30 rounded-xl p-4 text-xs text-white focus:outline-none focus:border-[#22ff88]"
+                      />
+                      <button
+                        onClick={() => {
+                          if (newCategoryName.trim()) {
+                            setCourse(prev => ({ ...prev, category: newCategoryName.trim() }));
+                            setIsCreatingCategory(false);
+                            if (!existingCategories.includes(newCategoryName.trim())) {
+                              setExistingCategories(prev => [...prev, newCategoryName.trim()].sort());
+                            }
+                          }
+                        }}
+                        className="px-4 bg-[#22ff88] text-black rounded-xl text-[10px] font-black uppercase tracking-widest"
+                      >
+                        OK
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => setIsCreatingCategory(false)}
+                      className="text-[9px] font-bold text-[#64748b] uppercase tracking-widest hover:text-white"
+                    >
+                      Cancelar e selecionar existente
+                    </button>
+                  </div>
+                ) : (
+                  <select
+                    value={course.category}
+                    onChange={(e) => {
+                      if (e.target.value === 'NEW') {
+                        setIsCreatingCategory(true);
+                        setNewCategoryName('');
+                      } else {
+                        setCourse(prev => ({ ...prev, category: e.target.value }));
+                      }
+                    }}
+                    className="w-full bg-[#0f1115] border border-white/5 rounded-xl md:rounded-2xl p-4 md:p-5 text-xs md:text-sm text-white focus:outline-none focus:border-[#22ff88]/30 transition-all appearance-none cursor-pointer"
+                  >
+                    <option value="">Selecione uma categoria</option>
+                    {existingCategories.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                    <option value="NEW" className="text-[#22ff88] font-bold">+ Criar Nova Categoria</option>
+                  </select>
+                )}
+              </div>
               <div>
                 <p className="text-[9px] md:text-[10px] font-bold text-[#64748b] uppercase tracking-widest mb-3 md:mb-4 px-1">VALOR DA INSCRIÇÃO (BRL)</p>
                 <div className="relative bg-[#0f1115] border border-white/5 rounded-xl md:rounded-2xl overflow-hidden">

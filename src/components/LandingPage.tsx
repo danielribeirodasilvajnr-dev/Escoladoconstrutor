@@ -5,7 +5,7 @@ import { cn } from '../lib/utils';
 import { supabase } from '../lib/supabase';
 
 interface LandingPageProps {
-  onExplore: () => void;
+  onExplore: (courseId?: string) => void;
   onAuth: (mode?: 'login' | 'register') => void;
 }
 
@@ -25,7 +25,7 @@ export function LandingPage({ onExplore, onAuth }: LandingPageProps) {
   });
 
   useEffect(() => {
-    const targetDate = new Date('2026-06-17T00:00:00').getTime();
+    const targetDate = new Date('2026-07-03T00:00:00').getTime();
 
     const interval = setInterval(() => {
       const now = new Date().getTime();
@@ -303,7 +303,7 @@ export function LandingPage({ onExplore, onAuth }: LandingPageProps) {
                           {Number(course.price) === 0 ? 'Grátis' : `R$ ${Number(course.price).toFixed(2).replace('.', ',')}`}
                         </div>
                         <button
-                          onClick={() => window.location.search = `?c=${course.id}`}
+                          onClick={() => onExplore(course.id)}
                           className="px-4 md:px-6 py-2.5 md:py-3 bg-[#22ff88]/10 hover:bg-[#22ff88] text-[#22ff88] hover:text-black font-bold text-xs md:text-sm tracking-wide rounded-xl transition-all"
                         >
                           Experimentar
@@ -390,7 +390,7 @@ export function LandingPage({ onExplore, onAuth }: LandingPageProps) {
                         </span>
                       </div>
                       <button
-                        onClick={() => window.location.search = `?c=${course.id}`}
+                        onClick={() => onExplore(course.id)}
                         className="h-12 md:h-14 px-6 md:px-8 bg-[#22ff88] text-black font-black text-[10px] uppercase tracking-widest rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-[0_10px_20px_rgba(34,255,136,0.1)]"
                       >
                         Começar

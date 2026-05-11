@@ -11,6 +11,7 @@ interface Course {
   id: string;
   title: string;
   description: string;
+  category: string;
   cover_url: string;
   price: number;
   is_blocked: boolean;
@@ -21,6 +22,7 @@ interface Course {
   } | null;
   students_count: number;
   rating: number;
+  created_at: string;
 }
 
 interface VitrineProps {
@@ -32,8 +34,25 @@ export function Vitrine({ userData, onViewChange }: VitrineProps) {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('Todas');
+  const [sortBy, setSortBy] = useState<string>('recent');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [viewingCurriculum, setViewingCurriculum] = useState<Course | null>(null);
+
+  // Dynamic categories based on available courses
+  const categoryStats = courses.reduce((acc, course) => {
+    const cat = course.category || 'Outros';
+    acc[cat] = (acc[cat] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const dynamicCategories = ['Todas', ...Object.keys(categoryStats).sort((a, b) => a.localeCompare(b))];
+
+  const getCategoryCount = (cat: string) => {
+    if (cat === 'Todas') return courses.length;
+    return categoryStats[cat] || 0;
+  };
 
   useEffect(() => {
     fetchPublishedCourses();
@@ -64,12 +83,27 @@ export function Vitrine({ userData, onViewChange }: VitrineProps) {
     }
   }
 
-  const filteredCourses = courses.filter(course => {
-    const search = (searchTerm || '').toLowerCase();
-    const titleMatch = (course.title || '').toLowerCase().includes(search);
-    const instructorMatch = (course.instructor?.full_name || '').toLowerCase().includes(search);
-    return titleMatch || instructorMatch;
-  });
+  const filteredCourses = courses
+    .filter(course => {
+      const search = (searchTerm || '').toLowerCase();
+      const titleMatch = (course.title || '').toLowerCase().includes(search);
+      const instructorMatch = (course.instructor?.full_name || '').toLowerCase().includes(search);
+      const categoryMatch = selectedCategory === 'Todas' || course.category === selectedCategory;
+      return (titleMatch || instructorMatch) && categoryMatch;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'price-low':
+          return a.price - b.price;
+        case 'price-high':
+          return b.price - a.price;
+        case 'alpha':
+          return a.title.localeCompare(b.title);
+        case 'recent':
+        default:
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      }
+    });
 
   return (
     <div className="p-3 md:p-10 max-w-[1600px] mx-auto space-y-6 md:space-y-12 pb-20 mt-2 md:mt-4">
@@ -114,10 +148,100 @@ export function Vitrine({ userData, onViewChange }: VitrineProps) {
             className="w-full bg-[#1a1c22] border border-white/5 rounded-2xl pl-12 pr-5 py-3.5 md:py-5 text-white focus:outline-none focus:border-[#22ff88]/30 transition-all font-medium text-sm md:text-lg placeholder:text-[#334155]"
           />
         </div>
-        <button className="h-12 sm:h-auto px-6 bg-[#1a1c22] text-[#64748b] rounded-2xl border border-white/5 flex items-center justify-center gap-2 hover:text-white hover:border-white/10 transition-all font-bold uppercase tracking-widest text-[10px] shrink-0">
-          <Filter className="w-4 h-4" />
-          Filtros
-        </button>
+        <div className="relative group">
+          <button 
+            onClick={() => setIsFilterOpen(!isFilterOpen)}
+            className={cn(
+              "h-12 md:h-16 px-6 md:px-8 bg-[#1a1c22] rounded-2xl border flex items-center justify-center gap-3 transition-all font-bold uppercase tracking-widest text-[10px] shrink-0",
+              isFilterOpen ? "border-[#22ff88]/40 text-white" : "border-white/5 text-[#64748b] hover:text-white hover:border-white/10"
+            )}
+          >
+            <Filter className={cn("w-4 h-4 transition-transform", isFilterOpen && "rotate-180")} />
+            Filtros
+          </button>
+
+          <AnimatePresence>
+            {isFilterOpen && (
+              <>
+                <div 
+                  className="fixed inset-0 z-40" 
+                  onClick={() => setIsFilterOpen(false)} 
+                />
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  className="absolute top-full right-0 mt-4 w-[280px] md:w-[320px] bg-[#1a1c22] border border-white/10 rounded-3xl p-6 shadow-2xl z-50 backdrop-blur-xl"
+                >
+                  <div className="space-y-6">
+                    <div>
+                      <span className="text-[10px] font-black text-[#64748b] uppercase tracking-[0.2em] block mb-4">Categoria</span>
+                      <div className="flex flex-wrap gap-2">
+                        {dynamicCategories.map(cat => (
+                          <button
+                            key={cat}
+                            onClick={() => setSelectedCategory(cat)}
+                            className={cn(
+                              "px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all flex items-center gap-2",
+                              selectedCategory === cat 
+                                ? "bg-[#22ff88] text-black" 
+                                : "bg-white/5 text-[#64748b] hover:text-white hover:bg-white/10"
+                            )}
+                          >
+                            {cat}
+                            <span className={cn(
+                              "px-1.5 py-0.5 rounded-md text-[8px] font-black",
+                              selectedCategory === cat ? "bg-black/20 text-black" : "bg-white/5 text-[#64748b]"
+                            )}>
+                              {getCategoryCount(cat)}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <span className="text-[10px] font-black text-[#64748b] uppercase tracking-[0.2em] block mb-4">Ordenação</span>
+                      <div className="grid grid-cols-1 gap-2">
+                        {[
+                          { id: 'recent', label: 'Mais Recente' },
+                          { id: 'price-low', label: 'Menor Preço' },
+                          { id: 'price-high', label: 'Maior Preço' },
+                          { id: 'alpha', label: 'Ordem Alfabética' }
+                        ].map(option => (
+                          <button
+                            key={option.id}
+                            onClick={() => setSortBy(option.id)}
+                            className={cn(
+                              "px-4 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest text-left transition-all flex items-center justify-between",
+                              sortBy === option.id 
+                                ? "bg-[#22ff88]/10 text-[#22ff88] border border-[#22ff88]/20" 
+                                : "bg-white/5 text-[#64748b] border border-transparent hover:bg-white/10 hover:text-white"
+                            )}
+                          >
+                            {option.label}
+                            {sortBy === option.id && <div className="w-1.5 h-1.5 rounded-full bg-[#22ff88]" />}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        setSelectedCategory('Todas');
+                        setSortBy('recent');
+                        setIsFilterOpen(false);
+                      }}
+                      className="w-full pt-4 border-t border-white/5 text-[9px] font-bold text-[#64748b] uppercase tracking-widest hover:text-white transition-colors"
+                    >
+                      Limpar Filtros
+                    </button>
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
       {loading ? (
@@ -159,7 +283,9 @@ export function Vitrine({ userData, onViewChange }: VitrineProps) {
                 <div className="absolute top-4 md:top-6 left-4 md:left-6">
                   <div className="bg-black/60 backdrop-blur-md px-3 md:px-4 py-1 md:py-1.5 rounded-full border border-white/10 flex items-center gap-2">
                     <span className="w-1.5 md:w-2 h-1.5 md:h-2 rounded-full bg-[#22ff88] animate-pulse" />
-                    <span className="text-[8px] md:text-[10px] font-black text-white uppercase tracking-widest">MASTERCLASS</span>
+                    <span className="text-[8px] md:text-[10px] font-black text-white uppercase tracking-widest">
+                      {course.category || 'MASTERCLASS'}
+                    </span>
                   </div>
                 </div>
 

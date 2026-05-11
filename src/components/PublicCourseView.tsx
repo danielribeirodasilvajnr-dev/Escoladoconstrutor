@@ -149,7 +149,7 @@ export function PublicCourseView({ courseId, onBack, onAuth, session }: PublicCo
         >
           <div className="flex items-center gap-3 mb-6">
             <span className="px-3 py-1 bg-[#22ff88]/10 text-[#22ff88] text-[10px] font-black rounded-lg uppercase tracking-widest border border-[#22ff88]/20">
-              Masterclass Oficial
+              {course.category || 'Masterclass Oficial'}
             </span>
             <div className="flex items-center gap-1.5 text-white/40">
               <Star className="w-3.5 h-3.5 text-[#22ff88] fill-[#22ff88]" />

@@ -34,6 +34,11 @@ export default function App() {
     const courseId = params.get('c');
     if (courseId) {
       setPublicCourseId(courseId);
+      // If we have a course ID, ensure we start in landing view and clear auth hashes
+      setView('landing');
+      if (window.location.hash === '#login' || window.location.hash === '#register') {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
     }
 
     const handleSession = async (session: Session | null) => {
@@ -212,7 +217,18 @@ export default function App() {
               if (mode) window.location.hash = mode;
               setView('auth');
             }}
-            onExplore={() => setView(session ? 'dashboard' : 'auth')} 
+            onExplore={(courseId) => {
+              if (courseId) {
+                setPublicCourseId(courseId);
+                setView('landing');
+                // Clear any auth hash when exploring
+                if (window.location.hash) {
+                  window.location.hash = '';
+                }
+              } else {
+                setView(session ? 'dashboard' : 'auth');
+              }
+            }} 
           />
         </motion.div>
       ) : (
