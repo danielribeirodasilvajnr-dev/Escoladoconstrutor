@@ -538,13 +538,12 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
         course_id: courseId // Required by Supabase PK or constraints sometimes, but usually just id is enough
       }));
 
-      // Update in DB (we can do this in the background)
-      for (const update of updates) {
-        await supabase
-          .from('modules')
-          .update({ order_index: update.order_index })
-          .eq('id', update.id);
-      }
+      // Update in DB via RPC (single request batch update)
+      const { error } = await supabase.rpc('update_module_orders', {
+        p_updates: updates
+      });
+      
+      if (error) throw error;
     } catch (error: any) {
       console.error('Erro ao salvar ordem dos módulos:', error.message);
     }
@@ -564,13 +563,12 @@ export function CourseEditor({ courseId, userData, onBack, onViewChange, onOpenE
         order_index: index
       }));
 
-      // Update in DB
-      for (const update of updates) {
-        await supabase
-          .from('lessons')
-          .update({ order_index: update.order_index })
-          .eq('id', update.id);
-      }
+      // Update in DB via RPC (single request batch update)
+      const { error } = await supabase.rpc('update_lesson_orders', {
+        p_updates: updates
+      });
+
+      if (error) throw error;
     } catch (error: any) {
       console.error('Erro ao salvar ordem das aulas:', error.message);
     }

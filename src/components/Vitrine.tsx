@@ -40,28 +40,63 @@ export function Vitrine({ userData, onViewChange }: VitrineProps) {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [viewingCurriculum, setViewingCurriculum] = useState<Course | null>(null);
 
-  // Dynamic categories based on available courses
-  const categoryStats = courses.reduce((acc, course) => {
-    const cat = course.category || 'Outros';
-    acc[cat] = (acc[cat] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [totalCourses, setTotalCourses] = useState(0);
+  const [categoryStats, setCategoryStats] = useState<Record<string, number>>({});
+  const PAGE_SIZE = 12;
 
+  // Dynamic categories based on fetched stats
   const dynamicCategories = ['Todas', ...Object.keys(categoryStats).sort((a, b) => a.localeCompare(b))];
 
   const getCategoryCount = (cat: string) => {
-    if (cat === 'Todas') return courses.length;
+    if (cat === 'Todas') return totalCourses;
     return categoryStats[cat] || 0;
   };
 
   useEffect(() => {
-    fetchPublishedCourses();
+    fetchCategoryStats();
   }, []);
 
-  async function fetchPublishedCourses() {
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchPublishedCourses(false);
+    }, 400);
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm, selectedCategory, sortBy]);
+
+  async function fetchCategoryStats() {
     try {
-      setLoading(true);
+      // Lightweight fetch just for counts
       const { data, error } = await supabase
+        .from('courses')
+        .select('category')
+        .eq('is_published', true);
+        
+      if (!error && data) {
+        const stats = data.reduce((acc, course) => {
+          const cat = course.category || 'Outros';
+          acc[cat] = (acc[cat] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+        setCategoryStats(stats);
+      }
+    } catch (err) {
+      console.error('Error fetching stats', err);
+    }
+  }
+
+  async function fetchPublishedCourses(isLoadMore = false) {
+    try {
+      if (isLoadMore) setLoadingMore(true);
+      else setLoading(true);
+
+      const currentPage = isLoadMore ? page : 0;
+      const from = currentPage * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+
+      let query = supabase
         .from('courses')
         .select(`
           *,
@@ -69,41 +104,66 @@ export function Vitrine({ userData, onViewChange }: VitrineProps) {
             full_name,
             avatar_url
           )
-        `)
-        .eq('is_published', true)
-        .order('created_at', { ascending: false });
+        `, { count: 'exact' })
+        .eq('is_published', true);
+
+      if (selectedCategory !== 'Todas') {
+        query = query.eq('category', selectedCategory);
+      }
+
+      if (searchTerm) {
+        query = query.ilike('title', `%${searchTerm}%`);
+      }
+
+      // Ordering
+      switch (sortBy) {
+        case 'price-low':
+          query = query.order('price', { ascending: true });
+          break;
+        case 'price-high':
+          query = query.order('price', { ascending: false });
+          break;
+        case 'alpha':
+          query = query.order('title', { ascending: true });
+          break;
+        case 'recent':
+        default:
+          query = query.order('created_at', { ascending: false });
+          break;
+      }
+
+      query = query.range(from, to);
+
+      const { data, count, error } = await query;
 
       if (error) throw error;
-      setCourses(data || []);
+
+      if (isLoadMore) {
+        setCourses(prev => {
+          const newCourses = data as any[] || [];
+          const existingIds = new Set(prev.map(c => c.id));
+          return [...prev, ...newCourses.filter(c => !existingIds.has(c.id))];
+        });
+      } else {
+        setCourses((data as any[]) || []);
+      }
+
+      if (count !== null) setTotalCourses(count);
+      setHasMore(count ? from + (data?.length || 0) < count : false);
+      
+      if (!isLoadMore) setPage(1);
+      else setPage(p => p + 1);
+
     } catch (error: any) {
       console.error('Erro ao buscar cursos da vitrine:', error.message);
       toast.error('Erro ao carregar vitrine: ' + error.message);
     } finally {
-      setLoading(false);
+      if (isLoadMore) setLoadingMore(false);
+      else setLoading(false);
     }
   }
 
-  const filteredCourses = courses
-    .filter(course => {
-      const search = (searchTerm || '').toLowerCase();
-      const titleMatch = (course.title || '').toLowerCase().includes(search);
-      const instructorMatch = (course.instructor?.full_name || '').toLowerCase().includes(search);
-      const categoryMatch = selectedCategory === 'Todas' || course.category === selectedCategory;
-      return (titleMatch || instructorMatch) && categoryMatch;
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'price-low':
-          return a.price - b.price;
-        case 'price-high':
-          return b.price - a.price;
-        case 'alpha':
-          return a.title.localeCompare(b.title);
-        case 'recent':
-        default:
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      }
-    });
+
 
   return (
     <div className="p-3 md:p-10 max-w-[1600px] mx-auto space-y-6 md:space-y-12 pb-20 mt-2 md:mt-4">
@@ -125,7 +185,7 @@ export function Vitrine({ userData, onViewChange }: VitrineProps) {
 
         <div className="flex items-center justify-center gap-4 bg-[#1a1c22] p-2 rounded-2xl border border-white/5 self-center lg:self-end">
           <div className="px-4 md:px-6 py-2 md:py-4 flex flex-col items-center">
-            <span className="text-xl md:text-2xl font-bold text-white leading-none">{courses.length}</span>
+            <span className="text-xl md:text-2xl font-bold text-white leading-none">{totalCourses}</span>
             <span className="text-[8px] md:text-[9px] font-bold text-[#64748b] uppercase tracking-widest mt-1">Cursos Ativos</span>
           </div>
           <div className="w-[1px] h-8 md:h-10 bg-white/5" />
@@ -250,7 +310,7 @@ export function Vitrine({ userData, onViewChange }: VitrineProps) {
             <div key={i} className="bg-[#1a1c22] aspect-[4/5] rounded-[2.5rem] md:rounded-[3rem] border border-white/5 animate-pulse" />
           ))}
         </div>
-      ) : filteredCourses.length === 0 ? (
+      ) : courses.length === 0 ? (
         <div className="bg-[#1a1c22] rounded-[2.5rem] md:rounded-[3rem] border border-white/5 p-12 md:p-20 text-center">
           <Zap className="w-12 h-12 md:w-16 md:h-16 text-[#64748b] mx-auto mb-6 md:mb-8 opacity-20" />
           <h2 className="text-xl md:text-2xl font-bold text-white mb-4">Nenhum curso encontrado</h2>
@@ -258,7 +318,7 @@ export function Vitrine({ userData, onViewChange }: VitrineProps) {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
-          {filteredCourses.map((course, i) => (
+          {courses.map((course, i) => (
             <motion.div
               key={course.id}
               initial={{ opacity: 0, y: 30 }}
@@ -356,6 +416,24 @@ export function Vitrine({ userData, onViewChange }: VitrineProps) {
               </div>
             </motion.div>
           ))}
+        </div>
+      )}
+
+      {/* Load More Button */}
+      {hasMore && !loading && courses.length > 0 && (
+        <div className="pt-8 flex justify-center">
+          <button
+            onClick={() => fetchPublishedCourses(true)}
+            disabled={loadingMore}
+            className="px-8 py-3.5 bg-white/5 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-white/10 transition-all flex items-center gap-2 border border-white/10"
+          >
+            {loadingMore ? (
+              <Loader2 className="w-4 h-4 animate-spin text-[#22ff88]" />
+            ) : (
+              <Zap className="w-4 h-4 text-[#22ff88]" />
+            )}
+            {loadingMore ? 'Carregando...' : 'Carregar mais cursos'}
+          </button>
         </div>
       )}
 

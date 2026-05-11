@@ -38,24 +38,65 @@ export function AdminUsersView() {
   const [inviteEmail, setInviteEmail] = useState('');
   const [isInviting, setIsInviting] = useState(false);
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  // Pagination states
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const PAGE_SIZE = 50;
 
-  async function fetchUsers() {
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchUsers(false);
+    }, 400); // debounce search
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm]);
+
+  async function fetchUsers(isLoadMore = false) {
     try {
-      setLoading(true);
-      const { data, error } = await supabase
+      if (isLoadMore) setLoadingMore(true);
+      else setLoading(true);
+
+      const currentPage = isLoadMore ? page : 0;
+      const from = currentPage * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+
+      let query = supabase
         .from('profiles')
-        .select('id, email, full_name, role, avatar_url, created_at')
+        .select('id, email, full_name, role, avatar_url, created_at', { count: 'exact' })
         .order('created_at', { ascending: false });
 
+      if (searchTerm) {
+        query = query.or(`full_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`);
+      }
+
+      query = query.range(from, to);
+
+      const { data, count, error } = await query;
+
       if (error) throw error;
-      setUsers(data || []);
+
+      if (isLoadMore) {
+        setUsers(prev => {
+          const newUsers = data || [];
+          const existingIds = new Set(prev.map(u => u.id));
+          return [...prev, ...newUsers.filter(u => !existingIds.has(u.id))];
+        });
+      } else {
+        setUsers(data || []);
+      }
+
+      if (count !== null) setTotalUsers(count);
+      setHasMore(count ? from + (data?.length || 0) < count : false);
+      
+      if (!isLoadMore) setPage(1);
+      else setPage(p => p + 1);
+
     } catch (error: any) {
       toast.error('Erro ao buscar usuários: ' + error.message);
     } finally {
-      setLoading(false);
+      if (isLoadMore) setLoadingMore(false);
+      else setLoading(false);
     }
   }
 
@@ -100,13 +141,7 @@ export function AdminUsersView() {
     }
   }
 
-  const filteredUsers = users.filter(user => {
-    if (!searchTerm) return true;
-    const searchLower = searchTerm.toLowerCase();
-    const nameMatch = user.full_name?.toLowerCase().includes(searchLower) || false;
-    const emailMatch = user.email?.toLowerCase().includes(searchLower) || false;
-    return nameMatch || emailMatch;
-  });
+
 
   const getRoleBadge = (role: string) => {
     switch (role) {
@@ -153,7 +188,7 @@ export function AdminUsersView() {
             <Users className="w-4 h-4 text-[#22ff88]" />
             <div>
               <p className="text-[8px] md:text-[10px] uppercase tracking-widest text-[#64748b] font-bold">Total de Usuários</p>
-              <p className="text-lg md:text-xl font-black text-white leading-none">{users.length}</p>
+              <p className="text-lg md:text-xl font-black text-white leading-none">{totalUsers}</p>
             </div>
           </div>
         </div>
@@ -166,13 +201,13 @@ export function AdminUsersView() {
             [1, 2, 3].map(i => (
               <div key={i} className="p-4 bg-white/[0.02] animate-pulse rounded-xl" />
             ))
-          ) : filteredUsers.length === 0 ? (
+          ) : users.length === 0 ? (
              <div className="p-10 text-center">
                 <Users className="w-8 h-8 text-[#64748b] mx-auto mb-2 opacity-20" />
                 <p className="text-sm text-[#64748b]">Nenhum usuário</p>
              </div>
           ) : (
-            filteredUsers.map(user => (
+            users.map(user => (
               <div key={user.id} className="p-3.5 border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors relative">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -233,7 +268,7 @@ export function AdminUsersView() {
                     <td colSpan={4} className="px-10 py-8 bg-white/[0.02]" />
                   </tr>
                 ))
-              ) : filteredUsers.length === 0 ? (
+              ) : users.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="px-10 py-20 text-center">
                     <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/10 text-[#64748b]">
@@ -243,7 +278,7 @@ export function AdminUsersView() {
                   </td>
                 </tr>
               ) : (
-                filteredUsers.map((user) => (
+                users.map((user) => (
                   <tr key={user.id} className="hover:bg-white/[0.02] transition-colors group">
                     <td className="px-10 py-6">
                       <div className="flex items-center gap-4">
@@ -301,6 +336,24 @@ export function AdminUsersView() {
             </tbody>
           </table>
         </div>
+
+        {/* Load More Button */}
+        {hasMore && !loading && (
+          <div className="p-6 md:p-8 flex justify-center border-t border-white/5">
+            <button
+              onClick={() => fetchUsers(true)}
+              disabled={loadingMore}
+              className="px-8 py-3.5 bg-white/5 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-white/10 transition-all flex items-center gap-2 border border-white/10"
+            >
+              {loadingMore ? (
+                <Loader2 className="w-4 h-4 animate-spin text-[#22ff88]" />
+              ) : (
+                <Plus className="w-4 h-4" />
+              )}
+              {loadingMore ? 'Carregando...' : 'Carregar mais usuários'}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Invite Modal */}

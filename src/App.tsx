@@ -55,7 +55,7 @@ export default function App() {
         const initialRole = session.user.user_metadata.role || 'membro';
 
         // 1. Immediately set base data from session metadata to unlock UI
-        const roleFallback = email === 'danielribeirodasilvajnr@gmail.com' ? 'master' : initialRole;
+        const roleFallback = initialRole;
 
         setUserData({
           id: session.user.id,
@@ -81,7 +81,7 @@ export default function App() {
             .single();
 
           if (profile) {
-            const finalRole = email === 'danielribeirodasilvajnr@gmail.com' ? 'master' : (profile.role || initialRole);
+            const finalRole = profile.role || initialRole;
 
             // Auto-sync missing info from metadata to profiles table
             const needsSync = (!profile.avatar_url && session.user.user_metadata.avatar_url) ||

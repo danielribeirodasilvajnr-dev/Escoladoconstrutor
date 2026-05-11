@@ -24,11 +24,8 @@ export function CheckoutModal({ course, userId, onClose, onSuccess }: CheckoutMo
       if (isFree) {
         // Immediate enrollment for free courses
         const { error } = await supabase
-          .from('enrollments')
-          .insert({
-            user_id: userId,
-            course_id: course.id,
-            payment_status: 'paid'
+          .rpc('enroll_free_course', {
+            p_course_id: course.id
           });
 
         if (error && error.code !== '23505') throw error;
