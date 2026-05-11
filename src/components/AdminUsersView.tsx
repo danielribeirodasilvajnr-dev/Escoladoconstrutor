@@ -7,8 +7,6 @@ import {
   Shield,
   GraduationCap,
   User,
-  MoreVertical,
-  Check,
   Loader2,
   Key,
   Plus,
@@ -33,7 +31,6 @@ export function AdminUsersView() {
   const [users, setUsers] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [isInviting, setIsInviting] = useState(false);
@@ -100,24 +97,7 @@ export function AdminUsersView() {
     }
   }
 
-  async function handleUpdateRole(userId: string, newRole: string) {
-    try {
-      setUpdatingId(userId);
-      const { error } = await supabase
-        .from('profiles')
-        .update({ role: newRole })
-        .eq('id', userId);
 
-      if (error) throw error;
-
-      setUsers(users.map(u => u.id === userId ? { ...u, role: newRole } : u));
-      toast.success('Cargo atualizado com sucesso!');
-    } catch (error: any) {
-      toast.error('Erro ao atualizar cargo: ' + error.message);
-    } finally {
-      setUpdatingId(null);
-    }
-  }
 
   async function handleInviteProfessor(e: React.FormEvent) {
     e.preventDefault();
@@ -223,12 +203,6 @@ export function AdminUsersView() {
                       <p className="text-[8px] text-[#64748b] font-mono tracking-tighter">ID: {user.id.slice(0, 8)}</p>
                     </div>
                   </div>
-                  <div className="shrink-0 ml-2">
-                    <RoleDropdown
-                      currentRole={user.role}
-                      onUpdate={(role) => handleUpdateRole(user.id, role)}
-                    />
-                  </div>
                 </div>
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-1.5 text-[9px] font-medium text-[#64748b] truncate flex-1">
@@ -258,19 +232,18 @@ export function AdminUsersView() {
                 <th className="px-10 py-6 font-bold">Usuário</th>
                 <th className="px-10 py-6 font-bold">Contato</th>
                 <th className="px-10 py-6 font-bold">Cargo Atual</th>
-                <th className="px-10 py-6 font-bold text-right">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
               {loading ? (
                 [1, 2, 3, 4, 5].map(i => (
                   <tr key={i} className="animate-pulse">
-                    <td colSpan={4} className="px-10 py-8 bg-white/[0.02]" />
+                    <td colSpan={3} className="px-10 py-8 bg-white/[0.02]" />
                   </tr>
                 ))
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-10 py-20 text-center">
+                  <td colSpan={3} className="px-10 py-20 text-center">
                     <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/10 text-[#64748b]">
                       <Users className="w-8 h-8" />
                     </div>
@@ -317,18 +290,6 @@ export function AdminUsersView() {
                           </span>
                         );
                       })()}
-                    </td>
-                    <td className="px-10 py-6 text-right">
-                      {updatingId === user.id ? (
-                        <Loader2 className="w-5 h-5 animate-spin ml-auto text-[#22ff88]" />
-                      ) : (
-                        <div className="flex justify-end gap-2">
-                          <RoleDropdown
-                            currentRole={user.role}
-                            onUpdate={(role) => handleUpdateRole(user.id, role)}
-                          />
-                        </div>
-                      )}
                     </td>
                   </tr>
                 ))
@@ -425,61 +386,6 @@ export function AdminUsersView() {
               </form>
             </motion.div>
           </div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-function RoleDropdown({ currentRole, onUpdate }: { currentRole: string, onUpdate: (role: string) => void }) {
-  const [open, setOpen] = useState(false);
-  const roles = [
-    { id: 'membro', label: 'Aluno', icon: User },
-    { id: 'administrador', label: 'Professor', icon: GraduationCap },
-    { id: 'master', label: 'Master', icon: Shield },
-  ];
-
-  return (
-    <div className="relative">
-      <button
-        onClick={() => setOpen(!open)}
-        className="p-2 hover:bg-white/10 rounded-lg transition-colors text-[#64748b] hover:text-white"
-      >
-        <MoreVertical className="w-5 h-5" />
-      </button>
-
-      <AnimatePresence>
-        {open && (
-          <>
-            <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: -10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -10 }}
-              className="absolute right-0 top-full mt-2 w-44 bg-[#1a1c22] border border-white/10 rounded-xl shadow-2xl z-50 p-1.5 text-left backdrop-blur-xl"
-            >
-              <p className="px-3 py-1.5 text-[8px] uppercase font-black text-[#64748b] tracking-widest border-b border-white/5 mb-1.5">Alterar Cargo</p>
-              {roles.map((role) => (
-                <button
-                  key={role.id}
-                  onClick={() => {
-                    if (role.id !== currentRole) onUpdate(role.id);
-                    setOpen(false);
-                  }}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-[11px] font-bold transition-all ${role.id === currentRole
-                      ? 'bg-[#22ff88]/10 text-[#22ff88]'
-                      : 'text-[#64748b] hover:bg-white/5 hover:text-white'
-                    }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <role.icon className="w-3.5 h-3.5" />
-                    {role.label}
-                  </div>
-                  {role.id === currentRole && <Check className="w-3.5 h-3.5" />}
-                </button>
-              ))}
-            </motion.div>
-          </>
         )}
       </AnimatePresence>
     </div>
