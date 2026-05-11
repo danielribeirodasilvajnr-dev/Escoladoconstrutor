@@ -2,7 +2,7 @@ import { motion } from 'motion/react';
 import { MessageCircle, Users, Zap, ExternalLink } from 'lucide-react';
 
 export function CommunityView() {
-  const whatsappUrl = "https://chat.whatsapp.com/YOUR_GROUP_LINK"; // Substituir pelo link real
+  const whatsappUrl = "https://chat.whatsapp.com/IzpcQajM3mDGvreqUCDnKA";
 
   return (
     <div className="p-6 md:p-12 min-h-[calc(100vh-80px)] flex items-center justify-center bg-[#0a0b0e]">
@@ -33,8 +33,8 @@ export function CommunityView() {
             <h1 className="text-3xl md:text-5xl font-black text-white mb-6 tracking-tight leading-none">
               Comunidade <span className="text-[#22ff88]">VIP</span>
             </h1>
-            <p className="text-[#64748b] text-sm md:text-lg leading-relaxed max-w-md mx-auto font-medium">
-              Conecte-se com os maiores profissionais da construção civil, troque experiências reais e acelere seu networking no nosso grupo oficial.
+            <p className="text-[#64748b] text-sm md:text-lg leading-relaxed max-w-xl mx-auto font-medium">
+              Receba comunicados oficiais, novidades da plataforma, atualizações de cursos e conteúdos exclusivos diretamente no grupo VIP da Construtor360. Ambiente informativo e organizado, exclusivo para alunos.
             </p>
           </div>
 
