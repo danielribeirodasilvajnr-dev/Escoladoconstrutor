@@ -8,6 +8,7 @@ import {
   LogOut,
   ChevronRight,
   ShieldCheck,
+  Shield,
   Layers,
   DollarSign,
   X
@@ -41,6 +42,7 @@ export function Sidebar({ activeView, onViewChange, userData, isOpen, onClose }:
   const masterItems = [
     { id: "admin-usuarios", icon: Users2, label: "Gestão de Usuários" },
     { id: "admin-financeiro", icon: DollarSign, label: "Gestão Financeira" },
+    { id: "admin-suporte", icon: Shield, label: "Gestão de Suporte" },
   ];
 
   const handleLogout = async () => {

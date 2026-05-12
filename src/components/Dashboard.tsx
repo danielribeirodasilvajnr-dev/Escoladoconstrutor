@@ -13,6 +13,8 @@ import { ExamPlayer } from './ExamPlayer';
 import { CertificateView } from './CertificateView';
 import { CertificatesTab } from './CertificatesTab';
 import { CommunityView } from './CommunityView';
+import { SupportEducationView } from './SupportEducationView';
+import { AdminSupportView } from './AdminSupportView';
 
 type DashboardView =
   | 'vitrine'
@@ -25,6 +27,7 @@ type DashboardView =
   | 'admin-cursos'
   | 'admin-usuarios'
   | 'admin-financeiro'
+  | 'admin-suporte'
   | 'settings'
   | 'player'
   | 'exam-player'
@@ -116,10 +119,14 @@ export function Dashboard({ userData, session }: DashboardProps) {
         return <AdminUsersView />;
       case "admin-financeiro":
         return <AdminFinanceView />;
+      case "admin-suporte":
+        return <AdminSupportView />;
       case 'settings':
         return <ProfileSettings userData={userData} />;
       case 'comunidade':
         return <CommunityView />;
+      case 'suporte':
+        return <SupportEducationView userData={userData} />;
       case 'exam-player':
         return currentExamId ? (
           <ExamPlayer
