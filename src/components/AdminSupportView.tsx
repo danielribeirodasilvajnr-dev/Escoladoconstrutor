@@ -54,7 +54,7 @@ export function AdminSupportView() {
         .from('support_tickets')
         .select(`
           *,
-          user:profiles (
+          user:user_id (
             full_name,
             email,
             avatar_url
