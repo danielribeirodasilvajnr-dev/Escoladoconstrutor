@@ -15,6 +15,10 @@ import { CertificatesTab } from './CertificatesTab';
 import { CommunityView } from './CommunityView';
 import { SupportEducationView } from './SupportEducationView';
 import { AdminSupportView } from './AdminSupportView';
+import { CoinWalletView } from './CoinWalletView';
+import { StoreView } from './StoreView';
+import { AdminCoinsView } from './AdminCoinsView';
+import { AdminStoreView } from './AdminStoreView';
 
 type DashboardView =
   | 'vitrine'
@@ -28,6 +32,10 @@ type DashboardView =
   | 'admin-usuarios'
   | 'admin-financeiro'
   | 'admin-suporte'
+  | 'admin-coins'
+  | 'admin-store'
+  | 'coin-wallet'
+  | 'store'
   | 'settings'
   | 'player'
   | 'exam-player'
@@ -119,8 +127,16 @@ export function Dashboard({ userData, session }: DashboardProps) {
         return <AdminUsersView />;
       case "admin-financeiro":
         return <AdminFinanceView />;
-      case "admin-suporte":
+      case 'admin-suporte':
         return <AdminSupportView userData={userData} />;
+      case 'admin-coins':
+        return <AdminCoinsView userData={userData} />;
+      case 'admin-store':
+        return <AdminStoreView userData={userData} />;
+      case 'coin-wallet':
+        return <CoinWalletView userData={userData} />;
+      case 'store':
+        return <StoreView userData={userData} />;
       case 'settings':
         return <ProfileSettings userData={userData} />;
       case 'comunidade':

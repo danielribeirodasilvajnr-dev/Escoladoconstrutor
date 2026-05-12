@@ -11,6 +11,8 @@ import {
   Shield,
   Layers,
   DollarSign,
+  Coins,
+  ShoppingBag,
   X
 } from 'lucide-react';
 import { cn } from '../lib/utils';
@@ -30,8 +32,10 @@ export function Sidebar({ activeView, onViewChange, userData, isOpen, onClose }:
     { id: "vitrine", icon: PlaySquare, label: "Vitrine" },
     { id: "overview", icon: Play, label: "Meus Cursos" },
     { id: "certificados", icon: Award, label: "Certificados" },
+    { id: "coin-wallet", icon: Coins, label: "360Coins" },
+    { id: "store", icon: ShoppingBag, label: "Loja 360" },
     { id: "comunidade", icon: Users2, label: "Comunidade" },
-    { id: "suporte", icon: BookOpen, label: "Suporte Educação" },
+    { id: "suporte", icon: BookOpen, label: "Suporte" },
   ];
 
   const adminItems = [
@@ -43,6 +47,8 @@ export function Sidebar({ activeView, onViewChange, userData, isOpen, onClose }:
     { id: "admin-usuarios", icon: Users2, label: "Gestão de Usuários" },
     { id: "admin-financeiro", icon: DollarSign, label: "Gestão Financeira" },
     { id: "admin-suporte", icon: Shield, label: "Gestão de Suporte" },
+    { id: "admin-coins", icon: Coins, label: "360Coins" },
+    { id: "admin-store", icon: ShoppingBag, label: "Loja 360 Admin" },
   ];
 
   const handleLogout = async () => {
