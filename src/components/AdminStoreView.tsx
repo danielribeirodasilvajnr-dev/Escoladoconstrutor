@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Package, Plus, Edit2, ToggleLeft, ToggleRight, Loader2, X, Save, ShoppingBag, CheckCircle2, XCircle } from 'lucide-react';
+import { Package, Plus, Edit2, ToggleLeft, ToggleRight, Loader2, X, Save, ShoppingBag, CheckCircle2, XCircle, Upload, Image as ImageIcon } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'motion/react';
@@ -22,9 +22,50 @@ export function AdminStoreView({ userData }: { userData: any }) {
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState<Partial<Product> | null>(null);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [processing, setProcessing] = useState<string | null>(null);
 
   useEffect(() => { fetchAll(); }, [tab]);
+
+  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = fileName; // Upload direto na raiz do bucket
+
+      console.log('Iniciando upload para bucket store-products:', filePath);
+
+      const { error: uploadError, data } = await supabase.storage
+        .from('store-products')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        console.error('Erro detalhado do Supabase Storage:', uploadError);
+        throw new Error(uploadError.message || 'Erro desconhecido no servidor');
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('store-products')
+        .getPublicUrl(filePath);
+
+      setForm(prev => ({ ...prev!, image_url: publicUrl }));
+      toast.success('Imagem carregada com sucesso!');
+    } catch (error: any) {
+      console.error('Erro capturado no catch:', error);
+      toast.error('Falha no upload: ' + error.message, {
+        duration: 5000,
+      });
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function fetchAll() {
     setLoading(true);
@@ -207,10 +248,41 @@ export function AdminStoreView({ userData }: { userData: any }) {
                 <button onClick={() => setForm(null)} className="p-2 hover:bg-white/5 rounded-xl transition-colors"><X className="w-5 h-5 text-[#64748b]" /></button>
               </div>
               <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] uppercase tracking-widest font-bold text-[#64748b]">Foto do Produto</label>
+                  <div className="flex flex-col gap-4">
+                    {form.image_url ? (
+                      <div className="relative w-full aspect-video bg-[#0f1115] rounded-xl overflow-hidden border border-white/5">
+                        <img src={form.image_url} alt="Preview" className="w-full h-full object-cover" />
+                        <button 
+                          onClick={() => setForm(prev => ({ ...prev!, image_url: '' }))}
+                          className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="flex flex-col items-center justify-center w-full aspect-video bg-[#0f1115] border-2 border-dashed border-white/5 rounded-xl cursor-pointer hover:border-[#22ff88]/30 transition-all group">
+                        {uploading ? (
+                          <Loader2 className="w-8 h-8 text-[#22ff88] animate-spin" />
+                        ) : (
+                          <>
+                            <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-3 group-hover:bg-[#22ff88]/10 transition-all">
+                              <Upload className="w-6 h-6 text-[#64748b] group-hover:text-[#22ff88]" />
+                            </div>
+                            <span className="text-xs text-[#64748b] font-bold">Clique para fazer upload</span>
+                            <span className="text-[10px] text-[#64748b]/60 mt-1 uppercase tracking-widest">PNG, JPG até 5MB</span>
+                          </>
+                        )}
+                        <input type="file" className="hidden" accept="image/*" onChange={handleUpload} disabled={uploading} />
+                      </label>
+                    )}
+                  </div>
+                </div>
+
                 {[
                   { label: 'Nome', key: 'name', type: 'text', placeholder: 'Ex: Mentoria Exclusiva' },
                   { label: 'Descrição', key: 'description', type: 'textarea', placeholder: 'Descreva o produto...' },
-                  { label: 'URL da Imagem', key: 'image_url', type: 'text', placeholder: 'https://...' },
                   { label: 'Categoria', key: 'category', type: 'text', placeholder: 'Ex: Mentoria, Físico, Digital' },
                 ].map(({ label, key, type, placeholder }) => (
                   <div key={key} className="space-y-1.5">
