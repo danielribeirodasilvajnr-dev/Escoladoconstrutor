@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { SupportTicketModal } from './SupportTicketModal';
+import { SupportChat } from './SupportChat';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface Ticket {
@@ -30,6 +31,7 @@ export function SupportEducationView({ userData }: { userData: any }) {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
 
   useEffect(() => {
     fetchTickets();
@@ -157,6 +159,7 @@ export function SupportEducationView({ userData }: { userData: any }) {
               return (
                 <div 
                   key={ticket.id}
+                  onClick={() => setSelectedTicket(ticket)}
                   className="group p-6 md:p-8 hover:bg-white/[0.02] transition-all cursor-pointer"
                 >
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -221,6 +224,79 @@ export function SupportEducationView({ userData }: { userData: any }) {
         }}
         userId={userData.id}
       />
+
+      {/* Ticket Details for Student */}
+      <AnimatePresence>
+        {selectedTicket && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-end">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedTicket(null)}
+              className="absolute inset-0 bg-black/90 backdrop-blur-md"
+            />
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="relative w-full max-w-2xl h-full bg-[#0f1115] border-l border-white/5 p-8 md:p-12 shadow-2xl flex flex-col"
+            >
+              <div className="flex items-center justify-between mb-10">
+                <button 
+                  onClick={() => setSelectedTicket(null)}
+                  className="flex items-center gap-2 text-[10px] font-black uppercase text-[#64748b] hover:text-white transition-colors"
+                >
+                  <XIcon className="w-4 h-4" /> Voltar
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto space-y-10 pr-4 custom-scrollbar">
+                <header className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <span className={`px-3 py-1 rounded-md border text-[10px] font-black uppercase tracking-widest ${getStatusBadge(selectedTicket.status).color}`}>
+                      {getStatusBadge(selectedTicket.status).label}
+                    </span>
+                    <span className="text-[10px] font-black uppercase text-[#64748b] tracking-widest">
+                      Protocolo: #{selectedTicket.id.slice(0, 8).toUpperCase()}
+                    </span>
+                  </div>
+                  <h2 className="text-3xl font-bold text-white leading-tight">{selectedTicket.subject}</h2>
+                </header>
+
+                <div className="space-y-4">
+                   <p className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest">Seu Relato</p>
+                   <div className="bg-white/[0.02] p-6 rounded-[2rem] border border-white/5">
+                      <p className="text-zinc-300 leading-relaxed text-sm">{selectedTicket.description}</p>
+                   </div>
+                </div>
+
+                <div className="space-y-4">
+                   <p className="text-[10px] font-bold text-[#22ff88] uppercase tracking-widest flex items-center gap-2">
+                     <MessageCircle className="w-3.5 h-3.5" /> Chat de Suporte
+                   </p>
+                   <div className="h-[450px]">
+                     <SupportChat 
+                       ticketId={selectedTicket.id} 
+                       currentUserId={userData.id} 
+                     />
+                   </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+
+function XIcon(props: any) {
+  return (
+    <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  );
+}
+

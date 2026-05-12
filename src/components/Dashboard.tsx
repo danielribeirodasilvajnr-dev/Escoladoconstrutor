@@ -120,7 +120,7 @@ export function Dashboard({ userData, session }: DashboardProps) {
       case "admin-financeiro":
         return <AdminFinanceView />;
       case "admin-suporte":
-        return <AdminSupportView />;
+        return <AdminSupportView userData={userData} />;
       case 'settings':
         return <ProfileSettings userData={userData} />;
       case 'comunidade':

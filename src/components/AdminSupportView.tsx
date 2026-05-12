@@ -14,6 +14,7 @@ import {
   Inbox
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { SupportChat } from './SupportChat';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 
@@ -35,17 +36,43 @@ interface Ticket {
   };
 }
 
-export function AdminSupportView() {
+export function AdminSupportView({ userData }: { userData: any }) {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterPriority, setFilterPriority] = useState<string>('all');
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [isAssigning, setIsAssigning] = useState(false);
 
   useEffect(() => {
     fetchTickets();
   }, []);
+
+  async function handleAssignTicket() {
+    if (!selectedTicket || !userData) return;
+
+    try {
+      setIsAssigning(true);
+      const { error } = await supabase
+        .from('support_tickets')
+        .update({
+          assigned_to: userData.id,
+          status: 'in_progress'
+        })
+        .eq('id', selectedTicket.id);
+
+      if (error) throw error;
+
+      toast.success('Você assumiu este chamado!');
+      setSelectedTicket(prev => prev ? { ...prev, status: 'in_progress' } : null);
+      fetchTickets(); // Atualiza a lista ao fundo
+    } catch (error: any) {
+      toast.error('Erro ao assumir chamado: ' + error.message);
+    } finally {
+      setIsAssigning(false);
+    }
+  }
 
   async function fetchTickets() {
     try {
@@ -82,6 +109,16 @@ export function AdminSupportView() {
       default:
         return { label: 'Fechado', color: 'bg-white/5 text-[#64748b] border-white/10' };
     }
+  };
+
+  const getSentimentLabel = (sentiment: string) => {
+    const labels: Record<string, string> = {
+      'calm': 'Calmo',
+      'confused': 'Confuso',
+      'irritated': 'Irritado',
+      'frustrated': 'Frustrado'
+    };
+    return labels[sentiment] || sentiment;
   };
 
   const getSentimentEmoji = (sentiment: string) => {
@@ -199,7 +236,7 @@ export function AdminSupportView() {
                               <div className="flex items-center gap-1.5 bg-white/5 px-2 py-0.5 rounded-md">
                                 <span className="text-xs">{getSentimentEmoji(ticket.sentiment)}</span>
                                 <span className="text-[9px] font-black uppercase text-[#64748b] tracking-widest">
-                                  {ticket.sentiment || 'Analizando...'}
+                                  {getSentimentLabel(ticket.sentiment) || 'Analisando...'}
                                 </span>
                               </div>
                             </div>
@@ -267,9 +304,15 @@ export function AdminSupportView() {
                   <XIcon className="w-4 h-4" /> Fechar Painel
                 </button>
                 <div className="flex gap-3">
-                   <button className="px-6 py-3 bg-[#22ff88] text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:scale-105 transition-all">
-                     Assumir Chamado
-                   </button>
+                   {selectedTicket.status === 'open' && (
+                     <button 
+                       onClick={handleAssignTicket}
+                       disabled={isAssigning}
+                       className="px-6 py-3 bg-[#22ff88] text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:scale-105 transition-all disabled:opacity-50"
+                     >
+                       {isAssigning ? 'Processando...' : 'Assumir Chamado'}
+                     </button>
+                   )}
                 </div>
               </div>
 
@@ -299,7 +342,7 @@ export function AdminSupportView() {
                     <p className="text-sm text-white font-bold">{selectedTicket.category}</p>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-xs">{getSentimentEmoji(selectedTicket.sentiment)}</span>
-                      <span className="text-xs text-[#22ff88]/70 font-medium">Sentimento: {selectedTicket.sentiment}</span>
+                      <span className="text-xs text-[#22ff88]/70 font-medium">Sentimento: {getSentimentLabel(selectedTicket.sentiment)}</span>
                     </div>
                   </div>
                 </div>
@@ -311,8 +354,12 @@ export function AdminSupportView() {
                    </div>
                 </div>
 
-                <div className="pt-10">
-                   <p className="text-center text-[10px] text-[#64748b] uppercase tracking-widest">Em breve: Sistema de Chat Integrado</p>
+                <div className="pt-6">
+                   <SupportChat 
+                     ticketId={selectedTicket.id} 
+                     currentUserId={userData.id} 
+                     isAdmin={true} 
+                   />
                 </div>
               </div>
             </motion.div>
