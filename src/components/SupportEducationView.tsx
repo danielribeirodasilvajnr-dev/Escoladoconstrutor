@@ -84,7 +84,23 @@ export function SupportEducationView({ userData }: { userData: any }) {
   const filteredTickets = tickets.filter(t => 
     t.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
     t.category?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ).filter(t => t.status !== 'resolved' && t.status !== 'closed');
+
+  async function handleResolveTicket(ticketId: string) {
+    try {
+      const { error } = await supabase
+        .from('support_tickets')
+        .update({ status: 'resolved' })
+        .eq('id', ticketId);
+
+      if (error) throw error;
+      
+      setSelectedTicket(null);
+      fetchTickets();
+    } catch (error) {
+      console.error('Erro ao encerrar chamado:', error);
+    }
+  }
 
   return (
     <div className="p-4 md:p-10 max-w-[1400px] mx-auto space-y-8 pb-20">
@@ -283,6 +299,18 @@ export function SupportEducationView({ userData }: { userData: any }) {
                      />
                    </div>
                 </div>
+
+                {(selectedTicket.status === 'open' || selectedTicket.status === 'in_progress' || selectedTicket.status === 'pending_student') && (
+                  <div className="pt-10 pb-6 border-t border-white/5 mt-10">
+                    <button
+                      onClick={() => handleResolveTicket(selectedTicket.id)}
+                      className="w-full flex items-center justify-center gap-3 px-8 py-5 bg-[#22ff88]/10 text-[#22ff88] text-xs font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-[#22ff88] hover:text-black transition-all border border-[#22ff88]/20 shadow-[0_10px_30px_rgba(34,255,136,0.05)]"
+                    >
+                      <CheckCircle2 className="w-5 h-5" />
+                      Marcar como Resolvido / Encerrar Chamado
+                    </button>
+                  </div>
+                )}
               </div>
             </motion.div>
           </div>

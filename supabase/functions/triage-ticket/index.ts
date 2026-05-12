@@ -12,13 +12,11 @@ serve(async (req) => {
   try {
     const { ticket_id, description } = await req.json()
 
-    // 1. Instanciar Supabase Client
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // 2. Chamar a IA (OpenAI)
     const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -30,59 +28,66 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `Você é um especialista em triagem de suporte para a plataforma de educação Construtor360.
-            Analise a descrição do problema e retorne APENAS um JSON puro no seguinte formato:
+            content: `Você é o Assistente IA da Construtor360. Analise e responda.
+            RETORNE APENAS JSON PURO. NÃO USE MARCAÇÕES DE CÓDIGO.
             {
-              "category": "string (ex: Financeiro, Login, Bug, Acesso ao Curso, Pagamento)",
+              "category": "Login | Financeiro | Certificado | Técnico | Outros",
               "priority": "low | medium | high | critical",
               "sentiment": "calm | confused | irritated | frustrated",
-              "tags": ["string"],
-              "confidence": 0.00 to 1.00
-            }
-            Regra Crítica: Se o usuário mencionar Procon, Processo ou Reembolso, a prioridade deve ser CRITICAL e o sentimento FRUSTRATED.`
+              "automated_response": "Sua resposta aqui",
+              "confidence": 1.0
+            }`
           },
           { role: 'user', content: description }
         ],
-        temperature: 0.2
+        temperature: 0.1
       }),
     })
 
     const aiData = await aiResponse.json()
+    let content = aiData.choices[0].message.content
     
-    if (!aiData.choices || aiData.choices.length === 0) {
-      throw new Error('Falha na resposta da IA')
-    }
+    // Limpar possíveis marcações de markdown da IA
+    content = content.replace(/```json/g, '').replace(/```/g, '').trim();
+    
+    const triage = JSON.parse(content)
 
-    const triage = JSON.parse(aiData.choices[0].message.content)
-
-    // 3. Atualizar o Ticket no Banco de Dados
-    const { error: updateError } = await supabase
+    // Atualizar ticket
+    await supabase
       .from('support_tickets')
       .update({
         category: triage.category,
         priority: triage.priority,
         sentiment: triage.sentiment,
-        tags: triage.tags,
         ai_confidence_score: triage.confidence,
-        status: 'open'
+        status: triage.automated_response ? 'pending_student' : 'open'
       })
       .eq('id', ticket_id)
 
-    if (updateError) throw updateError
+    // Inserir mensagem (Forçamos a inserção se houver resposta)
+    if (triage.automated_response) {
+      const { error: msgError } = await supabase.from('support_messages').insert({
+        ticket_id,
+        content: triage.automated_response,
+        is_ai_response: true
+      })
+      if (msgError) console.error('Erro ao inserir mensagem da IA:', msgError)
+    }
 
-    // 4. Registrar Auditoria
+    // Auditoria
     await supabase.from('ai_support_audit').insert({
       ticket_id,
       raw_input: description,
       ai_output: triage
     })
 
-    return new Response(JSON.stringify({ success: true, triage }), {
+    return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     })
 
   } catch (error) {
+    console.error('Erro na Edge Function:', error.message)
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,

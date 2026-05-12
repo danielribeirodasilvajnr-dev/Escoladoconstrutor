@@ -100,6 +100,7 @@ export function SupportChat({ ticketId, currentUserId, isAdmin }: SupportChatPro
 
       if (error) throw error;
       setNewMessage('');
+      fetchMessages(); // Refresh manual imediato para quem envia
     } catch (error: any) {
       toast.error('Erro ao enviar mensagem: ' + error.message);
     } finally {
