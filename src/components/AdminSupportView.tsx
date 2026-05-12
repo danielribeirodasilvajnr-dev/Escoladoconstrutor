@@ -130,12 +130,18 @@ export function AdminSupportView({ userData }: { userData: any }) {
     }
   };
 
-  const filteredTickets = tickets.filter(t => {
-    const matchesSearch = t.subject.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          t.user?.full_name?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === 'all' || t.status === filterStatus;
-    const matchesPriority = filterPriority === 'all' || t.priority === filterPriority;
-    return matchesSearch && matchesStatus && matchesPriority;
+  const filteredTickets = tickets.filter(t => 
+    (filterStatus === 'all' || t.status === filterStatus) &&
+    (filterPriority === 'all' || t.priority === filterPriority) &&
+    (t.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     t.user?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()))
+  ).filter(t => {
+    // Se o usuário selecionou um filtro específico (ex: 'resolved'), mostra ele.
+    // Se estiver em 'all', esconde os resolvidos/fechados.
+    if (filterStatus === 'all') {
+      return t.status !== 'resolved' && t.status !== 'closed';
+    }
+    return true;
   });
 
   return (
