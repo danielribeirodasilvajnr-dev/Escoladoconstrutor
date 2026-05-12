@@ -19,6 +19,7 @@ import { motion, AnimatePresence } from 'motion/react';
 interface Ticket {
   id: string;
   subject: string;
+  description: string;
   category: string;
   status: 'open' | 'in_progress' | 'pending_student' | 'resolved' | 'closed';
   priority: 'low' | 'medium' | 'high' | 'critical';
@@ -61,6 +62,8 @@ export function SupportEducationView({ userData }: { userData: any }) {
         return { label: 'Aberto', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20', icon: Clock };
       case 'in_progress':
         return { label: 'Em Atendimento', color: 'bg-[#22ff88]/10 text-[#22ff88] border-[#22ff88]/20', icon: MessageCircle };
+      case 'pending_student':
+        return { label: 'Aguardando sua resposta', color: 'bg-amber-500/10 text-amber-400 border-amber-500/20', icon: AlertCircle };
       case 'resolved':
         return { label: 'Resolvido', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20', icon: CheckCircle2 };
       default:
@@ -97,8 +100,9 @@ export function SupportEducationView({ userData }: { userData: any }) {
       
       setSelectedTicket(null);
       fetchTickets();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao encerrar chamado:', error);
+      toast.error('Erro ao encerrar chamado: ' + (error?.message || 'Tente novamente.'));
     }
   }
 

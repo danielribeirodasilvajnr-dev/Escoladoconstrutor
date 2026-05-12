@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /dashboard
+Disallow: /api/
 
 Sitemap: https://construtor360.com.br/sitemap.xml

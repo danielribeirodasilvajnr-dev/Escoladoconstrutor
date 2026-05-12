@@ -1,16 +1,37 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1"
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+// [C-03 FIX] Restringir CORS para domínio de produção
+const allowedOrigins = [
+  'https://construtor360.com.br',
+  'https://www.construtor360.com.br',
+  'http://localhost:3000', // Dev
+  'http://localhost:5173', // Dev Vite
+]
+
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get('origin') || ''
+  const isAllowed = allowedOrigins.some(o => origin.startsWith(o))
+  return {
+    'Access-Control-Allow-Origin': isAllowed ? origin : allowedOrigins[0],
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  }
 }
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req)
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
   try {
     const { ticket_id, description } = await req.json()
+
+    // [VALIDATION] Verificar se os dados necessários foram enviados
+    if (!ticket_id || !description) {
+      return new Response(JSON.stringify({ error: 'ticket_id e description são obrigatórios.' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400,
+      })
+    }
 
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -64,7 +85,7 @@ serve(async (req) => {
       })
       .eq('id', ticket_id)
 
-    // Inserir mensagem (Forçamos a inserção se houver resposta)
+    // Inserir mensagem automática da IA se houver resposta
     if (triage.automated_response) {
       const { error: msgError } = await supabase.from('support_messages').insert({
         ticket_id,

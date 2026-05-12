@@ -22,6 +22,8 @@ export function Auth({ onSuccess, onBack }: AuthProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [verificationSent, setVerificationSent] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmailSent, setResetEmailSent] = useState(false);
 
   // Sync mode if hash changes while already on Auth view
   React.useEffect(() => {
@@ -59,6 +61,26 @@ export function Auth({ onSuccess, onBack }: AuthProps) {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast.error('Digite seu e-mail antes de solicitar a recuperação.');
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}#reset-password`,
+      });
+      if (error) throw error;
+      setResetEmailSent(true);
+      toast.success('Link de recuperação enviado! Verifique seu e-mail.');
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao enviar e-mail de recuperação.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -73,13 +95,12 @@ export function Auth({ onSuccess, onBack }: AuthProps) {
         if (error) throw error;
         toast.success(`Bem-vindo de volta, ${email.split('@')[0]}!`);
       } else {
-        const isMaster = email === 'danielribeirodasilvajnr@gmail.com';
         const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             data: {
-              role: isMaster ? 'master' : accessLevel,
+              role: accessLevel,
               full_name: email.split('@')[0],
               pending_professor: accessLevel === 'administrador'
             },
@@ -307,7 +328,15 @@ export function Auth({ onSuccess, onBack }: AuthProps) {
             <input type="checkbox" className="w-4 h-4 rounded border-white/10 bg-transparent checked:bg-[#22ff88] transition-all" />
             <span className="group-hover:text-white transition-colors">Lembrar-me</span>
           </label>
-          <button className="hover:text-white transition-colors">Esqueceu sua senha?</button>
+          {mode === 'login' && (
+            <button 
+              type="button"
+              onClick={() => setShowForgotPassword(true)}
+              className="hover:text-white transition-colors"
+            >
+              Esqueceu sua senha?
+            </button>
+          )}
         </div>
 
         <div className="mt-10 pt-8 border-t border-white/5 text-center">
@@ -327,8 +356,9 @@ export function Auth({ onSuccess, onBack }: AuthProps) {
             </p>
           )}
           <p className="mt-6 text-[10px] text-[#64748b] leading-relaxed">
-            Esta página é protegida por Google reCAPTCHA para garantir que você não é um robô.
-            <button className="text-[#22ff88] ml-1">Saiba mais.</button>
+            Ao continuar, você concorda com nossos{' '}
+            <button className="text-[#22ff88]">Termos de Uso</button>{' '}e{' '}
+            <button className="text-[#22ff88]">Política de Privacidade</button>.
           </p>
         </div>
       </motion.div>
@@ -348,6 +378,72 @@ export function Auth({ onSuccess, onBack }: AuthProps) {
           <span>© 2026 Construtor360</span>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      <AnimatePresence>
+        {showForgotPassword && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            onClick={() => { setShowForgotPassword(false); setResetEmailSent(false); }}
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-[420px] bg-[#1a1c22] border border-white/10 rounded-[2rem] p-8 shadow-2xl"
+            >
+              {resetEmailSent ? (
+                <div className="text-center py-4 space-y-4">
+                  <div className="w-16 h-16 bg-[#22ff88]/10 rounded-full flex items-center justify-center mx-auto border border-[#22ff88]/20">
+                    <Globe className="w-8 h-8 text-[#22ff88]" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white">E-mail enviado!</h3>
+                  <p className="text-sm text-[#94a3b8]">
+                    Verifique a caixa de entrada de <span className="text-white font-bold">{email}</span> e siga as instruções para redefinir sua senha.
+                  </p>
+                  <button
+                    onClick={() => { setShowForgotPassword(false); setResetEmailSent(false); }}
+                    className="mt-4 px-6 py-3 bg-white/5 text-white text-xs font-bold rounded-xl hover:bg-white/10 transition-all border border-white/10"
+                  >
+                    Voltar ao login
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <h3 className="text-xl font-bold text-white mb-2">Recuperar senha</h3>
+                  <p className="text-sm text-[#94a3b8] mb-6">Digite seu e-mail e enviaremos um link para redefinir sua senha.</p>
+                  <input
+                    type="email"
+                    placeholder="Seu e-mail"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full bg-[#0f1115] border border-white/5 rounded-xl px-4 py-3.5 text-white placeholder:text-[#64748b] focus:outline-none focus:border-[#22ff88]/50 transition-all mb-4"
+                  />
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setShowForgotPassword(false)}
+                      className="flex-1 py-3 bg-white/5 text-white text-xs font-bold rounded-xl hover:bg-white/10 transition-all border border-white/10"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={handleForgotPassword}
+                      disabled={loading}
+                      className="flex-1 py-3 bg-[#22ff88] text-black text-xs font-black rounded-xl hover:opacity-90 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Enviar link'}
+                    </button>
+                  </div>
+                </>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
